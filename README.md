@@ -23,6 +23,6 @@ Compare Indian Electric Vehicles across all segments.
 - Smart recommendation wizard
 
 ## 📊 Dataset
-- 65 Indian EV models across 5 segments
+- 50+ Indian EV models across 5 segments
 - Segments: 2W, 3W, 4W, Bus, Truck
 - 6 Indian state subsidies included
