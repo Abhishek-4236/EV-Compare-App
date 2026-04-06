@@ -10,8 +10,8 @@ Compare Indian Electric Vehicles across all segments.
 ## 🏫 VBIT — Vignana Bharathi Institute of Technology
 
 ## 🛠️ Tech Stack
-- Frontend: React.js
-- Backend: Node.js + Express
+- Frontend: React.js (Vite)
+- Backend: FastAPI (Python)
 - Database: PostgreSQL
 - Charts: Chart.js
 
