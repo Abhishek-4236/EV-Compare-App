@@ -1,6 +1,9 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, Text, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Numeric, Boolean, Text, TIMESTAMP, ForeignKey
 from sqlalchemy.sql import func
 from database import Base
+from pgvector.sqlalchemy import Vector
+
+EMBEDDING_DIM = 384
 
 class Vehicle(Base):
     __tablename__ = "vehicles"
@@ -32,4 +35,23 @@ class Vehicle(Base):
     market_status = Column(String(20), default="Available")
     launch_year = Column(Integer)
     image_url = Column(Text)
+    embedding = Column(Vector(EMBEDDING_DIM))
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+
+class ChatSession(Base):
+    __tablename__ = "chat_sessions"
+
+    id = Column(String(36), primary_key=True, index=True)
+    last_vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=True)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(36), index=True, nullable=False)
+    role = Column(String(20), nullable=False)
+    content = Column(Text, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now())

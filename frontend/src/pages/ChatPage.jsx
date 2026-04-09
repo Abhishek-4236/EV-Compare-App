@@ -8,6 +8,7 @@ function ChatPage() {
       text: '👋 Hi! I\'m your India EV Assistant. Ask me anything about electric vehicles — prices, range, subsidies, comparisons!'
     }
   ]);
+  const [sessionId, setSessionId] = useState(null);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +22,13 @@ function ChatPage() {
 
     try {
       const res = await axios.post('http://localhost:8000/api/chat/', {
-        message: input
+        message: input,
+        session_id: sessionId
       });
+
+      if (!sessionId && res.data.session_id) {
+        setSessionId(res.data.session_id);
+      }
 
       const botMsg = {
         role: 'assistant',
