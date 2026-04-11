@@ -1,147 +1,216 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { vehicleAPI } from '../services/api';
 import VehicleCard from '../components/VehicleCard';
+import CompareBar from '../components/CompareBar';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 
-function BrowsePage() {
-  const [searchParams] = useSearchParams();
+const TABS = [
+  { label: 'All', category: '', icon: '⚡' },
+  { label: '2-Wheelers', category: '2W', icon: '🛵' },
+  { label: 'Cars', category: '4W', icon: '🚗' },
+  { label: '3-Wheelers', category: '3W', icon: '🛺' },
+  { label: 'Trucks', category: 'Truck', icon: '🚛' },
+  { label: 'Buses', category: 'Bus', icon: '🚌' },
+];
+
+const SORT_OPTIONS = [
+  { value: 'overall_rating', label: 'Rating ↓' },
+  { value: 'approx_price_inr', label: 'Price ↑' },
+  { value: 'range_km', label: 'Range ↓' },
+  { value: 'battery_kwh', label: 'Battery ↓' },
+];
+
+export default function BrowsePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [vehicles, setVehicles] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [compareIds, setCompareIds] = useState([]);
+  const [compareItems, setCompareItems] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
+
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
+    sort_by: 'overall_rating',
+    sort_order: 'DESC',
     max_price: 20000000,
     min_range: 0,
-    sort_by: 'overall_rating',
+    page: 1,
+    limit: 20,
   });
 
-  useEffect(() => {
-    fetchVehicles();
-  }, [filters]);
-
-  const fetchVehicles = async () => {
+  const fetchVehicles = useCallback(async () => {
     setLoading(true);
     try {
-      const params = {};
-      if (filters.category) params.category = filters.category;
-      if (filters.max_price < 20000000) params.max_price = filters.max_price;
-      if (filters.min_range > 0) params.min_range = filters.min_range;
-      params.sort_by = filters.sort_by;
-      params.limit = 65;
-
+      const params = { ...filters };
+      if (!params.category) delete params.category;
+      if (params.max_price >= 20000000) delete params.max_price;
+      if (params.min_range <= 0) delete params.min_range;
       const res = await vehicleAPI.getAll(params);
-      setVehicles(res.data.vehicles);
-      setTotal(res.data.total);
-    } catch (err) {
-      console.error(err);
+      setVehicles(res.data.vehicles || []);
+      setTotal(res.data.total || 0);
+    } catch (e) {
+      setVehicles([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [filters]);
 
-  const toggleCompare = (id) => {
-    setCompareIds(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id)
-        : prev.length < 3 ? [...prev, id] : prev
-    );
-  };
+  useEffect(() => { fetchVehicles(); }, [fetchVehicles]);
+
+  function setFilter(key, val) {
+    setFilters(f => ({ ...f, [key]: val, page: 1 }));
+  }
+
+  function toggleCompare(id) {
+    const v = vehicles.find(x => x.id === id);
+    if (!v) return;
+    setCompareItems(prev => {
+      if (prev.find(x => x.id === id)) return prev.filter(x => x.id !== id);
+      if (prev.length >= 4) return prev;
+      return [...prev, v];
+    });
+  }
+
+  function isSelected(id) { return compareItems.some(x => x.id === id); }
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Browse EVs <span style={styles.count}>({total} models)</span></h1>
-
-      {/* Filters */}
-      <div style={styles.filterBar}>
-        <select value={filters.category}
-          onChange={e => setFilters({ ...filters, category: e.target.value })}
-          style={styles.select}>
-          <option value="">All Segments</option>
-          <option value="2W">2-Wheeler</option>
-          <option value="3W">3-Wheeler</option>
-          <option value="4W">4-Wheeler</option>
-          <option value="Bus">Bus</option>
-          <option value="Truck">Truck</option>
-        </select>
-
-        <select value={filters.sort_by}
-          onChange={e => setFilters({ ...filters, sort_by: e.target.value })}
-          style={styles.select}>
-          <option value="overall_rating">Sort: Rating</option>
-          <option value="approx_price_inr">Sort: Price ↑</option>
-          <option value="range_km">Sort: Range ↓</option>
-          <option value="battery_kwh">Sort: Battery</option>
-        </select>
-
-        <div style={styles.rangeGroup}>
-          <label>Max Price: ₹{(filters.max_price / 100000).toFixed(0)}L</label>
-          <input type="range" min="50000" max="20000000" step="50000"
-            value={filters.max_price}
-            onChange={e => setFilters({ ...filters, max_price: parseInt(e.target.value) })} />
-        </div>
-
-        <div style={styles.rangeGroup}>
-          <label>Min Range: {filters.min_range} km</label>
-          <input type="range" min="0" max="700" step="10"
-            value={filters.min_range}
-            onChange={e => setFilters({ ...filters, min_range: parseInt(e.target.value) })} />
-        </div>
-
-        <button onClick={() => setFilters({ category: '', max_price: 20000000, min_range: 0, sort_by: 'overall_rating' })}
-          style={styles.resetBtn}>Reset</button>
+    <div className="ev-shell">
+      {/* Header */}
+      <div style={{ paddingTop: 32, marginBottom: 20 }}>
+        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 28, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.5px', marginBottom: 4 }}>
+          Browse EVs
+        </h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: 15 }}>
+          {loading ? 'Loading...' : `${total} models found across all segments`}
+        </p>
       </div>
 
-      {/* Compare bar */}
-      {compareIds.length >= 2 && (
-        <div style={styles.compareBar}>
-          {compareIds.length} vehicles selected
-          <a href={`/compare?ids=${compareIds.join(',')}`} style={styles.compareLink}>
-            Compare Now →
-          </a>
+      {/* Category Tabs */}
+      <div className="ev-tabs">
+        {TABS.map(t => (
+          <button
+            key={t.category}
+            className={`ev-tab ${filters.category === t.category ? 'active' : ''}`}
+            onClick={() => setFilter('category', t.category)}
+          >
+            {t.icon} {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Filter Bar */}
+      <div style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: 12,
+        padding: '12px 16px',
+        display: 'flex',
+        gap: 12,
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        marginBottom: 20,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '1 1 200px' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Sort by:</span>
+          <select
+            className="ev-select"
+            value={filters.sort_by}
+            onChange={e => setFilter('sort_by', e.target.value)}
+            style={{ flex: 1 }}
+          >
+            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
         </div>
-      )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '1 1 200px' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+            Max: ₹{(filters.max_price / 100000).toFixed(0)}L
+          </span>
+          <input
+            type="range" min={50000} max={20000000} step={50000}
+            value={filters.max_price}
+            onChange={e => setFilter('max_price', parseInt(e.target.value))}
+            style={{ flex: 1, accentColor: 'var(--accent)' }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '1 1 200px' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+            Range ≥ {filters.min_range}km
+          </span>
+          <input
+            type="range" min={0} max={600} step={10}
+            value={filters.min_range}
+            onChange={e => setFilter('min_range', parseInt(e.target.value))}
+            style={{ flex: 1, accentColor: 'var(--accent)' }}
+          />
+        </div>
+
+        <button
+          className="ev-btn ev-btn-sm"
+          onClick={() => setFilters(f => ({ ...f, max_price: 20000000, min_range: 0, sort_by: 'overall_rating', page: 1 }))}
+        >
+          <X size={14} /> Reset
+        </button>
+      </div>
 
       {/* Grid */}
-      {loading ? <p>Loading EVs...</p> : (
-        <div style={styles.grid}>
+      {loading ? (
+        <div className="ev-grid-auto">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} style={{ borderRadius: 14, overflow: 'hidden' }}>
+              <div className="ev-skeleton" style={{ height: 160 }} />
+              <div style={{ padding: 14, background: 'var(--bg-card)', border: '1px solid var(--border)', borderTop: 0, borderRadius: '0 0 14px 14px' }}>
+                <div className="ev-skeleton" style={{ height: 12, width: '50%', marginBottom: 8 }} />
+                <div className="ev-skeleton" style={{ height: 18, width: '40%', marginBottom: 10 }} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                  <div className="ev-skeleton" style={{ height: 40 }} />
+                  <div className="ev-skeleton" style={{ height: 40 }} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : vehicles.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+          <h3 style={{ fontWeight: 700, fontSize: 20, marginBottom: 8, color: 'var(--text)' }}>No EVs found</h3>
+          <p style={{ color: 'var(--text-muted)', marginBottom: 20 }}>Try adjusting your filters or resetting them.</p>
+          <button className="ev-btn ev-btn-primary" onClick={() => setFilters(f => ({ ...f, max_price: 20000000, min_range: 0, category: '', page: 1 }))}>
+            Reset Filters
+          </button>
+        </div>
+      ) : (
+        <div className="ev-grid-auto">
           {vehicles.map(v => (
-            <VehicleCard key={v.id} vehicle={v}
+            <VehicleCard
+              key={v.id}
+              vehicle={v}
               onCompareToggle={toggleCompare}
-              isSelected={compareIds.includes(v.id)} />
+              isSelected={isSelected(v.id)}
+            />
           ))}
         </div>
       )}
+
+      {/* Pagination */}
+      {total > filters.limit && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 32 }}>
+          <button className="ev-btn ev-btn-sm" disabled={filters.page <= 1} onClick={() => setFilter('page', filters.page - 1)}>← Prev</button>
+          <span style={{ padding: '7px 14px', fontSize: 14, color: 'var(--text-muted)' }}>
+            Page {filters.page} of {Math.ceil(total / filters.limit)}
+          </span>
+          <button className="ev-btn ev-btn-sm" disabled={filters.page * filters.limit >= total} onClick={() => setFilter('page', filters.page + 1)}>Next →</button>
+        </div>
+      )}
+
+      {/* Compare Drawer */}
+      <CompareBar
+        selected={compareItems}
+        onRemove={id => setCompareItems(prev => prev.filter(x => x.id !== id))}
+        onClear={() => setCompareItems([])}
+      />
     </div>
   );
 }
-
-const styles = {
-  container: { maxWidth: '1200px', margin: '0 auto', padding: '2rem' },
-  title: { fontSize: '2rem', marginBottom: '1.5rem' },
-  count: { fontSize: '1rem', color: '#666', fontWeight: 'normal' },
-  filterBar: {
-    display: 'flex', gap: '1rem', flexWrap: 'wrap',
-    alignItems: 'center', marginBottom: '2rem',
-    padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '8px',
-  },
-  select: { padding: '0.5rem', borderRadius: '6px', border: '1px solid #ccc' },
-  rangeGroup: { display: 'flex', flexDirection: 'column', gap: '0.2rem', fontSize: '0.85rem' },
-  resetBtn: {
-    padding: '0.5rem 1rem', backgroundColor: '#1a1a2e',
-    color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer',
-  },
-  compareBar: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '1rem', backgroundColor: '#1a1a2e', color: 'white',
-    borderRadius: '8px', marginBottom: '1rem',
-  },
-  compareLink: {
-    color: '#00d4ff', fontWeight: 'bold', textDecoration: 'none',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '1.5rem',
-  },
-};
-
-export default BrowsePage;

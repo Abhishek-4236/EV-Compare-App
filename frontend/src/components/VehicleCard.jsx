@@ -1,75 +1,127 @@
 import { Link } from 'react-router-dom';
+import { Zap, Gauge, Battery, Star, Plus, Check } from 'lucide-react';
+
+const SEGMENT_COLORS = {
+  '2W': { bg: '#fef9c3', color: '#854d0e', icon: '🛵' },
+  '3W': { bg: '#dbeafe', color: '#1e40af', icon: '🛺' },
+  '4W': { bg: '#dcfce7', color: '#166534', icon: '🚗' },
+  'Truck': { bg: '#fce7f3', color: '#9d174d', icon: '🚛' },
+  'Bus': { bg: '#ede9fe', color: '#5b21b6', icon: '🚌' },
+};
 
 function formatPrice(p) {
+  if (!p && p !== 0) return 'N/A';
   if (p >= 10000000) return `₹${(p / 10000000).toFixed(2)}Cr`;
   if (p >= 100000) return `₹${(p / 100000).toFixed(1)}L`;
-  return `₹${(p / 1000).toFixed(0)}K`;
+  if (p >= 1000) return `₹${(p / 1000).toFixed(0)}K`;
+  return `₹${p}`;
 }
 
-function VehicleCard({ vehicle, onCompareToggle, isSelected }) {
+function SegmentIcon({ category }) {
+  const info = SEGMENT_COLORS[category] || { bg: '#f3f4f6', color: '#374151', icon: '⚡' };
   return (
-    <div style={{ ...styles.card, ...(isSelected ? styles.selected : {}) }}>
-      <div style={styles.badge}>{vehicle.category} • {vehicle.wheel_type}</div>
-      <div style={styles.body}>
-        <h3 style={styles.name}>{vehicle.brand} {vehicle.model}</h3>
-        <div style={styles.price}>{formatPrice(vehicle.approx_price_inr)}</div>
-        <div style={styles.specs}>
-          <span>🔋 {vehicle.range_km} km</span>
-          <span>⚡ {vehicle.battery_kwh} kWh</span>
-          <span>🏎 {vehicle.top_speed_kmh} kmph</span>
-        </div>
-        {vehicle.fame2_subsidy_inr > 0 && (
-          <div style={styles.subsidy}>
-            FAME II: -{formatPrice(vehicle.fame2_subsidy_inr)}
-          </div>
-        )}
-        <div style={styles.actions}>
-          <Link to={`/vehicle/${vehicle.id}`} style={styles.detailBtn}>
-            Details
-          </Link>
-          <button
-            style={{ ...styles.compareBtn, ...(isSelected ? styles.activeBtn : {}) }}
-            onClick={() => onCompareToggle && onCompareToggle(vehicle.id)}
-          >
-            {isSelected ? '✓ Added' : '+ Compare'}
-          </button>
-        </div>
-      </div>
+    <div style={{
+      width: '100%', height: '100%',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      background: info.bg, gap: 8,
+    }}>
+      <span style={{ fontSize: 52, lineHeight: 1 }}>{info.icon}</span>
+      <span style={{ fontSize: 11, fontWeight: 600, color: info.color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        {category}
+      </span>
     </div>
   );
 }
 
-const styles = {
-  card: {
-    border: '1px solid #e9ecef', borderRadius: '12px',
-    overflow: 'hidden', backgroundColor: 'white',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-  },
-  selected: { border: '2px solid #00d4ff' },
-  badge: {
-    padding: '0.4rem 1rem', backgroundColor: '#1a1a2e',
-    color: '#00d4ff', fontSize: '0.8rem', fontWeight: 'bold',
-  },
-  body: { padding: '1rem' },
-  name: { margin: '0 0 0.5rem', fontSize: '1.1rem' },
-  price: { fontSize: '1.4rem', fontWeight: 'bold', color: '#1a1a2e', marginBottom: '0.5rem' },
-  specs: { display: 'flex', gap: '0.8rem', fontSize: '0.85rem', marginBottom: '0.5rem', flexWrap: 'wrap' },
-  subsidy: {
-    fontSize: '0.8rem', color: '#16a34a',
-    backgroundColor: '#dcfce7', padding: '0.2rem 0.5rem',
-    borderRadius: '4px', marginBottom: '0.5rem', display: 'inline-block',
-  },
-  actions: { display: 'flex', gap: '0.5rem', marginTop: '0.8rem' },
-  detailBtn: {
-    padding: '0.4rem 0.8rem', backgroundColor: '#1a1a2e',
-    color: 'white', borderRadius: '6px', textDecoration: 'none', fontSize: '0.85rem',
-  },
-  compareBtn: {
-    padding: '0.4rem 0.8rem', backgroundColor: '#f1f5f9',
-    border: '1px solid #cbd5e1', borderRadius: '6px',
-    cursor: 'pointer', fontSize: '0.85rem',
-  },
-  activeBtn: { backgroundColor: '#00d4ff', color: '#1a1a2e', border: 'none' },
-};
+export default function VehicleCard({ vehicle: v, onCompareToggle, isSelected }) {
+  const segInfo = SEGMENT_COLORS[v.category] || {};
 
-export default VehicleCard;
+  return (
+    <div className="ev-vehicle-card">
+      {/* Image / Segment visual */}
+      <div className="ev-vehicle-card-img">
+        {v.image_url
+          ? <img src={v.image_url} alt={`${v.brand} ${v.model}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <SegmentIcon category={v.category} />
+        }
+        {/* Rating badge */}
+        {v.overall_rating && (
+          <div style={{
+            position: 'absolute', top: 10, right: 10,
+            background: 'rgba(0,0,0,0.65)',
+            color: 'white', borderRadius: 8,
+            padding: '3px 8px', fontSize: 12, fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: 3,
+            backdropFilter: 'blur(8px)',
+          }}>
+            <Star size={11} fill="gold" color="gold" /> {Number(v.overall_rating).toFixed(1)}
+          </div>
+        )}
+        {/* FAME badge */}
+        {v.fame2_subsidy_inr > 0 && (
+          <div style={{
+            position: 'absolute', top: 10, left: 10,
+            background: 'var(--accent)', color: 'white',
+            borderRadius: 6, padding: '3px 7px', fontSize: 10, fontWeight: 700,
+          }}>
+            FAME II
+          </div>
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="ev-vehicle-card-body">
+        <div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            {v.brand}
+          </div>
+          <div className="ev-vehicle-card-name">{v.model}</div>
+        </div>
+
+        <div className="ev-vehicle-card-price">{formatPrice(v.approx_price_inr)}</div>
+
+        {/* Specs Grid */}
+        <div className="ev-vehicle-card-specs">
+          <div className="ev-spec-item">
+            <span className="ev-spec-label"><Zap size={9} style={{ display: 'inline', marginRight: 2 }} />Range</span>
+            <span className="ev-spec-value">{v.range_km} km</span>
+          </div>
+          <div className="ev-spec-item">
+            <span className="ev-spec-label"><Battery size={9} style={{ display: 'inline', marginRight: 2 }} />Battery</span>
+            <span className="ev-spec-value">{Number(v.battery_kwh).toFixed(1)} kWh</span>
+          </div>
+          {v.top_speed_kmh && (
+            <div className="ev-spec-item">
+              <span className="ev-spec-label"><Gauge size={9} style={{ display: 'inline', marginRight: 2 }} />Top Speed</span>
+              <span className="ev-spec-value">{v.top_speed_kmh} kmph</span>
+            </div>
+          )}
+          {v.charging_type && (
+            <div className="ev-spec-item">
+              <span className="ev-spec-label">Charging</span>
+              <span className="ev-spec-value" style={{ fontSize: 11, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                {v.charging_type}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="ev-vehicle-card-footer">
+        <label className="ev-compare-check" onClick={e => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onCompareToggle && onCompareToggle(v.id)}
+          />
+          Compare
+        </label>
+        <Link to={`/vehicle/${v.id}`} className="ev-btn ev-btn-sm ev-btn-primary">
+          Details
+        </Link>
+      </div>
+    </div>
+  );
+}

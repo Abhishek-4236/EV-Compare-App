@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from decimal import Decimal
+from pydantic import EmailStr
 
 class VehicleOut(BaseModel):
     id: int
@@ -46,3 +47,38 @@ class RecommendRequest(BaseModel):
     daily_km: int
     segment: str
     priority: str
+
+
+class SignupRequest(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class AuthResponse(BaseModel):
+    success: bool
+    access_token: str
+    token_type: str = "bearer"
+    user: dict
+
+
+class KnowledgeArticleBase(BaseModel):
+    title: str
+    source: Optional[str] = None
+    content: str
+
+
+class KnowledgeArticleCreate(KnowledgeArticleBase):
+    pass
+
+
+class KnowledgeArticle(KnowledgeArticleBase):
+    id: int
+
+    class Config:
+        from_attributes = True

@@ -10,6 +10,7 @@ npm-debug.log
 
 # Environment secrets
 .env
+.env.*
 .env.local
 
 # OS files
@@ -18,3 +19,8 @@ Thumbs.db
 
 # Build
 /frontend/build/
+
+# Dataset files
+*.xlsx
+*.csv
+data/

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, Literal
 from database import get_db
 from models import Vehicle
 from schemas import VehicleOut, VehicleListResponse
@@ -27,8 +27,8 @@ def get_vehicles(
     min_range: Optional[int] = None,
     max_range: Optional[int] = None,
     charging_type: Optional[str] = None,
-    sort_by: str = "overall_rating",
-    sort_order: str = "DESC",
+    sort_by: Literal["approx_price_inr", "range_km", "overall_rating", "battery_kwh", "top_speed_kmh"] = "overall_rating",
+    sort_order: Literal["ASC", "DESC"] = "DESC",
     page: int = 1,
     limit: int = 20,
     db: Session = Depends(get_db)
@@ -52,7 +52,7 @@ def get_vehicles(
 
     total = query.count()
 
-    safe_sort = sort_by if sort_by in ALLOWED_SORTS else "overall_rating"
+    safe_sort = sort_by # Type hinting now ensures it's safe
     sort_col = getattr(Vehicle, safe_sort)
     query = query.order_by(
         sort_col.desc() if sort_order == "DESC" else sort_col.asc()

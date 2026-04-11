@@ -1,7 +1,7 @@
 from functools import lru_cache
 from sentence_transformers import SentenceTransformer
 
-MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+MODEL_NAME = "BAAI/bge-small-en-v1.5"
 EMBEDDING_DIM = 384
 
 
@@ -30,3 +30,25 @@ def vehicle_to_text(vehicle) -> str:
         f"rating {vehicle.overall_rating}" if vehicle.overall_rating else None,
     ]
     return ". ".join([p for p in parts if p])
+
+
+def chunk_text(text: str, max_chars: int = 1000) -> list[str]:
+    """Naive splitter: splits long text into ~max_chars chunks at sentence boundaries."""
+    paragraphs: list[str] = []
+    current = []
+
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if sum(len(p) for p in current) + len(line) + 1 > max_chars:
+            if current:
+                paragraphs.append(" ".join(current))
+                current = []
+        current.append(line)
+
+    if current:
+        paragraphs.append(" ".join(current))
+
+    return paragraphs
+

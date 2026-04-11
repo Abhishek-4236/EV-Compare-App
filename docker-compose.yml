@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   postgres:
-    image: pgvector/pgvector:pg16-latest
+    image: pgvector/pgvector:pg16
     container_name: ev-postgres
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -28,11 +28,15 @@ services:
     environment:
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-ev_compare}
       PYTHONUNBUFFERED: 1
+      REDIS_URL: redis://redis:6379
+      GROQ_API_KEY: ${GROQ_API_KEY}
     ports:
       - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - ev-network
     develop:
@@ -46,6 +50,14 @@ services:
             - "*.pyc"
         - action: rebuild
           path: ./backend/requirements.txt
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - ev-network
 
   frontend:
     build:

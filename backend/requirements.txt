@@ -18,3 +18,13 @@ typing_extensions==4.15.0
 uvicorn==0.41.0
 sentence-transformers
 pgvector
+asyncpg
+redis
+groq
+alembic
+passlib
+python-jose[cryptography]
+email-validator
+pydantic-settings
+pandas
+openpyxl

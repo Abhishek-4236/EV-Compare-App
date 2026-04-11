@@ -1,14 +1,31 @@
 # backend/seed.py
 import pandas as pd
+from pathlib import Path
 from database import engine, SessionLocal, Base
-from models import Vehicle, ChatMessage, ChatSession
+from models import Vehicle, ChatMessage, ChatSession, ChatFeedback
 from embeddings import embed_text
+
+
+def map_segment(category: str) -> str:
+    value = (category or "").strip().lower()
+    if value == "2w":
+        return "TWO_WHEELER"
+    if value == "3w":
+        return "THREE_WHEELER"
+    if value == "4w":
+        return "FOUR_WHEELER"
+    if value == "truck":
+        return "TRUCK"
+    if value == "bus":
+        return "BUS"
+    return "FOUR_WHEELER"
 
 # Create tables
 Base.metadata.create_all(bind=engine)
 
-# Read Excel
-df = pd.read_excel("../India_EV_All_Segments_Dataset_2026.xlsx")
+# Read Excel (relative to repo root)
+data_path = Path(__file__).resolve().parent.parent / "data" / "raw" / "India_EV_All_Segments_Dataset_2026.xlsx"
+df = pd.read_excel(data_path)
 
 # Clean column names
 df.columns = df.columns.str.strip()
@@ -18,6 +35,7 @@ db = SessionLocal()
 try:
     # Clear existing data to avoid duplicates
     db.query(ChatMessage).delete()
+    db.query(ChatFeedback).delete()
     db.query(ChatSession).delete()
     db.query(Vehicle).delete()
     db.commit()
@@ -40,6 +58,7 @@ try:
             embedding = None
 
         vehicle = Vehicle(
+            segment=map_segment(str(row["Category"]).strip()),
             category=str(row["Category"]).strip(),
             wheel_type=str(row["Wheel_Type"]).strip(),
             brand=str(row["Brand"]).strip(),
@@ -57,11 +76,11 @@ try:
         inserted += 1
 
     db.commit()
-    print(f"✅ Successfully inserted {inserted} vehicles into PostgreSQL!")
+    print(f"Successfully inserted {inserted} vehicles into PostgreSQL!")
 
 except Exception as e:
     db.rollback()
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
 
 finally:
     db.close()

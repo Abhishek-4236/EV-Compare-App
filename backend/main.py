@@ -1,25 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
-from routers import vehicles, compare, recommend
-from routers import vehicles, compare, recommend, chat
+from routers import vehicles, compare, recommend, chat, subsidies, map, auth
 
-Base.metadata.create_all(bind=engine)
+from core.config import settings
 
 app = FastAPI(
-    title="India EV Compare API",
+    title=settings.PROJECT_NAME,
     description="EV Information & Comparison Agent — VBIT",
     version="1.0.0"
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=settings.FRONTEND_URL,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,6 +22,17 @@ app.add_middleware(
 app.include_router(vehicles.router)
 app.include_router(compare.router)
 app.include_router(recommend.router)
+app.include_router(subsidies.router)
+app.include_router(map.router)
+app.include_router(auth.router)
+
+@app.on_event("startup")
+def startup():
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception:
+        # Allow API to start even if DB is temporarily unavailable.
+        pass
 
 @app.get("/health")
 def health():
