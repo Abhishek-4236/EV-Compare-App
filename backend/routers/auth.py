@@ -6,6 +6,7 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
+from core.config import settings
 from database import get_db
 from models import User
 from schemas import SignupRequest, LoginRequest, AuthResponse
@@ -13,9 +14,9 @@ from schemas import SignupRequest, LoginRequest, AuthResponse
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
-JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret-change-me")
-JWT_ALG = "HS256"
-JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "1440"))
+JWT_SECRET = settings.JWT_SECRET
+JWT_ALG = settings.JWT_ALGORITHM
+JWT_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 
 def create_access_token(sub: str) -> str:

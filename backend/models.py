@@ -1,5 +1,6 @@
 import enum
 from sqlalchemy import Column, Integer, String, Numeric, Boolean, Text, TIMESTAMP, ForeignKey, Enum
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from database import Base
 from pgvector.sqlalchemy import Vector
@@ -45,6 +46,7 @@ class Vehicle(Base):
     market_status = Column(String(20), default="Available")
     launch_year = Column(Integer)
     image_url = Column(Text)
+    extra_info = Column(JSONB, nullable=True)
     embedding = Column(Vector(EMBEDDING_DIM))
     created_at = Column(TIMESTAMP, server_default=func.now())
 
@@ -53,6 +55,8 @@ class ChatSession(Base):
     __tablename__ = "chat_sessions"
 
     id = Column(String(36), primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    title = Column(String(200), default="New Chat")
     last_vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=True)
     expertise_level = Column(String(20), default="Novice")
     lessons_learned = Column(Text, nullable=True)

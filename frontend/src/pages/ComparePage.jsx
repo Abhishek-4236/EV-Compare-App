@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { vehicleAPI } from '../services/api';
-import { ArrowLeft, Trophy, Zap, Battery, Gauge, Star, TrendingDown } from 'lucide-react';
+import { ArrowLeft, Trophy, Zap, Battery, Star, TrendingDown } from 'lucide-react';
 
 function formatPrice(p) {
   if (!p && p !== 0) return 'N/A';
@@ -10,24 +10,26 @@ function formatPrice(p) {
   return `₹${(p / 1000).toFixed(0)}K`;
 }
 
-const SPECS = [
+const CORE_SPECS = [
   { key: 'approx_price_inr', label: 'Price', format: formatPrice, lower_is_best: true },
-  { key: 'range_km', label: 'Range (km)', format: v => `${v} km`, lower_is_best: false },
-  { key: 'battery_kwh', label: 'Battery (kWh)', format: v => `${Number(v).toFixed(1)} kWh`, lower_is_best: false },
-  { key: 'top_speed_kmh', label: 'Top Speed', format: v => v ? `${v} kmph` : 'N/A', lower_is_best: false },
-  { key: 'charging_type', label: 'Charging', format: v => v || 'N/A', lower_is_best: null },
-  { key: 'charging_time_ac_hrs', label: 'AC Charge Time', format: v => v ? `${v} hrs` : 'N/A', lower_is_best: true },
-  { key: 'charging_time_dc_min', label: 'DC Fast Charge', format: v => v ? `${v} min` : 'N/A', lower_is_best: true },
-  { key: 'fame2_subsidy_inr', label: 'FAME II Subsidy', format: formatPrice, lower_is_best: false },
-  { key: 'overall_rating', label: 'Rating', format: v => v ? `${Number(v).toFixed(1)} / 5` : 'N/A', lower_is_best: false },
-  { key: 'warranty_years', label: 'Battery Warranty', format: v => v ? `${v} years` : 'N/A', lower_is_best: false },
+  { key: 'range_km', label: 'Range (km)', format: v => v ? `${v} km` : null, lower_is_best: false },
+  { key: 'battery_kwh', label: 'Battery (kWh)', format: v => v ? `${Number(v).toFixed(1)} kWh` : null, lower_is_best: false },
+  { key: 'top_speed_kmh', label: 'Top Speed', format: v => v ? `${v} kmph` : null, lower_is_best: false },
+  { key: 'vehicle_type', label: 'Vehicle Type', format: v => v || null, lower_is_best: null },
+  { key: 'wheel_type', label: 'Wheel Size', format: v => v || null, lower_is_best: null },
+  { key: 'charging_type', label: 'Charging', format: v => v || null, lower_is_best: null },
+  { key: 'charging_time_ac_hrs', label: 'AC Charge Time', format: v => v ? `${v} hrs` : null, lower_is_best: true },
+  { key: 'charging_time_dc_min', label: 'DC Fast Charge', format: v => v ? `${v} min` : null, lower_is_best: true },
+  { key: 'fame2_subsidy_inr', label: 'FAME II Subsidy', format: v => v ? formatPrice(v) : null, lower_is_best: false },
+  { key: 'overall_rating', label: 'Rating', format: v => v ? `${Number(v).toFixed(1)} / 5` : null, lower_is_best: false },
+  { key: 'warranty_years', label: 'Battery Warranty', format: v => v ? `${v} years` : null, lower_is_best: false },
 ];
 
 function getBestIdx(vehicles, spec) {
   if (spec.lower_is_best === null) return -1;
   const vals = vehicles.map(v => {
-    const val = v[spec.key];
-    return val !== null && val !== undefined ? Number(val) : null;
+    const val = spec.getValue ? spec.getValue(v) : v[spec.key];
+    return val !== null && val !== undefined && val !== '' && !isNaN(Number(val)) ? Number(val) : null;
   });
   if (vals.every(v => v === null)) return -1;
   const filtered = vals.map((v, i) => ({ v, i })).filter(x => x.v !== null);
@@ -43,19 +45,21 @@ export default function ComparePage() {
   const [searchParams] = useSearchParams();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const idsParam = searchParams.get('ids');
 
   useEffect(() => {
-    const ids = searchParams.get('ids')?.split(',').map(Number).filter(Boolean);
+    const ids = idsParam?.split(',').map(Number).filter(Boolean);
     if (ids?.length >= 2) {
       vehicleAPI.compare(ids)
         .then(res => { setVehicles(res.data.vehicles || []); setLoading(false); })
         .catch(() => setLoading(false));
-    } else {
-      setLoading(false);
     }
-  }, []);
+  }, [idsParam]);
 
-  if (loading) return (
+  const hasEnoughIds = idsParam?.split(',').filter(Boolean).length >= 2;
+  const isLoading = hasEnoughIds ? loading : false;
+
+  if (isLoading) return (
     <div className="ev-shell" style={{ paddingTop: 40, textAlign: 'center' }}>
       <div className="ev-skeleton" style={{ height: 40, maxWidth: 300, margin: '0 auto 16px' }} />
       <div className="ev-skeleton" style={{ height: 300 }} />
@@ -83,6 +87,43 @@ export default function ComparePage() {
     const bestScore = (best.range_km || 0) - (best.approx_price_inr || 0) / 100000;
     return score > bestScore ? v : best;
   }, vehicles[0]);
+
+  // Build dynamic specs
+  const extraKeys = new Set();
+  vehicles.forEach(v => {
+    if (v.extra_info) {
+      Object.keys(v.extra_info).forEach(k => extraKeys.add(k));
+    }
+  });
+
+  const specsToRender = [];
+
+  // 1. Add core specs that have data
+  CORE_SPECS.forEach(spec => {
+    const hasData = vehicles.some(v => {
+      const formatted = spec.format(v[spec.key]);
+      return formatted !== null && formatted !== undefined && formatted !== '';
+    });
+    if (hasData) {
+      specsToRender.push({
+        ...spec,
+        formatRaw: v => {
+          const val = spec.format(v[spec.key]);
+          return val === null || val === undefined || val === '' ? 'N/A' : val;
+        }
+      });
+    }
+  });
+
+  // 2. Add extra info specs
+  Array.from(extraKeys).forEach(key => {
+    specsToRender.push({
+      key: `extra_${key}`,
+      label: key,
+      formatRaw: v => (v.extra_info && v.extra_info[key]) || 'N/A',
+      lower_is_best: null
+    });
+  });
 
   return (
     <div className="ev-shell" style={{ paddingTop: 32 }}>
@@ -135,7 +176,7 @@ export default function ComparePage() {
       <div style={{ overflowX: 'auto', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '0 0 14px 14px', marginBottom: 32 }}>
         <table className="ev-compare-table" style={{ minWidth: 600 }}>
           <tbody>
-            {SPECS.map(spec => {
+            {specsToRender.map(spec => {
               const bestIdx = getBestIdx(vehicles, spec);
               return (
                 <tr key={spec.key}>
@@ -147,7 +188,7 @@ export default function ComparePage() {
                     return (
                       <td key={v.id} className={isBest ? 'ev-compare-best-cell' : ''}
                         style={{ padding: '12px 16px', textAlign: 'center', minWidth: 120, fontWeight: isBest ? 700 : 400 }}>
-                        <span className={isBest ? 'ev-compare-best' : ''}>{spec.format(v[spec.key])}</span>
+                        <span className={isBest ? 'ev-compare-best' : ''}>{spec.formatRaw(v)}</span>
                         {isBest && <Zap size={12} color="var(--accent)" style={{ marginLeft: 4 }} />}
                       </td>
                     );
@@ -169,36 +210,36 @@ export default function ComparePage() {
             {
               label: 'Best Range',
               icon: <Zap size={20} />,
-              v: vehicles.reduce((a, b) => (b.range_km || 0) > (a.range_km || 0) ? b : a),
-              detail: v => `${v.range_km} km`,
+              vehicle: vehicles.reduce((a, b) => (b.range_km || 0) > (a.range_km || 0) ? b : a),
+              detail: item => `${item.range_km} km`,
             },
             {
               label: 'Best Value',
               icon: <TrendingDown size={20} />,
-              v: vehicles.reduce((a, b) => (a.approx_price_inr || Infinity) < (b.approx_price_inr || Infinity) ? a : b),
-              detail: v => formatPrice(v.approx_price_inr),
+              vehicle: vehicles.reduce((a, b) => (a.approx_price_inr || Infinity) < (b.approx_price_inr || Infinity) ? a : b),
+              detail: item => formatPrice(item.approx_price_inr),
             },
             {
               label: 'Best Rating',
               icon: <Star size={20} />,
-              v: vehicles.reduce((a, b) => (Number(b.overall_rating) || 0) > (Number(a.overall_rating) || 0) ? b : a),
-              detail: v => v.overall_rating ? `${Number(v.overall_rating).toFixed(1)} / 5` : 'N/A',
+              vehicle: vehicles.reduce((a, b) => (Number(b.overall_rating) || 0) > (Number(a.overall_rating) || 0) ? b : a),
+              detail: item => item.overall_rating ? `${Number(item.overall_rating).toFixed(1)} / 5` : 'N/A',
             },
             {
               label: 'Biggest Battery',
               icon: <Battery size={20} />,
-              v: vehicles.reduce((a, b) => (Number(b.battery_kwh) || 0) > (Number(a.battery_kwh) || 0) ? b : a),
-              detail: v => `${Number(v.battery_kwh).toFixed(1)} kWh`,
+              vehicle: vehicles.reduce((a, b) => (Number(b.battery_kwh) || 0) > (Number(a.battery_kwh) || 0) ? b : a),
+              detail: item => `${Number(item.battery_kwh).toFixed(1)} kWh`,
             },
-          ].map(({ label, icon, v, detail }) => (
+          ].map(({ label, icon, vehicle, detail }) => (
             <div key={label} className="ev-card" style={{ padding: 18, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)', flexShrink: 0 }}>
                 {icon}
               </div>
               <div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>{label}</div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)', marginBottom: 1 }}>{v.brand} {v.model}</div>
-                <div style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>{detail(v)}</div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)', marginBottom: 1 }}>{vehicle.brand} {vehicle.model}</div>
+                <div style={{ color: 'var(--accent)', fontWeight: 700, fontSize: 13 }}>{detail(vehicle)}</div>
               </div>
             </div>
           ))}

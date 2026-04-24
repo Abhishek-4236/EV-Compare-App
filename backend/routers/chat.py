@@ -1,31 +1,27 @@
-# backend/routers/chat.py
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
-from pydantic import BaseModel
-import uuid
 import json
-import asyncio
+import uuid
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi.responses import StreamingResponse
+from jose import JWTError, jwt
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from database import get_db
-from models import ChatSession, ChatMessage, ChatFeedback, Vehicle
-from services.chat_analysis import (
-    build_query_plan, is_greeting, is_domain_query, has_known_vehicle_reference,
-    is_location_query, is_list_query, is_compare_query, detect_explicit_vehicle,
-    is_pronoun_query, needs_explicit_vehicle, should_use_grounded_fallback,
-    detect_expertise
-)
-from services.retrieval import (
-    search_vehicles, search_articles, build_context,
-    retrieval_confidence, station_answer, summarize_inventory
-)
-from services.llm import generate_answer, fallback_answer
+from models import ChatFeedback, ChatMessage, ChatSession, Vehicle
+from services.ev_rag import ev_rag_service
+from .auth import JWT_ALG, JWT_SECRET, read_bearer_token
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
+_MEMORY_SESSIONS: dict[str, dict] = {}
+_MEMORY_MESSAGES: dict[str, list[dict[str, str]]] = {}
+
 
 class ChatRequest(BaseModel):
     message: str
     session_id: str | None = None
+
 
 class FeedbackRequest(BaseModel):
     session_id: str
@@ -33,180 +29,233 @@ class FeedbackRequest(BaseModel):
     rating: int
     note: str | None = None
 
-async def handle_initial_chat_logic(request: ChatRequest, db: Session):
-    plan = build_query_plan(request.message, db)
 
-    if request.session_id:
-        session = db.query(ChatSession).filter(ChatSession.id == request.session_id).first()
-    else:
+def get_optional_user_id(authorization: str | None = Header(default=None)) -> int | None:
+    if not authorization:
+        return None
+    token = read_bearer_token(authorization)
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+        user_id = payload.get("sub")
+        return int(user_id) if user_id else None
+    except JWTError:
+        return None
+
+
+def get_or_create_session(request: ChatRequest, user_id: int | None, db: Session) -> ChatSession:
+    title = request.message[:40] + ("..." if len(request.message) > 40 else "")
+    fallback_id = request.session_id or str(uuid.uuid4())
+    try:
         session = None
-    
-    if session is None:
-        session = ChatSession(id=str(uuid.uuid4()), expertise_level="Novice")
-        db.add(session)
+        if request.session_id:
+            session = db.query(ChatSession).filter(ChatSession.id == request.session_id).first()
+        if session is None:
+            session = ChatSession(id=str(uuid.uuid4()), expertise_level="Novice", user_id=user_id, title=title)
+            db.add(session)
+            db.commit()
+        elif user_id and not session.user_id:
+            session.user_id = user_id
+            db.commit()
+        return session
+    except Exception:
+        db.rollback()
+        _MEMORY_SESSIONS.setdefault(
+            fallback_id,
+            {
+                "id": fallback_id,
+                "title": title,
+                "created_at": datetime.now(UTC),
+                "user_id": user_id,
+            },
+        )
+        return ChatSession(
+            id=fallback_id,
+            expertise_level="Novice",
+            user_id=user_id,
+            title=title,
+        )
+
+
+def save_assistant_message(db: Session, session_id: str, answer: str) -> None:
+    try:
+        db.add(ChatMessage(session_id=session_id, role="assistant", content=answer))
         db.commit()
+    except Exception:
+        db.rollback()
+        _MEMORY_MESSAGES.setdefault(session_id, []).append({"role": "assistant", "content": answer})
 
-    # Expertise detection
-    current_expertise = detect_expertise(request.message)
-    if current_expertise != "Novice" and session.expertise_level == "Novice":
-        session.expertise_level = current_expertise
-    elif current_expertise == "Expert":
-        session.expertise_level = "Expert"
-    
-    db.add(ChatMessage(session_id=session.id, role="user", content=request.message))
-    db.commit()
 
-    if is_greeting(request.message):
-        return session.id, {
-            "answer": "Hello! I hope you're having a great day. I'm your EViq assistant, ready to help you navigate the Indian EV market with ease. Whether you're looking for model comparisons, subsidy details, or technical charging advice, I'm here for you. How can I assist you in your EV journey today?",
+def build_history_context(db: Session, session_id: str) -> list[dict[str, str]]:
+    try:
+        messages = (
+            db.query(ChatMessage)
+            .filter(ChatMessage.session_id == session_id)
+            .order_by(ChatMessage.created_at.asc())
+            .limit(12)
+            .all()
+        )
+        return [{"role": message.role, "content": message.content} for message in messages]
+    except Exception:
+        db.rollback()
+        return _MEMORY_MESSAGES.get(session_id, [])[-12:]
+
+
+def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session):
+    session = get_or_create_session(request, user_id, db)
+    try:
+        db.add(ChatMessage(session_id=session.id, role="user", content=request.message))
+        db.commit()
+    except Exception:
+        db.rollback()
+        _MEMORY_MESSAGES.setdefault(session.id, []).append({"role": "user", "content": request.message})
+
+    history = build_history_context(db, session.id)
+    normalized_message = request.message.strip().lower()
+    if any(phrase in normalized_message for phrase in ["list all ev", "all evs", "show all vehicles", "show all evs", "full list"]):
+        answer = ev_rag_service.inventory_summary()
+        save_assistant_message(db, session.id, answer)
+        return {
+            "success": True,
+            "session_id": session.id,
+            "answer": answer,
+            "intent": "info",
+            "parsed_query": None,
             "sources": [],
-        }, plan
-
-    if not (is_domain_query(request.message) or has_known_vehicle_reference(request.message, db)):
-        return session.id, {
-            "answer": "I mainly help with India EV topics. Share your EV need (budget, segment, range, city, subsidy, comparison) and I will answer in detail.",
+        }
+    try:
+        result = ev_rag_service.answer(request.message, history)
+    except FileNotFoundError:
+        answer = (
+            "The EV knowledge base is not built yet. "
+            "Run `python scripts/build_ev_knowledge_base.py` inside `backend/` and try again."
+        )
+        save_assistant_message(db, session.id, answer)
+        return {
+            "success": False,
+            "session_id": session.id,
+            "answer": answer,
+            "intent": "info",
+            "parsed_query": None,
             "sources": [],
-        }, plan
+        }
 
-    if is_location_query(request.message):
-        return session.id, {"answer": station_answer(request.message), "sources": []}, plan
+    save_assistant_message(db, session.id, result.answer)
+    source_payload = []
+    vehicle_id_cache: dict[tuple[str, str, int | None, int | None], int | None] = {}
+    for match in result.matches:
+        key = (
+            match.vehicle.brand,
+            match.vehicle.model,
+            match.vehicle.price_inr,
+            match.vehicle.range_km,
+        )
+        if key not in vehicle_id_cache:
+            vehicle_row = (
+                db.query(Vehicle)
+                .filter(
+                    Vehicle.brand == match.vehicle.brand,
+                    Vehicle.model == match.vehicle.model,
+                )
+                .first()
+            )
+            if vehicle_row is None and match.vehicle.price_inr is not None:
+                vehicle_row = (
+                    db.query(Vehicle)
+                    .filter(
+                        Vehicle.brand == match.vehicle.brand,
+                        Vehicle.approx_price_inr == match.vehicle.price_inr,
+                    )
+                    .first()
+                )
+            vehicle_id_cache[key] = vehicle_row.id if vehicle_row else None
 
-    if plan.needs_clarification and plan.clarification_question:
-        return session.id, {"answer": plan.clarification_question, "sources": []}, plan
-
-    if is_list_query(request.message):
-        return session.id, {"answer": summarize_inventory(db), "sources": []}, plan
-
-    return session.id, None, plan
-
-@router.post("/")
-def chat(request: ChatRequest, db: Session = Depends(get_db)):
-    session_id, initial_response, plan = asyncio.run(handle_initial_chat_logic(request, db))
-    if initial_response:
-        db.add(ChatMessage(session_id=session_id, role="assistant", content=initial_response["answer"]))
-        db.commit()
-        return {"success": True, "session_id": session_id, **initial_response}
-
-    session = db.query(ChatSession).filter(ChatSession.id == session_id).first()
-
-    # Retrieve relevant EVs
-    explicit_id = detect_explicit_vehicle(request.message, db)
-    vehicles = []
-    if is_compare_query(request.message):
-        vehicles = search_vehicles(request.message, db)
-    elif explicit_id:
-        v = db.query(Vehicle).filter(Vehicle.id == explicit_id).first()
-        if v: vehicles = [v]
-    elif is_pronoun_query(request.message) and session.last_vehicle_id:
-        v = db.query(Vehicle).filter(Vehicle.id == session.last_vehicle_id).first()
-        if v: vehicles = [v]
-    elif needs_explicit_vehicle(request.message) and not session.last_vehicle_id:
-        answer = "Please tell me the exact EV model name so I can give precise specs."
-        return {"success": True, "session_id": session.id, "answer": answer, "sources": []}
-    else:
-        vehicles = search_vehicles(request.message, db)
-
-    if vehicles:
-        session.last_vehicle_id = vehicles[0].id
-        db.commit()
-
-    conf = retrieval_confidence(plan, vehicles, request.message)
-    if is_pronoun_query(request.message) and session.last_vehicle_id and vehicles:
-        conf = max(conf, 0.7)
-    
-    if conf < 0.45:
-        answer = "I need one more detail for accurate results. Please share segment (2W/3W/4W/Truck/Bus) or budget and minimum range."
-        return {"success": True, "session_id": session.id, "answer": answer, "sources": []}
-    
-    # RAG Context
-    articles = search_articles(request.message, db)
-    context = build_context(vehicles, articles)
-    
-    # Expertise tone adaptation
-    tone = "simple and beginner-friendly"
-    if session.expertise_level == "Enthusiast":
-        tone = "knowledgeable and slightly technical"
-    elif session.expertise_level == "Expert":
-        tone = "highly technical, using industry terms (torque, NMC, BMS, TCO)"
-
-    # Self-correction loop (feedback aware)
-    corrections = ""
-    past_feedback = db.query(ChatFeedback).filter(ChatFeedback.session_id == session.id, ChatFeedback.rating == -1).all()
-    if past_feedback:
-        corrections = "\nLessons from previous mistakes (Do NOT repeat these):\n"
-        for fb in past_feedback:
-            if fb.note: corrections += f"- {fb.note}\n"
-
-    prompt = f"""You are an expert EV advisor for the Indian market.
-Match the user's level: You are talking to a {session.expertise_level} so be {tone}.
-
-Rules:
-1) If the user asks about specific EV models, prices, ranges, or specifications, prioritize using the EV Database Context below.
-2) If the specific EV data they asked for is missing from the context, clearly state 'That specific data is not available in my current dataset'.
-3) For general EV knowledge, concepts, you can use your broader expert knowledge.
-4) Keep answers concise.
-5) comparisons should use markdown tables.
-6) Always use Indian price formats.
-{corrections}
-EV Database Context:
-{context}
-
-User Question: {request.message}
-
-Answer:"""
-
-    if should_use_grounded_fallback(request.message):
-        answer = fallback_answer(request.message, vehicles, articles)
-    else:
-        answer = generate_answer(prompt, request.message, vehicles, articles)
-
-    db.add(ChatMessage(session_id=session.id, role="assistant", content=answer))
-    db.commit()
+        source_payload.append(
+            {
+                "id": vehicle_id_cache[key],
+                "vehicle_id": vehicle_id_cache[key],
+                "rag_id": match.vehicle.id,
+                "brand": match.vehicle.brand,
+                "model": match.vehicle.model,
+                "name": match.vehicle.name,
+                "type": match.vehicle.vehicle_type,
+                "price": match.vehicle.price_inr,
+                "range_km": match.vehicle.range_km,
+                "battery_kwh": match.vehicle.battery_kwh,
+                "charging_time": match.vehicle.charging_time,
+                "score": match.score,
+            }
+        )
 
     return {
-        "success": True, "session_id": session.id, "answer": answer,
-        "sources": [{"brand": v.brand, "model": v.model, "price": v.approx_price_inr, "range_km": v.range_km, "image_url": v.image_url} for v in vehicles]
+        "success": True,
+        "session_id": session.id,
+        "answer": result.answer,
+        "intent": result.intent,
+        "parsed_query": result.parsed_query.model_dump(),
+        "sources": source_payload,
     }
 
+
+@router.post("/")
+def chat(request: ChatRequest, user_id: int | None = Depends(get_optional_user_id), db: Session = Depends(get_db)):
+    return generate_chat_payload(request, user_id, db)
+
+
 @router.post("/stream")
-async def chat_stream(request: ChatRequest, db: Session = Depends(get_db)):
-    session_id, initial_response, plan = await handle_initial_chat_logic(request, db)
-
-    if initial_response:
-        db.add(ChatMessage(session_id=session_id, role="assistant", content=initial_response["answer"]))
-        db.commit()
-        async def stream_initial():
-            yield f"data: {json.dumps({'type': 'session', 'session_id': session_id})}\n\n"
-            yield f"data: {json.dumps({'type': 'chunk', 'content': initial_response['answer']})}\n\n"
-            yield f"data: {json.dumps({'type': 'done', 'sources': []})}\n\n"
-        return StreamingResponse(stream_initial(), media_type="text/event-stream")
-
-    # (Simplified streaming logic similar to non-stream for brevity, but preserving core flow)
-    vehicles = search_vehicles(request.message, db)
-    articles = search_articles(request.message, db)
-    context = build_context(vehicles, articles)
-    
-    prompt = f"EV Database Context: {context}\n\nUser Question: {request.message}"
-    
-    if should_use_grounded_fallback(request.message):
-        answer = fallback_answer(request.message, vehicles)
-    else:
-        answer = generate_answer(prompt, request.message, vehicles)
+async def chat_stream(request: ChatRequest, user_id: int | None = Depends(get_optional_user_id), db: Session = Depends(get_db)):
+    payload = generate_chat_payload(request, user_id, db)
+    answer = payload["answer"]
+    session_id = payload["session_id"]
+    sources = payload.get("sources", [])
 
     async def event_stream():
         yield f"data: {json.dumps({'type': 'session', 'session_id': session_id})}\n\n"
         for token in answer.split(" "):
             yield f"data: {json.dumps({'type': 'chunk', 'content': token + ' '})}\n\n"
-            await asyncio.sleep(0.01)
-        yield f"data: {json.dumps({'type': 'done', 'sources': [{'brand': v.brand, 'model': v.model} for v in vehicles]})}\n\n"
+        yield f"data: {json.dumps({'type': 'done', 'sources': sources})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
 
 @router.post("/feedback")
 def feedback(request: FeedbackRequest, db: Session = Depends(get_db)):
     if request.rating not in (-1, 1):
         raise HTTPException(status_code=400, detail="rating must be 1 or -1")
     fb = ChatFeedback(session_id=request.session_id, vehicle_id=request.vehicle_id, rating=request.rating, note=request.note)
-    db.add(fb)
-    db.commit()
-    return {"success": True}
+    try:
+        db.add(fb)
+        db.commit()
+        return {"success": True}
+    except Exception:
+        db.rollback()
+        return {"success": False}
+
+
+@router.get("/sessions")
+def get_user_sessions(user_id: int | None = Depends(get_optional_user_id), db: Session = Depends(get_db)):
+    if not user_id:
+        return []
+    try:
+        sessions = db.query(ChatSession).filter(ChatSession.user_id == user_id).order_by(ChatSession.created_at.desc()).all()
+        return [{"id": session.id, "title": session.title, "created_at": session.created_at} for session in sessions]
+    except Exception:
+        db.rollback()
+        sessions = [
+            session
+            for session in _MEMORY_SESSIONS.values()
+            if session.get("user_id") == user_id
+        ]
+        sessions.sort(key=lambda item: item.get("created_at") or datetime.now(UTC), reverse=True)
+        return [{"id": session["id"], "title": session["title"], "created_at": session["created_at"]} for session in sessions]
+
+
+@router.get("/history/{session_id}")
+def get_session_history(session_id: str, db: Session = Depends(get_db)):
+    try:
+        messages = db.query(ChatMessage).filter(ChatMessage.session_id == session_id).order_by(ChatMessage.created_at.asc()).all()
+        return [{"role": message.role, "text": message.content} for message in messages]
+    except Exception:
+        db.rollback()
+        return [{"role": message["role"], "text": message["content"]} for message in _MEMORY_MESSAGES.get(session_id, [])]

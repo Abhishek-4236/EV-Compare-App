@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Gauge, Battery, Star, Plus, Check } from 'lucide-react';
+import { Zap, Gauge, Battery, Star, Heart } from 'lucide-react';
+import { garageAPI } from '../services/api';
+import useAuth from '../store/useAuth';
 
 const SEGMENT_COLORS = {
   '2W': { bg: '#fef9c3', color: '#854d0e', icon: '🛵' },
@@ -17,8 +20,15 @@ function formatPrice(p) {
   return `₹${p}`;
 }
 
-function SegmentIcon({ category }) {
-  const info = SEGMENT_COLORS[category] || { bg: '#f3f4f6', color: '#374151', icon: '⚡' };
+function SegmentIcon({ vehicle }) {
+  let cat = vehicle.category || 'other';
+  if (cat === '4W' && vehicle.vehicle_type) {
+    const vt = vehicle.vehicle_type.toLowerCase();
+    if (vt.includes('truck') || vt.includes('commercial') || vt.includes('cargo')) {
+      cat = 'Truck';
+    }
+  }
+  const info = SEGMENT_COLORS[cat] || { bg: '#f3f4f6', color: '#374151', icon: '⚡' };
   return (
     <div style={{
       width: '100%', height: '100%',
@@ -28,22 +38,35 @@ function SegmentIcon({ category }) {
     }}>
       <span style={{ fontSize: 52, lineHeight: 1 }}>{info.icon}</span>
       <span style={{ fontSize: 11, fontWeight: 600, color: info.color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-        {category}
+        {cat}
       </span>
     </div>
   );
 }
 
 export default function VehicleCard({ vehicle: v, onCompareToggle, isSelected }) {
-  const segInfo = SEGMENT_COLORS[v.category] || {};
+  const { user } = useAuth();
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
+  async function handleSave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user || saving || saved) return;
+    setSaving(true);
+    try {
+      await garageAPI.save({ vehicle_ids: String(v.id), name: `${v.brand} ${v.model}` });
+      setSaved(true);
+    } catch { /* ignore — user may not be logged in */ }
+    finally { setSaving(false); }
+  }
   return (
     <div className="ev-vehicle-card">
       {/* Image / Segment visual */}
       <div className="ev-vehicle-card-img">
         {v.image_url
           ? <img src={v.image_url} alt={`${v.brand} ${v.model}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <SegmentIcon category={v.category} />
+          : <SegmentIcon vehicle={v} />
         }
         {/* Rating badge */}
         {v.overall_rating && (
@@ -118,9 +141,30 @@ export default function VehicleCard({ vehicle: v, onCompareToggle, isSelected })
           />
           Compare
         </label>
-        <Link to={`/vehicle/${v.id}`} className="ev-btn ev-btn-sm ev-btn-primary">
-          Details
-        </Link>
+
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {/* Save to Garage */}
+          {user && (
+            <button
+              onClick={handleSave}
+              title={saved ? 'Saved to Garage' : 'Save to Garage'}
+              style={{
+                width: 30, height: 30, borderRadius: 8,
+                border: '1px solid var(--border)',
+                background: saved ? 'var(--accent-soft)' : 'var(--bg-muted)',
+                color: saved ? 'var(--accent)' : 'var(--text-muted)',
+                cursor: saved ? 'default' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s', flexShrink: 0,
+              }}
+            >
+              <Heart size={13} fill={saved ? 'currentColor' : 'none'} />
+            </button>
+          )}
+          <Link to={`/vehicle/${v.id}`} className="ev-btn ev-btn-sm ev-btn-primary">
+            Details
+          </Link>
+        </div>
       </div>
     </div>
   );

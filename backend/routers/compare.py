@@ -8,8 +8,8 @@ router = APIRouter(prefix="/api/compare", tags=["Compare"])
 
 @router.post("/")
 async def compare_vehicles(request: CompareRequest, db: Session = Depends(get_db)):
-    if len(request.ids) < 2 or len(request.ids) > 3:
-        raise HTTPException(status_code=400, detail="Send 2 or 3 vehicle IDs")
+    if len(request.ids) < 2 or len(request.ids) > 4:
+        raise HTTPException(status_code=400, detail="Send 2 to 4 vehicle IDs")
 
     vehicles = db.query(Vehicle).filter(Vehicle.id.in_(request.ids)).all()
 

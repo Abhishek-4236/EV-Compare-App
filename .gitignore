@@ -1,26 +1,18 @@
-# Python
 __pycache__/
-*.pyc
-.venv/
-venv/
-
-# Node
-node_modules/
-npm-debug.log
-
-# Environment secrets
+*.py[cod]
+*$py.class
 .env
-.env.*
-.env.local
-
-# OS files
+.venv
+env/
+venv/
+ENV/
+bin/
+lib/
+include/
+.vscode/
+.idea/
+*.db
+*.log
 .DS_Store
-Thumbs.db
-
-# Build
-/frontend/build/
-
-# Dataset files
-*.xlsx
-*.csv
-data/
+# Ignore alembic's local configuration if it contains credentials
+backend/alembic.ini

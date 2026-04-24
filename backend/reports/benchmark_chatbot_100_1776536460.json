@@ -1,0 +1,1942 @@
+{
+  "summary": {
+    "total_cases": 100,
+    "passed": 87,
+    "failed": 13,
+    "avg_latency_ms": 32.87,
+    "by_difficulty": {
+      "easy": {
+        "total": 25,
+        "passed": 25,
+        "avg_latency_ms": 42.17,
+        "accuracy_percent": 100.0
+      },
+      "mid": {
+        "total": 25,
+        "passed": 17,
+        "avg_latency_ms": 28.05,
+        "accuracy_percent": 68.0
+      },
+      "hard": {
+        "total": 25,
+        "passed": 24,
+        "avg_latency_ms": 40.05,
+        "accuracy_percent": 96.0
+      },
+      "expert": {
+        "total": 25,
+        "passed": 21,
+        "avg_latency_ms": 21.19,
+        "accuracy_percent": 84.0
+      }
+    },
+    "by_style": {
+      "direct": {
+        "total": 50,
+        "passed": 42,
+        "avg_latency_ms": 35.11,
+        "accuracy_percent": 84.0
+      },
+      "vague": {
+        "total": 25,
+        "passed": 24,
+        "avg_latency_ms": 40.05,
+        "accuracy_percent": 96.0
+      },
+      "indirect": {
+        "total": 25,
+        "passed": 21,
+        "avg_latency_ms": 21.19,
+        "accuracy_percent": 84.0
+      }
+    },
+    "samples": [
+      {
+        "query": "What is the price of Ola S1 Pro?",
+        "passed": true,
+        "latency_ms": 26.35,
+        "answer_preview": "Ola S1 Pro. Price: \u20b9130,000"
+      },
+      {
+        "query": "Tell me the range of Ather 450X.",
+        "passed": true,
+        "latency_ms": 19.43,
+        "answer_preview": "Ather Rizta Z. Range: 160 km"
+      },
+      {
+        "query": "Battery capacity of TVS iQube?",
+        "passed": true,
+        "latency_ms": 19.45,
+        "answer_preview": "TVS iQube. Battery: 3.4 kWh"
+      },
+      {
+        "query": "What is the charging time of Bajaj Chetak?",
+        "passed": true,
+        "latency_ms": 40.68,
+        "answer_preview": "Bajaj Chetak. Charging: 4-6 hrs"
+      },
+      {
+        "query": "How much does Hero Vida V1 cost?",
+        "passed": true,
+        "latency_ms": 29.5,
+        "answer_preview": "Here are the closest EV matches from the current dataset: - Hero Vida V1: \u20b9120,000, 165 km range, 3.9 kWh battery, charging 4-6 hrs - Hero Vida VX2 Go: \u20b9110,000, 92 km range, 3.4 kWh battery, charging 4-6 hrs - Hero Vida"
+      },
+      {
+        "query": "Tata Nexon EV price and range",
+        "passed": true,
+        "latency_ms": 20.1,
+        "answer_preview": "Tata Nexon EV. Price: \u20b91,650,000. Range: 460 km"
+      },
+      {
+        "query": "MG ZS EV battery details",
+        "passed": true,
+        "latency_ms": 41.65,
+        "answer_preview": "MG ZS EV. Battery: 50.3 kWh"
+      },
+      {
+        "query": "Mahindra XUV400 charging type",
+        "passed": true,
+        "latency_ms": 17.78,
+        "answer_preview": "Mahindra XUV400. Charging: 7 hr / 1.5 hr DC"
+      }
+    ],
+    "accuracy_percent": 87.0
+  },
+  "results": [
+    {
+      "id": 1,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "What is the price of Ola S1 Pro?",
+      "expected_keywords": [
+        "ola",
+        "s1 pro",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 26.35,
+      "source_count": 6,
+      "answer_preview": "Ola S1 Pro. Price: \u20b9130,000"
+    },
+    {
+      "id": 2,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Tell me the range of Ather 450X.",
+      "expected_keywords": [
+        "ather",
+        "450x",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 19.43,
+      "source_count": 6,
+      "answer_preview": "Ather Rizta Z. Range: 160 km"
+    },
+    {
+      "id": 3,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Battery capacity of TVS iQube?",
+      "expected_keywords": [
+        "tvs",
+        "iqube",
+        "battery"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 19.45,
+      "source_count": 6,
+      "answer_preview": "TVS iQube. Battery: 3.4 kWh"
+    },
+    {
+      "id": 4,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "What is the charging time of Bajaj Chetak?",
+      "expected_keywords": [
+        "bajaj",
+        "chetak",
+        "charging"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 40.68,
+      "source_count": 6,
+      "answer_preview": "Bajaj Chetak. Charging: 4-6 hrs"
+    },
+    {
+      "id": 5,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "How much does Hero Vida V1 cost?",
+      "expected_keywords": [
+        "hero",
+        "vida",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 29.5,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Hero Vida V1: \u20b9120,000, 165 km range, 3.9 kWh battery, charging 4-6 hrs - Hero Vida VX2 Go: \u20b9110,000, 92 km range, 3.4 kWh battery, charging 4-6 hrs - Hero Vida"
+    },
+    {
+      "id": 6,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Tata Nexon EV price and range",
+      "expected_keywords": [
+        "nexon",
+        "price",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 20.1,
+      "source_count": 6,
+      "answer_preview": "Tata Nexon EV. Price: \u20b91,650,000. Range: 460 km"
+    },
+    {
+      "id": 7,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "MG ZS EV battery details",
+      "expected_keywords": [
+        "mg",
+        "zs",
+        "battery"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 41.65,
+      "source_count": 6,
+      "answer_preview": "MG ZS EV. Battery: 50.3 kWh"
+    },
+    {
+      "id": 8,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Mahindra XUV400 charging type",
+      "expected_keywords": [
+        "mahindra",
+        "xuv400",
+        "charging"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 17.78,
+      "source_count": 6,
+      "answer_preview": "Mahindra XUV400. Charging: 7 hr / 1.5 hr DC"
+    },
+    {
+      "id": 9,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Range of BYD Atto 3?",
+      "expected_keywords": [
+        "byd",
+        "atto",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 40.82,
+      "source_count": 6,
+      "answer_preview": "BYD Atto 3. Range: 521 km"
+    },
+    {
+      "id": 10,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "What is the price of Hyundai Ioniq 5?",
+      "expected_keywords": [
+        "hyundai",
+        "ioniq",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 32.57,
+      "source_count": 6,
+      "answer_preview": "Hyundai Ioniq 5 N. Price: \u20b94,650,000"
+    },
+    {
+      "id": 11,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Kia EV6 battery and charging time",
+      "expected_keywords": [
+        "kia",
+        "ev6",
+        "battery",
+        "charging"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 4,
+      "latency_ms": 21.13,
+      "source_count": 6,
+      "answer_preview": "Kia EV6. Battery: 77.0 kWh. Charging: 6-8 hrs AC / 1 hr DC"
+    },
+    {
+      "id": 12,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Give me Tata Punch EV specs",
+      "expected_keywords": [
+        "punch",
+        "tata"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 20.69,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Tata Punch EV: \u20b91,200,000, 421 km range, 35.0 kWh battery, charging 6-8 hrs AC / 1 hr DC - Tata Tiago EV XE MR: \u20b9800,000, 250 km range, 19.2 kWh battery, chargi"
+    },
+    {
+      "id": 13,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "How much is Tata Tiago EV?",
+      "expected_keywords": [
+        "tiago",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 20.12,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Tata Tiago EV: \u20b92,082,182, 490 km range, 22.68 kWh battery, charging 8 hr / 1 hr DC - Tata Tiago EV XE MR: \u20b9800,000, 250 km range, 19.2 kWh battery, charging 6-"
+    },
+    {
+      "id": 14,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "What is the range of MG Comet EV?",
+      "expected_keywords": [
+        "comet",
+        "mg",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 30.52,
+      "source_count": 6,
+      "answer_preview": "MG Comet EV. Range: 230 km"
+    },
+    {
+      "id": 15,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Mercedes EQS price in India",
+      "expected_keywords": [
+        "mercedes",
+        "eqs",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 30.16,
+      "source_count": 6,
+      "answer_preview": "Mercedes EQS. Price: \u20b915,500,000"
+    },
+    {
+      "id": 16,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "BYD Seal top speed",
+      "expected_keywords": [
+        "byd",
+        "seal",
+        "top speed"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 21.21,
+      "source_count": 6,
+      "answer_preview": "BYD Seal. Top speed: 180.0"
+    },
+    {
+      "id": 17,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Ola S1 X battery",
+      "expected_keywords": [
+        "ola",
+        "s1 x",
+        "battery"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 38.15,
+      "source_count": 6,
+      "answer_preview": "Ola S1 X. Battery: 2.0 kWh"
+    },
+    {
+      "id": 18,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Ather Rizta Z charging time",
+      "expected_keywords": [
+        "ather",
+        "rizta",
+        "charging"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 41.01,
+      "source_count": 6,
+      "answer_preview": "Ather Rizta Z. Charging: 4-6 hrs"
+    },
+    {
+      "id": 19,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Tell me about Ather 450X",
+      "expected_keywords": [
+        "ather",
+        "450x"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 37.06,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Ather 450X: \u20b9147,000, 161 km range, 2.9 kWh battery, charging 4-6 hrs - Ather Rizta Z: \u20b9186,000, 160 km range, 3.7 kWh battery, charging 4-6 hrs - Ather Rizta S"
+    },
+    {
+      "id": 20,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "What is Ola S1 Pro top speed?",
+      "expected_keywords": [
+        "ola",
+        "s1 pro",
+        "top speed"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 19.06,
+      "source_count": 6,
+      "answer_preview": "Ola S1 Pro. Top speed: 120.0"
+    },
+    {
+      "id": 21,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Need TVS iQube details",
+      "expected_keywords": [
+        "tvs",
+        "iqube"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 50.05,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | TVS iQube | scooter | \u20b9108,000 | 140 km | 3.4 kWh | 4-6 hrs | | Mercedes EQS | car | \u20b915,500,000 | 677 km | 108.0 kWh | 6-8 hrs AC / "
+    },
+    {
+      "id": 22,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Price of Bajaj Chetak please",
+      "expected_keywords": [
+        "bajaj",
+        "chetak",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 242.23,
+      "source_count": 6,
+      "answer_preview": "Bajaj Chetak. Price: \u20b991,000"
+    },
+    {
+      "id": 23,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Hero Vida V1 range",
+      "expected_keywords": [
+        "hero",
+        "vida",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 45.42,
+      "source_count": 6,
+      "answer_preview": "Hero Vida V1. Range: 165 km"
+    },
+    {
+      "id": 24,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "MG ZS EV charging time",
+      "expected_keywords": [
+        "mg",
+        "zs",
+        "charging"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 112.64,
+      "source_count": 6,
+      "answer_preview": "MG ZS EV. Charging: 9 hr / 1 hr DC"
+    },
+    {
+      "id": 25,
+      "difficulty": "easy",
+      "style": "direct",
+      "query": "Tata Nexon EV battery",
+      "expected_keywords": [
+        "nexon",
+        "battery"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 36.59,
+      "source_count": 6,
+      "answer_preview": "Tata Nexon EV. Battery: 40.5 kWh"
+    },
+    {
+      "id": 26,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Compare Ola S1 Pro vs Ather 450X",
+      "expected_keywords": [
+        "ola",
+        "ather"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 27.47,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Ola S1 Pro | scooter | \u20b9130,000 | 176 km | 4.0 kWh | 4-6 hrs | | Ola S1 Air | scooter | \u20b9121,000 | 151 km | 4.0 kWh | 4-6 hrs |"
+    },
+    {
+      "id": 27,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Which has more range, TVS iQube or Bajaj Chetak?",
+      "expected_keywords": [
+        "tvs",
+        "bajaj",
+        "range"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 55.03,
+      "source_count": 6,
+      "answer_preview": "TVS iQube. Range: 140 km"
+    },
+    {
+      "id": 28,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Difference between Tata Nexon EV and MG ZS EV",
+      "expected_keywords": [
+        "nexon",
+        "zs"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 34.01,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Tata Nexon EV: \u20b91,650,000, 460 km range, 40.5 kWh battery, charging 6-8 hrs AC / 1 hr DC - MG ZS EV: \u20b92,202,300, 461 km range, 50.3 kWh battery, charging 9 hr /"
+    },
+    {
+      "id": 29,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Compare Mahindra XUV400 and Tata Punch EV",
+      "expected_keywords": [
+        "mahindra",
+        "punch"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 43.86,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Mahindra XUV400 | car | \u20b91,920,000 | 456 km | 39.4 kWh | 7 hr / 1.5 hr DC | | Tata Punch EV | car | \u20b91,200,000 | 421 km | 35.0 kWh | "
+    },
+    {
+      "id": 30,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "BYD Atto 3 vs Hyundai Ioniq 5",
+      "expected_keywords": [
+        "byd",
+        "hyundai"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 36.3,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | BYD Atto 3 | car | \u20b93,600,000 | 521 km | 60.48 kWh | 8-10 hrs AC / 1 hr DC | | Hyundai Ioniq 5 N | hatchback | \u20b94,650,000 | 352 km | "
+    },
+    {
+      "id": 31,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Kia EV6 versus Mercedes EQS",
+      "expected_keywords": [
+        "kia",
+        "mercedes"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 21.91,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Kia EV6 | car | \u20b96,600,000 | 500 km | 77.0 kWh | 6-8 hrs AC / 1 hr DC | | Mercedes EQS | car | \u20b915,500,000 | 677 km | 108.0 kWh | 6-8"
+    },
+    {
+      "id": 32,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Compare BYD Seal and Tata Nexon EV",
+      "expected_keywords": [
+        "byd",
+        "nexon"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 21.98,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Tata Nexon EV | car | \u20b91,650,000 | 460 km | 40.5 kWh | 6-8 hrs AC / 1 hr DC | | BYD Seal | car | \u20b95,626,000 | 580 km | 82.56 kWh | 9 "
+    },
+    {
+      "id": 33,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Ola S1 X or Hero Vida V1, which is cheaper?",
+      "expected_keywords": [
+        "ola",
+        "vida"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 23.49,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Ola S1 X: \u20b990,000, 108 km range, 2.0 kWh battery, charging 4-6 hrs - Hero Vida V1: \u20b9120,000, 165 km range, 3.9 kWh battery, charging 4-6 hrs - Hero Vida VX2 Plu"
+    },
+    {
+      "id": 34,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Ather Rizta Z vs TVS iQube comparison",
+      "expected_keywords": [
+        "ather",
+        "tvs"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 19.16,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Ather Rizta Z | scooter | \u20b9186,000 | 160 km | 3.7 kWh | 4-6 hrs | | Ather Rizta S | scooter | \u20b9140,000 | 123 km | 2.9 kWh | 4-6 hrs |"
+    },
+    {
+      "id": 35,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Compare Tata Tiago EV against MG Comet EV",
+      "expected_keywords": [
+        "tiago",
+        "comet"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 18.36,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Tata Tiago EV | hatchback | \u20b92,082,182 | 490 km | 22.68 kWh | 8 hr / 1 hr DC | | Tata Tiago EV XE MR | hatchback | \u20b9800,000 | 250 km "
+    },
+    {
+      "id": 36,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Between Ather 450X and Ola S1 Pro, what should I pick?",
+      "expected_keywords": [
+        "ather",
+        "ola"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 21.42,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Ola S1 Pro: \u20b9130,000, 176 km range, 4.0 kWh battery, charging 4-6 hrs - Ather 450X: \u20b9147,000, 161 km range, 2.9 kWh battery, charging 4-6 hrs - Ola S1 Air: \u20b9121"
+    },
+    {
+      "id": 37,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "If I compare Punch EV with Nexon EV, what stands out?",
+      "expected_keywords": [
+        "punch",
+        "nexon"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 23.88,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Tata Nexon EV | car | \u20b91,650,000 | 460 km | 40.5 kWh | 6-8 hrs AC / 1 hr DC | | Tata Punch EV | car | \u20b91,200,000 | 421 km | 35.0 kWh "
+    },
+    {
+      "id": 38,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Show me a side-by-side for Ioniq 5 and EV6",
+      "expected_keywords": [
+        "ioniq",
+        "ev6"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 21.69,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Hyundai Ioniq 5 N: \u20b94,650,000, 352 km range, 84.0 kWh battery, charging 7 hrs AC/0.5-1 hrs DC - Omega Seiki Rage+: \u20b9370,000, 120 km range, 10.8 kWh battery, cha"
+    },
+    {
+      "id": 39,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Nexon EV vs XUV400 which one looks stronger on paper?",
+      "expected_keywords": [
+        "nexon",
+        "xuv400"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 22.85,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Tata Nexon EV | car | \u20b91,650,000 | 460 km | 40.5 kWh | 6-8 hrs AC / 1 hr DC | | Euler Motors Turbo EV 1000 | mini truck | \u20b9600,000 | "
+    },
+    {
+      "id": 40,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "What changes if I choose MG ZS EV over BYD Atto 3?",
+      "expected_keywords": [
+        "mg",
+        "byd"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 21.95,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - MG ZS EV: \u20b92,202,300, 461 km range, 50.3 kWh battery, charging 9 hr / 1 hr DC - BYD Atto 3: \u20b93,600,000, 521 km range, 60.48 kWh battery, charging 8-10 hrs AC / "
+    },
+    {
+      "id": 41,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Could you compare Ather 450X with TVS iQube?",
+      "expected_keywords": [
+        "ather",
+        "tvs"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 47.87,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Ather 450X | scooter | \u20b9147,000 | 161 km | 2.9 kWh | 4-6 hrs | | Ather Rizta Z | scooter | \u20b9186,000 | 160 km | 3.7 kWh | 4-6 hrs |"
+    },
+    {
+      "id": 42,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "S1 Pro compared with S1 X",
+      "expected_keywords": [
+        "s1 pro",
+        "s1 x"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 26.04,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Ola S1 Pro | scooter | \u20b9130,000 | 176 km | 4.0 kWh | 4-6 hrs | | Ola S1 X | scooter | \u20b990,000 | 108 km | 2.0 kWh | 4-6 hrs |"
+    },
+    {
+      "id": 43,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Bajaj Chetak versus Hero Vida V1",
+      "expected_keywords": [
+        "bajaj",
+        "vida"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 25.38,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Hero Vida V1 | scooter | \u20b9120,000 | 165 km | 3.9 kWh | 4-6 hrs | | Bajaj Chetak | scooter | \u20b991,000 | 100 km | 3.0 kWh | 4-6 hrs |"
+    },
+    {
+      "id": 44,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Comet EV vs Tiago EV for city use",
+      "expected_keywords": [
+        "comet",
+        "tiago"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 39.56,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Tata Tiago EV | hatchback | \u20b92,082,182 | 490 km | 22.68 kWh | 8 hr / 1 hr DC | | MG Comet EV | hatchback | \u20b91,040,000 | 230 km | 17.4"
+    },
+    {
+      "id": 45,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Is Atto 3 better than ZS EV?",
+      "expected_keywords": [
+        "atto",
+        "zs"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 32.54,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - BYD Atto 3: \u20b93,600,000, 521 km range, 60.48 kWh battery, charging 8-10 hrs AC / 1 hr DC - MG ZS EV: \u20b92,202,300, 461 km range, 50.3 kWh battery, charging 9 hr / "
+    },
+    {
+      "id": 46,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Punch EV or Tiago EV for budget buyers",
+      "expected_keywords": [
+        "punch",
+        "tiago"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 23.68,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Tata Tiago EV: \u20b92,082,182, 490 km range, 22.68 kWh battery, charging 8 hr / 1 hr DC - Tata Tiago EV XE MR: \u20b9800,000, 250 km range, 19.2 kWh battery, charging 6-"
+    },
+    {
+      "id": 47,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Compare Mercedes EQS and Kia EV6",
+      "expected_keywords": [
+        "mercedes",
+        "kia"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 24.17,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Mercedes EQS | car | \u20b915,500,000 | 677 km | 108.0 kWh | 6-8 hrs AC / 1 hr DC | | Kia EV6 | car | \u20b96,600,000 | 500 km | 77.0 kWh | 6-8"
+    },
+    {
+      "id": 48,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Need a quick comparison of Ather Rizta Z and Ola S1 X",
+      "expected_keywords": [
+        "rizta",
+        "s1 x"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 25.43,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Ather Rizta Z: \u20b9186,000, 160 km range, 3.7 kWh battery, charging 4-6 hrs - Ather Rizta S: \u20b9140,000, 123 km range, 2.9 kWh battery, charging 4-6 hrs - Ola Roadst"
+    },
+    {
+      "id": 49,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "How does Hyundai Ioniq 5 compare with BYD Seal?",
+      "expected_keywords": [
+        "ioniq",
+        "seal"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 21.9,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Hyundai Ioniq 5 N | hatchback | \u20b94,650,000 | 352 km | 84.0 kWh | 7 hrs AC/0.5-1 hrs DC | | Hyundai creta EV | car | \u20b92,500,000 | 510 "
+    },
+    {
+      "id": 50,
+      "difficulty": "mid",
+      "style": "direct",
+      "query": "Compare TVS iQube, Bajaj Chetak, and Ather 450X",
+      "expected_keywords": [
+        "tvs",
+        "bajaj",
+        "ather"
+      ],
+      "expect_sources_min": 2,
+      "mode": "comparison",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 21.23,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Bajaj Chetak | scooter | \u20b991,000 | 100 km | 3.0 kWh | 4-6 hrs | | TVS iQube | scooter | \u20b9108,000 | 140 km | 3.4 kWh | 4-6 hrs |"
+    },
+    {
+      "id": 51,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Best electric scooter under 1.5 lakh",
+      "expected_keywords": [
+        "\u20b9",
+        "km"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 25.8,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Hero Electric Flash: \u20b963,100, 85 km range, 1.54 kWh battery, charging 4-6 hrs - Hero Electric Photon: \u20b9115,000, 90 km range, 1.87 kWh battery, charging 4-6 hrs "
+    },
+    {
+      "id": 52,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Long range electric bike under 2 lakh",
+      "expected_keywords": [
+        "range",
+        "bike"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 39.78,
+      "source_count": 6,
+      "answer_preview": "Revolt RV BlazeX. Range: 150 km"
+    },
+    {
+      "id": 53,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Cheapest EV with fast charging",
+      "expected_keywords": [
+        "price",
+        "charging"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 25.42,
+      "source_count": 6,
+      "answer_preview": "Tata Xpres T EV. Charging: 4.6hr/ 30 min DC"
+    },
+    {
+      "id": 54,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Recommend a family EV under 20 lakh",
+      "expected_keywords": [
+        "ev",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 30.43,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Mahindra XUV 3XO EV: \u20b91,643,000, 456 km range, 39.4 kWh battery, charging 7 hr AC / 1.5 hr DC - Tata Tiago EV XE MR: \u20b9800,000, 250 km range, 19.2 kWh battery, c"
+    },
+    {
+      "id": 55,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Which EV should I buy for a 70 km daily commute?",
+      "expected_keywords": [
+        "range",
+        "km"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 42.3,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Hyundai creta EV: \u20b92,500,000, 510 km range, 51.4 kWh battery, charging 5 hr / 1 hr DC - Tata Ace EV pro: \u20b9650,000, 155 km range, 14.4 kWh battery, charging 6 hr"
+    },
+    {
+      "id": 56,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Suggest an EV with at least 400 km range",
+      "expected_keywords": [
+        "400",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 26.56,
+      "source_count": 6,
+      "answer_preview": "Tata Starbus EV. Range: 400 km"
+    },
+    {
+      "id": 57,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Need a premium electric car above 40 lakh",
+      "expected_keywords": [
+        "price",
+        "car"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 23.5,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Mahindra Electric ZEO: \u20b9800,000, 160 km range, 21.3 kWh battery, charging 3-6hrs/1-2hrs - Mahindra Electric Treo Zor: \u20b9347,848, 130 km range, 10.24 kWh battery,"
+    },
+    {
+      "id": 58,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Best scooter for college commute",
+      "expected_keywords": [
+        "scooter",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 24.43,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - TVS iQube: \u20b9108,000, 140 km range, 3.4 kWh battery, charging 4-6 hrs - Bajaj Chetak: \u20b991,000, 100 km range, 3.0 kWh battery, charging 4-6 hrs - Ather Rizta S: \u20b9"
+    },
+    {
+      "id": 59,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Give me a budget EV for city use",
+      "expected_keywords": [
+        "price",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 22.54,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - MG Comet EV: \u20b91,040,000, 230 km range, 17.4 kWh battery, charging 7 hrs AC / 1 hr DC - Omega Seiki Stream city: \u20b9355,000, 300 km range, 15.0 kWh battery, chargi"
+    },
+    {
+      "id": 60,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Need a highway-friendly EV car",
+      "expected_keywords": [
+        "range",
+        "car"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 15.04,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Euler Motors High load EV: \u20b9451,000, 150 km range, 13.44 kWh battery, charging 3-6 hrs - Tata tigor EV: \u20b91,600,000, 315 km range, 26.0 kWh battery, charging 9 h"
+    },
+    {
+      "id": 61,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Electric vehicle for family of five under 15 lakh",
+      "expected_keywords": [
+        "family",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 0,
+      "latency_ms": 46.74,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Mahindra Electric Treo Zor: \u20b9347,848, 130 km range, 10.24 kWh battery, charging 4 hr - Hero Electric Flash: \u20b963,100, 85 km range, 1.54 kWh battery, charging 4-6"
+    },
+    {
+      "id": 62,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "I want the longest range EV you have",
+      "expected_keywords": [
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 24.2,
+      "source_count": 6,
+      "answer_preview": "Tata tigor EV. Range: 315 km"
+    },
+    {
+      "id": 63,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Suggest a reliable EV under 10 lakh",
+      "expected_keywords": [
+        "price",
+        "ev"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 18.71,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Tata Tiago EV XE MR: \u20b9800,000, 250 km range, 19.2 kWh battery, charging 6-8 hrs AC / 1 hr DC - Pure EV Etryst 350 X: \u20b9153,500, 171 km range, 3.5 kWh battery, ch"
+    },
+    {
+      "id": 64,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "What electric scooter should I get if I want easy charging?",
+      "expected_keywords": [
+        "scooter",
+        "charging"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 16.99,
+      "source_count": 6,
+      "answer_preview": "Hero Electric Flash. Charging: 4-6 hrs"
+    },
+    {
+      "id": 65,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Find me a fast charging electric car",
+      "expected_keywords": [
+        "charging",
+        "car"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 15.53,
+      "source_count": 6,
+      "answer_preview": "Mahindra Electric ZEO. Charging: 3-6hrs/1-2hrs"
+    },
+    {
+      "id": 66,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Any EV around 12 lakh with good range?",
+      "expected_keywords": [
+        "range",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 22.46,
+      "source_count": 6,
+      "answer_preview": "Ashok Leyland Boss EV. Range: 250 km"
+    },
+    {
+      "id": 67,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Recommend an EV for daily office commute",
+      "expected_keywords": [
+        "range",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 23.47,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Pure EV ETrance Neo: \u20b981,000, 101 km range, 1.8 kWh battery, charging 4-6 hrs - Pure EV EcoDryfft: \u20b9120,807, 151 km range, 3.5 kWh battery, charging 4-6 hrs - H"
+    },
+    {
+      "id": 68,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Need an EV with strong battery and decent range",
+      "expected_keywords": [
+        "battery",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 24.48,
+      "source_count": 6,
+      "answer_preview": "Ashok Leyland Verse EV. Range: 300 km. Battery: 400.0 kWh"
+    },
+    {
+      "id": 69,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Show budget-friendly scooters with decent range",
+      "expected_keywords": [
+        "scooter",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 13.29,
+      "source_count": 6,
+      "answer_preview": "Okaya Freedum. Range: 75 km"
+    },
+    {
+      "id": 70,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Can you suggest a practical electric hatchback?",
+      "expected_keywords": [
+        "ev",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 27.27,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Tata Starbus EV: \u20b922,000,000, 400 km range, 200.0 kWh battery, charging 2-3 hrs DC - Tata Ultra EV 9: \u20b916,000,000, 180 km range, 200.0 kWh battery, charging 2 h"
+    },
+    {
+      "id": 71,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "What should I buy if I mostly drive in traffic?",
+      "expected_keywords": [
+        "city",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 235.85,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - BGauss C12 I Max 2.0: \u20b9125,100, 123 km range, 2.7 kWh battery, charging 4-6 hrs - Euler Motors Storm EV: \u20b91,300,000, 210 km range, 6.6 kWh battery, charging 5 h"
+    },
+    {
+      "id": 72,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Recommend an electric car with low running stress",
+      "expected_keywords": [
+        "car",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 139.98,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Mahindra Electric ZEO: \u20b9800,000, 160 km range, 21.3 kWh battery, charging 3-6hrs/1-2hrs - Mahindra Electric E-Alfa Cargo: \u20b9160,000, 95 km range, 1.6 kWh battery"
+    },
+    {
+      "id": 73,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Give me a good EV if charging access is limited",
+      "expected_keywords": [
+        "charging",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 65.6,
+      "source_count": 6,
+      "answer_preview": "MG Comet EV. Charging: 7 hrs AC / 1 hr DC"
+    },
+    {
+      "id": 74,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "Best value electric car under 25 lakh",
+      "expected_keywords": [
+        "price",
+        "car"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 21.32,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Mahindra Electric ZEO: \u20b9800,000, 160 km range, 21.3 kWh battery, charging 3-6hrs/1-2hrs - Mahindra Electric E-Alfa Cargo: \u20b9160,000, 95 km range, 1.6 kWh battery"
+    },
+    {
+      "id": 75,
+      "difficulty": "hard",
+      "style": "vague",
+      "query": "I need an EV with solid daily usability, not just specs",
+      "expected_keywords": [
+        "range",
+        "price"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 29.6,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Hyundai creta EV: \u20b92,500,000, 510 km range, 51.4 kWh battery, charging 5 hr / 1 hr DC - Ashok Leyland Boss EV: \u20b918,000,000, 250 km range, 280.0 kWh battery, cha"
+    },
+    {
+      "id": 76,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "What is regenerative braking?",
+      "expected_keywords": [
+        "energy",
+        "battery",
+        "braking"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 17.37,
+      "source_count": 0,
+      "answer_preview": "Regenerative braking lets an EV recover some energy while slowing down and send it back to the battery. It improves efficiency most in city driving and also reduces brake wear."
+    },
+    {
+      "id": 77,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Difference between AC charging and DC fast charging",
+      "expected_keywords": [
+        "ac",
+        "dc",
+        "charging"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 13.22,
+      "source_count": 0,
+      "answer_preview": "AC charging uses the vehicle's onboard charger to convert AC power into DC for the battery, so it is usually slower. DC fast charging converts power outside the car and feeds the battery directly, which is much faster bu"
+    },
+    {
+      "id": 78,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "LFP vs NMC battery which is safer?",
+      "expected_keywords": [
+        "lfp",
+        "nmc",
+        "safer"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 10.43,
+      "source_count": 0,
+      "answer_preview": "LFP batteries are generally safer and more thermally stable, which suits hot conditions well. NMC batteries usually offer higher energy density and stronger range for the same pack size, but they need tighter thermal man"
+    },
+    {
+      "id": 79,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Does fast charging degrade battery life?",
+      "expected_keywords": [
+        "fast charging",
+        "degradation",
+        "heat"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 22.95,
+      "source_count": 0,
+      "answer_preview": "Frequent fast charging can increase battery heat and may slightly accelerate long-term degradation compared with slower charging. It is usually fine for occasional use, but daily slow charging is gentler for battery heal"
+    },
+    {
+      "id": 80,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Explain cell balancing in an EV battery management system",
+      "expected_keywords": [
+        "cell balancing",
+        "battery",
+        "health"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 13.29,
+      "source_count": 0,
+      "answer_preview": "Cell balancing is a battery-management-system function that keeps cells at similar voltage levels. That helps safety, usable capacity, and long-term battery health because one weak or overcharged cell can limit the whole"
+    },
+    {
+      "id": 81,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "EV vs petrol running cost over time",
+      "expected_keywords": [
+        "cost",
+        "electricity",
+        "petrol"
+      ],
+      "expect_sources_min": 0,
+      "mode": "offtopic",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 12.55,
+      "source_count": 0,
+      "answer_preview": "EVs usually have much lower running cost than petrol cars because electricity is cheaper per kilometer and maintenance is simpler. The exact savings depend on tariff, efficiency, and whether you mostly charge at home or "
+    },
+    {
+      "id": 82,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Is it safe to charge an EV in heavy rain?",
+      "expected_keywords": [
+        "safe",
+        "rain",
+        "sealed"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 13.02,
+      "source_count": 0,
+      "answer_preview": "Modern EVs are designed with sealed battery packs and charging systems, so charging in rain is normally safe when the equipment is in good condition. Flood damage, broken connectors, or poor aftermarket modifications are"
+    },
+    {
+      "id": 83,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "PM E-Drive vs FAME II",
+      "expected_keywords": [
+        "pm e-drive",
+        "fame"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 13.38,
+      "source_count": 0,
+      "answer_preview": "FAME II and PM E-Drive are related but not the same scheme. PM E-Drive is the newer support program and its scope, time period, and incentive structure differ from FAME II."
+    },
+    {
+      "id": 84,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Are solid state batteries available in Indian EVs yet?",
+      "expected_keywords": [
+        "solid-state",
+        "lfp",
+        "nmc"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 13.6,
+      "source_count": 0,
+      "answer_preview": "Solid-state batteries are still not common in mass-market EVs sold in India today. Most current production EVs still use lithium-ion chemistries such as LFP or NMC."
+    },
+    {
+      "id": 85,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "How does temperature affect EV range?",
+      "expected_keywords": [
+        "temperature",
+        "range"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 15.64,
+      "source_count": 0,
+      "answer_preview": "Ambient temperature affects real-world EV range because very hot or very cold conditions change battery efficiency, cabin HVAC load, and charging behavior. Highway range usually drops when thermal load and sustained spee"
+    },
+    {
+      "id": 86,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "What is CCS2 connector?",
+      "expected_keywords": [
+        "ccs2",
+        "connector",
+        "dc"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 25.75,
+      "source_count": 0,
+      "answer_preview": "CCS2 is a common DC fast-charging connector standard used by many modern electric cars. It combines AC and DC charging capability in one connector system."
+    },
+    {
+      "id": 87,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "What happens to old EV batteries after degradation?",
+      "expected_keywords": [
+        "second-life",
+        "recycling"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 37.5,
+      "source_count": 0,
+      "answer_preview": "When EV batteries degrade significantly, they can still be reused in second-life storage applications and later sent for recycling to recover valuable materials."
+    },
+    {
+      "id": 88,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Can I install a 7kW charger in an apartment parking lot?",
+      "expected_keywords": [
+        "7 kw",
+        "apartment",
+        "load"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 3,
+      "latency_ms": 32.03,
+      "source_count": 0,
+      "answer_preview": "A 7 kW AC charger may be possible in an apartment parking area, but it depends on wiring capacity, sanctioned load, safety approvals, and resident association rules."
+    },
+    {
+      "id": 89,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Explain V2L technology",
+      "expected_keywords": [
+        "v2l",
+        "vehicle-to-load"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 16.34,
+      "source_count": 0,
+      "answer_preview": "V2L means Vehicle-to-Load. It allows an EV to power external appliances such as lights, camping gear, or tools using energy from the vehicle battery."
+    },
+    {
+      "id": 90,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Explain V2V charging",
+      "expected_keywords": [
+        "vehicle-to-vehicle",
+        "charging"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 15.44,
+      "source_count": 0,
+      "answer_preview": "V2V charging refers to one vehicle supplying power to another. It is still niche compared with standard charging and depends on vehicle hardware, software, and connector support."
+    },
+    {
+      "id": 91,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "who is the president of India?",
+      "expected_keywords": [
+        "ev",
+        "electric"
+      ],
+      "expect_sources_min": 0,
+      "mode": "offtopic",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 13.6,
+      "source_count": 0,
+      "answer_preview": "I mainly help with EV questions. Ask me about electric vehicles, charging, batteries, range, subsidies, or EV comparisons and I\u2019ll answer clearly."
+    },
+    {
+      "id": 92,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "write me a python sorting script",
+      "expected_keywords": [
+        "ev",
+        "electric"
+      ],
+      "expect_sources_min": 0,
+      "mode": "offtopic",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 23.93,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Ather Rizta Z: \u20b9186,000, 160 km range, 3.7 kWh battery, charging 4-6 hrs - Ather Rizta S: \u20b9140,000, 123 km range, 2.9 kWh battery, charging 4-6 hrs - MG Cyberst"
+    },
+    {
+      "id": 93,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Is Tesla Model Y in this dataset?",
+      "expected_keywords": [
+        "dataset",
+        "current"
+      ],
+      "expect_sources_min": 0,
+      "mode": "no_match",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 16.01,
+      "source_count": 0,
+      "answer_preview": "That vehicle is not available in my current EV dataset. Ask me about a model that exists in the current India-focused dataset and I\u2019ll help with price, range, battery, charging, or comparison."
+    },
+    {
+      "id": 94,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "whiich is moar range ola s11 or aher?",
+      "expected_keywords": [
+        "ola",
+        "ather",
+        "range"
+      ],
+      "expect_sources_min": 1,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 29.48,
+      "source_count": 6,
+      "answer_preview": "Ola S1 Pro. Range: 176 km"
+    },
+    {
+      "id": 95,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "best ev",
+      "expected_keywords": [
+        "budget",
+        "range",
+        "vehicle"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 39.49,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Tata Xpres T EV: \u20b91,374,557, 391 km range, 32.0 kWh battery, charging 4.6hr/ 30 min DC - MG ZS EV: \u20b92,202,300, 461 km range, 50.3 kWh battery, charging 9 hr / 1"
+    },
+    {
+      "id": 96,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "which one should i buy?",
+      "expected_keywords": [
+        "budget",
+        "range",
+        "vehicle"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 1,
+      "latency_ms": 23.67,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - Okinawa OKHI-90: \u20b9158,500, 160 km range, 3.6 kWh battery, charging 4-6 hrs - Mahindra BE 6: \u20b92,200,000, 620 km range, 59.0 kWh battery, charging 6-8 hrs AC / 1 "
+    },
+    {
+      "id": 97,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "give me specs",
+      "expected_keywords": [
+        "vehicle",
+        "name"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 0,
+      "latency_ms": 29.08,
+      "source_count": 6,
+      "answer_preview": "Here are the closest EV matches from the current dataset: - MG ZS EV: \u20b92,202,300, 461 km range, 50.3 kWh battery, charging 9 hr / 1 hr DC - MG Windsor EV: \u20b92,030,000, 449 km range, 52.9 kWh battery, charging 9.5 hr / 1 h"
+    },
+    {
+      "id": 98,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Tell me about Elon Musk and Tata Motors",
+      "expected_keywords": [
+        "ev",
+        "electric"
+      ],
+      "expect_sources_min": 0,
+      "mode": "offtopic",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 2,
+      "latency_ms": 23.76,
+      "source_count": 0,
+      "answer_preview": "I mainly help with EV questions. Ask me about electric vehicles, charging, batteries, range, subsidies, or EV comparisons and I\u2019ll answer clearly."
+    },
+    {
+      "id": 99,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "Can you compare a petrol car for me?",
+      "expected_keywords": [
+        "ev",
+        "electric"
+      ],
+      "expect_sources_min": 0,
+      "mode": "offtopic",
+      "http_status": 200,
+      "passed": true,
+      "keyword_hits": 1,
+      "latency_ms": 36.93,
+      "source_count": 6,
+      "answer_preview": "| Vehicle | Type | Price | Range | Battery | Charging | |---|---|---:|---:|---:|---| | Altigreen LOW DECK | car | \u20b9412,000 | 120 km | 11.0 kWh | 3-4 hrs | | Tata Xpres T EV | car | \u20b91,374,557 | 391 km | 32.0 kWh | 4.6hr/"
+    },
+    {
+      "id": 100,
+      "difficulty": "expert",
+      "style": "indirect",
+      "query": "What is its top speed?",
+      "expected_keywords": [
+        "vehicle",
+        "name"
+      ],
+      "expect_sources_min": 0,
+      "mode": "keywords",
+      "http_status": 200,
+      "passed": false,
+      "keyword_hits": 0,
+      "latency_ms": 21.28,
+      "source_count": 6,
+      "answer_preview": "Tata Nexon EV. Top speed: 120.0"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "dataset_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+  "dataset_signature": "India_EV_All_Segments_Dataset_2026_filled.xlsx:19824:1775987696898240700",
+  "inserted": 112,
+  "skipped": 0,
+  "faiss_ready": true,
+  "rag_documents": 112,
+  "imported_at": "2026-04-23T04:39:25.372451+00:00"
+}

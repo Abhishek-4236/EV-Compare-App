@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { vehicleAPI } from '../services/api';
 import { Link } from 'react-router-dom';
-import { Zap, Battery, Star, TrendingDown, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { Zap, Battery, Star, TrendingDown, ChevronRight, CheckCircle, AlertCircle, GitCompare } from 'lucide-react';
+import useCompare from '../store/useCompare';
 
 function formatPrice(p) {
   if (!p && p !== 0) return 'N/A';
@@ -43,18 +44,38 @@ function ScoreBar({ score, max = 10 }) {
   );
 }
 
-function ResultCard({ rec, rank }) {
-  const rankColors = ['#f59e0b', '#94a3b8', '#b45309'];
+function ResultCard({ rec, rank, compareItems, onToggleCompare }) {
   const rankLabel = ['🥇 Best Match', '🥈 Runner-up', '🥉 Third Choice'];
+  const isSelected = compareItems.some(x => x.id === rec.id);
+
   return (
-    <div className="ev-card" style={{ padding: 0, overflow: 'hidden' }}>
+    <div className="ev-card" style={{ padding: 0, overflow: 'hidden', transition: 'box-shadow 0.2s', boxShadow: isSelected ? '0 0 0 2px var(--accent)' : undefined }}>
       <div style={{ background: rank === 0 ? 'var(--accent-soft)' : 'var(--bg-muted)', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontWeight: 700, fontSize: 13, color: rank === 0 ? 'var(--accent-dark)' : 'var(--text-muted)' }}>
           {rankLabel[rank] || `#${rank + 1} Pick`}
         </span>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
-          Score: {rec.recommend_score?.toFixed(1)}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
+            Score: {rec.recommend_score?.toFixed(1)}
+          </span>
+          {/* Compare checkbox */}
+          <label
+            onClick={e => e.stopPropagation()}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600, color: isSelected ? 'var(--accent-dark)' : 'var(--text-muted)', userSelect: 'none' }}
+          >
+            <div style={{
+              width: 18, height: 18, borderRadius: 4, border: `2px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+              background: isSelected ? 'var(--accent)' : 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
+            }}
+              onClick={() => onToggleCompare(rec)}
+            >
+              {isSelected && <span style={{ color: 'white', fontSize: 10, fontWeight: 900 }}>✓</span>}
+            </div>
+            <GitCompare size={13} />
+            Compare
+          </label>
+        </div>
       </div>
       <div style={{ padding: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
@@ -70,7 +91,6 @@ function ResultCard({ rec, rank }) {
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <Link to={`/vehicle/${rec.id}`} className="ev-btn ev-btn-sm">Details</Link>
-            <Link to={`/compare?ids=${rec.id}`} className="ev-btn ev-btn-sm ev-btn-primary">Compare</Link>
           </div>
         </div>
 
@@ -108,6 +128,7 @@ export default function RecommendPage() {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { compareItems, toggleCompare } = useCompare();
 
   async function submit() {
     setLoading(true);
@@ -121,7 +142,7 @@ export default function RecommendPage() {
       });
       setResults(res.data);
       setStep(3);
-    } catch (e) {
+    } catch {
       setError('Could not fetch recommendations. Make sure the backend is running.');
     } finally {
       setLoading(false);
@@ -296,15 +317,28 @@ export default function RecommendPage() {
             <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 24, fontWeight: 800, color: 'var(--text)', marginBottom: 6 }}>
               🎯 Your Top EV Picks
             </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 8 }}>
               Recommendations for budget {formatPrice(results.query?.budget)}, {results.query?.daily_km}km daily, {results.query?.segment} segment
             </p>
+            {compareItems.length > 0 && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', background: 'var(--accent-soft)', borderRadius: 99, fontSize: 13, color: 'var(--accent-dark)', fontWeight: 600 }}>
+                <GitCompare size={14} /> {compareItems.length} selected for comparison
+              </div>
+            )}
           </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
             {results.recommendations?.map((rec, i) => (
-              <ResultCard key={rec.id} rec={rec} rank={i} />
+              <ResultCard
+                key={rec.id}
+                rec={rec}
+                rank={i}
+                compareItems={compareItems}
+                onToggleCompare={toggleCompare}
+              />
             ))}
           </div>
+
           {!results.recommendations?.length && (
             <div className="ev-card" style={{ padding: 32, textAlign: 'center' }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>😕</div>
@@ -312,7 +346,8 @@ export default function RecommendPage() {
               <p style={{ color: 'var(--text-muted)' }}>Try increasing your budget or changing the segment.</p>
             </div>
           )}
-          <button className="ev-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={() => { setStep(0); setResults(null); }}>
+
+          <button className="ev-btn" style={{ width: '100%', justifyContent: 'center', marginBottom: compareItems.length > 0 ? 80 : 0 }} onClick={() => { setStep(0); setResults(null); }}>
             ← Start Over
           </button>
         </div>

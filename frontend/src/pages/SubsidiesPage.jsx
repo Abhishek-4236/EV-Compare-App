@@ -9,7 +9,13 @@ function formatPrice(p) {
   return `₹${(p / 1000).toFixed(0)}K`;
 }
 
-const STATES = ['karnataka', 'maharashtra', 'delhi', 'gujarat', 'tamil nadu', 'telangana'];
+const STATES = [
+    'andhra pradesh', 'arunachal pradesh', 'assam', 'bihar', 'chhattisgarh', 'goa', 'gujarat', 'haryana', 
+    'himachal pradesh', 'jharkhand', 'karnataka', 'kerala', 'madhya pradesh', 'maharashtra', 'manipur', 
+    'meghalaya', 'mizoram', 'nagaland', 'odisha', 'punjab', 'rajasthan', 'sikkim', 'tamil nadu', 
+    'telangana', 'tripura', 'uttar pradesh', 'uttarakhand', 'west bengal', 'delhi', 'jammu and kashmir', 
+    'ladakh', 'chandigarh', 'puducherry', 'andaman and nicobar', 'lakshadweep'
+].sort();
 
 const STATE_POLICIES = {
   karnataka: { roadTax: 'Waived', regFee: 'Waived', note: 'EV Policy 2017 updated under EVPOA Karnataka' },
@@ -18,6 +24,14 @@ const STATE_POLICIES = {
   gujarat: { roadTax: 'Waived', regFee: 'Waived', note: 'Gujarat EV Policy 2021' },
   'tamil nadu': { roadTax: 'Waived', regFee: 'Waived', note: 'TN EV Policy 2023' },
   telangana: { roadTax: 'Waived', regFee: '50% waiver', note: 'Telangana EV & ESS Policy 2020' },
+  'uttar pradesh': { roadTax: 'Waived', regFee: 'Waived', note: 'UP EV Policy 2022' },
+  kerala: { roadTax: '50% waiver', regFee: 'Waived', note: 'Kerala EV Policy 2019' },
+  rajasthan: { roadTax: 'Waived', regFee: 'Waived', note: 'Rajasthan EV Policy 2022' },
+  odisha: { roadTax: 'Waived', regFee: 'Waived', note: 'Odisha EV Policy 2021' },
+  'west bengal': { roadTax: 'Waived', regFee: 'Waived', note: 'West Bengal EV Policy 2021' },
+  haryana: { roadTax: 'Waived', regFee: 'Waived', note: 'Haryana EV Policy 2022' },
+  punjab: { roadTax: 'Waived', regFee: 'Waived', note: 'Punjab EV Policy 2022' },
+  chandigarh: { roadTax: 'Waived', regFee: 'Waived', note: 'Chandigarh EV Policy 2022' },
 };
 
 export default function SubsidiesPage() {
@@ -62,7 +76,7 @@ export default function SubsidiesPage() {
     }
   }
 
-  const policy = STATE_POLICIES[state] || {};
+  const policy = STATE_POLICIES[state] || { roadTax: 'Standard Rates', regFee: 'Standard Rates', note: 'Detailed local EV policy unconfirmed. Ask dealer for exact regional tax rates.' };
 
   return (
     <div className="ev-shell" style={{ paddingTop: 32 }}>

@@ -1,10 +1,23 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import not_, or_
 from database import get_db
 from models import Vehicle
 from schemas import RecommendRequest
 
 router = APIRouter(prefix="/api/recommend", tags=["Recommend"])
+
+
+def passenger_car_filter():
+    commercial_like = or_(
+        Vehicle.vehicle_type.ilike("%commercial%"),
+        Vehicle.vehicle_type.ilike("%cargo%"),
+        Vehicle.vehicle_type.ilike("%truck%"),
+        Vehicle.vehicle_type.ilike("%mini truck%"),
+        Vehicle.vehicle_type.ilike("%scv%"),
+        Vehicle.vehicle_type.ilike("%delivery%"),
+    )
+    return or_(Vehicle.vehicle_type.is_(None), not_(commercial_like))
 
 @router.post("/")
 async def recommend_vehicles(request: RecommendRequest, db: Session = Depends(get_db)):
@@ -20,15 +33,20 @@ async def recommend_vehicles(request: RecommendRequest, db: Session = Depends(ge
     if seg == "scooter":
         query = query.filter(
             Vehicle.category == "2W",
-            Vehicle.wheel_type.ilike("%scooter%")
+            Vehicle.vehicle_type.ilike("%scooter%")
         )
-    elif seg == "motorcycle":
+    elif seg in {"motorcycle", "bike"}:
         query = query.filter(
             Vehicle.category == "2W",
-            Vehicle.wheel_type.ilike("%motorcycle%")
+            or_(
+                Vehicle.vehicle_type.ilike("%motorcycle%"),
+                Vehicle.vehicle_type.ilike("%bike%"),
+            )
         )
     elif seg == "car":
-        query = query.filter(Vehicle.category == "4W")
+        query = query.filter(Vehicle.category == "4W", passenger_car_filter())
+    elif seg in {"auto", "three_wheeler", "3w"}:
+        query = query.filter(Vehicle.category == "3W")
     elif seg == "truck":
         query = query.filter(Vehicle.category == "Truck")
 

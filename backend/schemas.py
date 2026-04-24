@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any
 from decimal import Decimal
 from pydantic import EmailStr
 
@@ -20,12 +20,18 @@ class VehicleOut(BaseModel):
     safety_rating: Optional[int] = None
     brake_type: Optional[str] = None
     fame2_subsidy_inr: Optional[int] = 0
+    state_subsidy_inr: Optional[int] = 0
+    warranty_years: Optional[int] = None
+    ip_rating: Optional[str] = None
+    connected_features: Optional[bool] = False
+    regenerative_braking: Optional[bool] = False
     overall_rating: Optional[Decimal] = None
     charging_type: Optional[str] = None
     vehicle_type: Optional[str] = None
     market_status: Optional[str] = None
     launch_year: Optional[int] = None
     image_url: Optional[str] = None
+    extra_info: Optional[dict[str, Any]] = None
 
     class Config:
         from_attributes = True
@@ -35,6 +41,11 @@ class VehicleListResponse(BaseModel):
     success: bool
     total: int
     page: int
+    vehicles: list[VehicleOut]
+
+
+class FeaturedDiverseResponse(BaseModel):
+    success: bool
     vehicles: list[VehicleOut]
 
 
@@ -80,5 +91,18 @@ class KnowledgeArticleCreate(KnowledgeArticleBase):
 class KnowledgeArticle(KnowledgeArticleBase):
     id: int
 
+    class Config:
+        from_attributes = True
+
+class GarageSaveRequest(BaseModel):
+    vehicle_ids: str
+    name: Optional[str] = "Saved Vehicle"
+
+class GarageOut(BaseModel):
+    id: int
+    user_id: int
+    vehicle_ids: str
+    name: Optional[str]
+    
     class Config:
         from_attributes = True

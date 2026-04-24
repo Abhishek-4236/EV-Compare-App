@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { vehicleAPI } from '../services/api';
-import { ArrowLeft, Zap, Battery, Gauge, Star, CheckCircle, AlertCircle, GitCompare, MessageSquare, TrendingUp } from 'lucide-react';
+import { vehicleAPI, garageAPI } from '../services/api';
+import { ArrowLeft, Zap, Battery, Gauge, Star, CheckCircle, AlertCircle, GitCompare, MessageSquare, TrendingUp, Heart } from 'lucide-react';
 
 function formatPrice(p) {
   if (!p && p !== 0) return 'N/A';
@@ -17,6 +17,7 @@ export default function VehicleDetailPage() {
   const [vehicle, setVehicle] = useState(null);
   const [subsidy, setSubsidy] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSaved, setIsSaved] = useState(false);
   const [subsidyState, setSubsidyState] = useState('telangana');
   const [dailyKm, setDailyKm] = useState(40);
 
@@ -31,7 +32,29 @@ export default function VehicleDetailPage() {
     vehicleAPI.getSubsidies({ vehicle_id: vehicle.id, state: subsidyState, daily_km: dailyKm })
       .then(res => setSubsidy(res.data))
       .catch(() => setSubsidy(null));
-  }, [vehicle, subsidyState, dailyKm]);
+
+    // Check if vehicle is already in garage
+    garageAPI.get().then(res => {
+      const exists = res.data.some(item => item.vehicle_ids === String(id));
+      setIsSaved(exists);
+    }).catch(() => {});
+  }, [vehicle, subsidyState, dailyKm, id]);
+
+  const toggleSave = async () => {
+    try {
+      if (isSaved) {
+        const res = await garageAPI.get();
+        const item = res.data.find(i => i.vehicle_ids === String(id));
+        if (item) await garageAPI.remove(item.id);
+        setIsSaved(false);
+      } else {
+        await garageAPI.save({ vehicle_ids: String(id), name: `${vehicle.brand} ${vehicle.model}` });
+        setIsSaved(true);
+      }
+    } catch (err) {
+      console.error("Failed to toggle save", err);
+    }
+  };
 
   if (loading) return (
     <div className="ev-shell" style={{ paddingTop: 40 }}>
@@ -49,20 +72,41 @@ export default function VehicleDetailPage() {
     </div>
   );
 
-  const SPECS = [
-    { label: 'Range', value: `${vehicle.range_km} km`, icon: <Zap size={16} color="var(--accent)" /> },
-    { label: 'Battery', value: `${Number(vehicle.battery_kwh).toFixed(1)} kWh`, icon: <Battery size={16} color="var(--accent)" /> },
-    { label: 'Top Speed', value: vehicle.top_speed_kmh ? `${vehicle.top_speed_kmh} kmph` : 'N/A', icon: <Gauge size={16} color="var(--accent)" /> },
-    { label: 'Motor', value: vehicle.motor_kw ? `${vehicle.motor_kw} kW` : 'N/A', icon: <Zap size={16} color="var(--accent)" /> },
-    { label: 'Charging', value: vehicle.charging_type || 'N/A', icon: null },
-    { label: 'AC Charge', value: vehicle.charging_time_ac_hrs ? `${vehicle.charging_time_ac_hrs} hrs` : 'N/A', icon: null },
-    { label: 'DC Fast Charge', value: vehicle.charging_time_dc_min ? `${vehicle.charging_time_dc_min} min` : 'N/A', icon: null },
-    { label: 'Warranty', value: vehicle.warranty_years ? `${vehicle.warranty_years} yrs` : 'N/A', icon: null },
-    { label: 'Safety Rating', value: vehicle.safety_rating ? `${vehicle.safety_rating} stars` : 'N/A', icon: null },
-    { label: 'Brakes', value: vehicle.brake_type || 'N/A', icon: null },
-    { label: 'IP Rating', value: vehicle.ip_rating || 'N/A', icon: null },
-    { label: 'Launch Year', value: vehicle.launch_year || 'N/A', icon: null },
+  // ── Dynamic core specs — only include fields that have real values ────────
+  const coreSpecs = [
+    { label: 'Range',         value: vehicle.range_km        ? `${vehicle.range_km} km`                        : null, icon: <Zap size={16} color="var(--accent)" /> },
+    { label: 'Battery',       value: vehicle.battery_kwh     ? `${Number(vehicle.battery_kwh).toFixed(1)} kWh` : null, icon: <Battery size={16} color="var(--accent)" /> },
+    { label: 'Top Speed',     value: vehicle.top_speed_kmh   ? `${vehicle.top_speed_kmh} kmph`                 : null, icon: <Gauge size={16} color="var(--accent)" /> },
+    { label: 'Motor Power',   value: vehicle.motor_kw        ? `${vehicle.motor_kw} kW`                        : null, icon: <Zap size={16} color="var(--accent)" /> },
+    { label: 'Charging Type', value: vehicle.charging_type   || null },
+    { label: 'AC Charge Time',value: vehicle.charging_time_ac_hrs ? `${vehicle.charging_time_ac_hrs} hrs`      : null },
+    { label: 'DC Fast Charge',value: vehicle.charging_time_dc_min ? `${vehicle.charging_time_dc_min} min`      : null },
+    { label: 'Warranty',      value: vehicle.warranty_years  ? `${vehicle.warranty_years} yrs`                 : null },
+    { label: 'Safety Rating', value: vehicle.safety_rating   ? `${vehicle.safety_rating} ⭐`                   : null },
+    { label: 'Brake Type',    value: vehicle.brake_type      || null },
+    { label: 'IP Rating',     value: vehicle.ip_rating       || null },
+    { label: 'Launch Year',   value: vehicle.launch_year     ? String(vehicle.launch_year)                     : null },
+    { label: 'Vehicle Type',  value: vehicle.vehicle_type    || null },
+    { label: 'Wheel Size',    value: vehicle.wheel_type      || null },
+    { label: 'Monthly Cost',  value: vehicle.monthly_cost_inr ? `₹${vehicle.monthly_cost_inr.toLocaleString('en-IN')}/mo` : null },
+  ].filter(s => s.value !== null);
+
+  // ── Extra info from Excel — fully dynamic, auto-shows any new column ──────
+  const extraSpecs = vehicle.extra_info
+    ? Object.entries(vehicle.extra_info).map(([key, val]) => ({ label: key, value: String(val) }))
+    : [];
+
+  // ── All specs combined in one unified list ─────────────────────────────────
+  const ALL_SPECS = [...coreSpecs, ...extraSpecs];
+
+  // ── Boolean feature flags (only show section if any are true) ─────────────
+  const FEATURES = [
+    { label: 'Connected Features',  val: vehicle.connected_features },
+    { label: 'Regenerative Braking',val: vehicle.regenerative_braking },
+    { label: 'DC Fast Charging',    val: !!vehicle.charging_time_dc_min },
+    { label: 'FAME II Eligible',    val: vehicle.fame2_subsidy_inr > 0 },
   ];
+  const hasFeatureFlags = FEATURES.some(f => f.val);
 
   return (
     <div className="ev-shell" style={{ paddingTop: 32 }}>
@@ -110,6 +154,13 @@ export default function VehicleDetailPage() {
               <Link to={`/chat?q=Tell me about ${vehicle.brand} ${vehicle.model}`} className="ev-btn ev-btn-sm">
                 <MessageSquare size={14} /> Ask AI
               </Link>
+              <button 
+                onClick={toggleSave}
+                className={`ev-btn ev-btn-sm ${isSaved ? 'ev-btn-primary' : ''}`}
+                style={{ background: isSaved ? 'rgba(239, 68, 68, 0.1)' : '', color: isSaved ? '#ef4444' : '', borderColor: isSaved ? '#ef4444' : '' }}
+              >
+                <Heart size={14} fill={isSaved ? 'currentColor' : 'none'} /> {isSaved ? 'Saved' : 'Save'}
+              </button>
             </div>
           </div>
         </div>
@@ -118,44 +169,43 @@ export default function VehicleDetailPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 20, alignItems: 'start' }}>
         {/* Left column */}
         <div>
-          {/* Specs Grid */}
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 14, color: 'var(--text)' }}>
-            Key Specifications
+          {/* Full Specifications — ALL data from Excel, unified dynamic grid */}
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 6, color: 'var(--text)' }}>
+            Full Specifications
           </h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
+            {ALL_SPECS.length} data points — all pulled directly from source data
+          </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 28 }}>
-            {SPECS.map(s => (
+            {ALL_SPECS.map(s => (
               <div key={s.label} className="ev-card" style={{ padding: '14px 16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  {s.icon}
+                  {s.icon || null}
                   <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{s.label}</span>
                 </div>
-                <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--text)' }}>{s.value}</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)', wordBreak: 'break-word' }}>{s.value}</div>
               </div>
             ))}
           </div>
 
-          {/* Feature flags */}
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 14, color: 'var(--text)' }}>
-            Features
-          </h2>
-          <div className="ev-card" style={{ padding: 20, marginBottom: 24 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-              {[
-                { label: 'Connected Features', val: vehicle.connected_features },
-                { label: 'Regenerative Braking', val: vehicle.regenerative_braking },
-                { label: 'Fast DC Charging', val: !!vehicle.charging_time_dc_min },
-                { label: 'FAME II Eligible', val: vehicle.fame2_subsidy_inr > 0 },
-              ].map(({ label, val }) => (
-                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: val ? 'var(--text)' : 'var(--text-muted)' }}>
-                  {val
-                    ? <CheckCircle size={16} color="var(--accent)" />
-                    : <AlertCircle size={16} color="var(--border)" />
-                  }
-                  {label}
+          {/* Feature Highlights — only shown when flags have real data */}
+          {hasFeatureFlags && (
+            <>
+              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 14, color: 'var(--text)' }}>
+                Feature Highlights
+              </h2>
+              <div className="ev-card" style={{ padding: 20, marginBottom: 24 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                  {FEATURES.filter(f => f.val).map(({ label }) => (
+                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text)' }}>
+                      <CheckCircle size={16} color="var(--accent)" />
+                      {label}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right column — Subsidy & TCO */}

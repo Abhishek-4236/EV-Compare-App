@@ -14,8 +14,18 @@ const chatApi = axios.create({
   timeout: 20000,
 });
 
+// Attach JWT token to every request automatically
+const attachToken = (config) => {
+  const token = localStorage.getItem('eviq_token');
+  if (token) config.headers['Authorization'] = `Bearer ${token}`;
+  return config;
+};
+api.interceptors.request.use(attachToken);
+chatApi.interceptors.request.use(attachToken);
+
 export const vehicleAPI = {
     getAll: (params) => api.get('/vehicles/', { params }),
+    getDiverseFeatured: () => api.get('/vehicles/featured/diverse'),
     getById: (id) => api.get(`/vehicles/${id}`),
     getBrands: () => api.get('/vehicles/meta/brands'),
     compare: (ids) => api.post('/compare/', { ids }),
@@ -25,12 +35,41 @@ export const vehicleAPI = {
     getMapStations: (params) => api.get('/map/stations', { params }),
 };
 
+export const authAPI = {
+  signup: (data) => api.post('/auth/signup', data),
+  login: (data) => api.post('/auth/login', data),
+  getMe: (token) => api.get('/auth/me', { headers: { Authorization: `Bearer ${token}` } }),
+};
+
+export const garageAPI = {
+  get: () => api.get('/garage'),
+  save: (data) => api.post('/garage', data),
+  remove: (id) => api.delete(`/garage/${id}`),
+};
+
+export const adminAPI = {
+  uploadDataset: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/admin/upload-dataset', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  getStats: () => api.get('/admin/stats'),
+};
+
 export const chatAPI = {
   send: (payload) => chatApi.post('/chat/', payload),
+  getSessions: () => chatApi.get('/chat/sessions'),
+  getHistory: (sessionId) => chatApi.get(`/chat/history/${sessionId}`),
   sendStream: async (payload, handlers = {}) => {
+    const token = localStorage.getItem('eviq_token');
     const response = await fetch(`${API_BASE}/chat/stream`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(payload),
     });
     if (!response.ok || !response.body) throw new Error('SSE stream failed');
@@ -54,10 +93,11 @@ export const chatAPI = {
           if (data.type === 'session' && handlers.onSession) handlers.onSession(data.session_id);
           if (data.type === 'chunk' && handlers.onChunk) handlers.onChunk(data.content);
           if (data.type === 'done' && handlers.onDone) handlers.onDone(data);
-        } catch (_) {
+        } catch {
           // Ignore malformed chunks.
         }
       }
     }
   },
 };
+

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Zap, GitFork } from 'lucide-react';
+import { Zap, GitFork, ArrowRight, MessageSquare } from 'lucide-react';
 
 const FOOTER_LINKS = {
   'Platform': [
@@ -18,8 +18,27 @@ export default function Footer() {
   return (
     <footer className="ev-footer">
       <div className="ev-footer-inner">
+        <div className="ev-footer-cta">
+          <div>
+            <div className="ev-section-label" style={{ marginBottom: 10 }}>Ready To Decide</div>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(24px, 4vw, 34px)', lineHeight: 1.05, marginBottom: 10 }}>
+              Compare, calculate, and shortlist your next EV in minutes.
+            </h3>
+            <p style={{ color: 'var(--text-muted)', maxWidth: 520, fontSize: 15, lineHeight: 1.7 }}>
+              Browse real models, ask grounded EV questions, and move from confusion to a shortlist with one clean workflow.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <Link to="/chat" className="ev-btn ev-btn-primary">
+              <MessageSquare size={16} /> Ask EViq
+            </Link>
+            <Link to="/browse" className="ev-btn">
+              Browse EVs <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 40, marginBottom: 40 }}>
-          {/* Brand */}
           <div>
             <div className="ev-brand" style={{ marginBottom: 12 }}>
               <Zap size={18} fill="currentColor" />

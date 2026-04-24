@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { vehicleAPI } from '../services/api';
 import VehicleCard from '../components/VehicleCard';
-import CompareBar from '../components/CompareBar';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import useCompare from '../store/useCompare';
+import { X } from 'lucide-react';
 
 const TABS = [
   { label: 'All', category: '', icon: '⚡' },
@@ -22,12 +23,12 @@ const SORT_OPTIONS = [
 ];
 
 export default function BrowsePage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const MotionDiv = motion.div;
   const [vehicles, setVehicles] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [compareItems, setCompareItems] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
+  const { compareItems, toggleCompare } = useCompare();
 
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
@@ -49,7 +50,7 @@ export default function BrowsePage() {
       const res = await vehicleAPI.getAll(params);
       setVehicles(res.data.vehicles || []);
       setTotal(res.data.total || 0);
-    } catch (e) {
+    } catch {
       setVehicles([]);
     } finally {
       setLoading(false);
@@ -62,22 +63,55 @@ export default function BrowsePage() {
     setFilters(f => ({ ...f, [key]: val, page: 1 }));
   }
 
-  function toggleCompare(id) {
+  function setPage(newPage) {
+    setFilters(f => ({ ...f, page: newPage }));
+  }
+
+  function handleToggleCompare(id) {
     const v = vehicles.find(x => x.id === id);
-    if (!v) return;
-    setCompareItems(prev => {
-      if (prev.find(x => x.id === id)) return prev.filter(x => x.id !== id);
-      if (prev.length >= 4) return prev;
-      return [...prev, v];
-    });
+    if (v) toggleCompare(v);
   }
 
   function isSelected(id) { return compareItems.some(x => x.id === id); }
 
+  const activeSummary = [
+    filters.category && TABS.find(tab => tab.category === filters.category)?.label,
+    filters.max_price < 20000000 && `Under ₹${(filters.max_price / 100000).toFixed(1)}L`,
+    filters.min_range > 0 && `${filters.min_range}+ km`,
+    filters.sort_by !== 'overall_rating' && SORT_OPTIONS.find(option => option.value === filters.sort_by)?.label,
+  ].filter(Boolean);
+
   return (
     <div className="ev-shell">
-      {/* Header */}
-      <div style={{ paddingTop: 32, marginBottom: 20 }}>
+      <MotionDiv
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="ev-page-hero"
+        style={{ marginTop: 24, marginBottom: 22 }}
+      >
+        <div className="ev-page-hero-copy">
+          <div className="ev-section-label">Browse The Catalog</div>
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, color: 'var(--text)', letterSpacing: '-1px', marginBottom: 8 }}>
+            Explore the India EV market by segment, budget, and range.
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: 15, lineHeight: 1.75, maxWidth: 640 }}>
+            Narrow the catalog quickly, shortlist what looks promising, and jump into compare or vehicle details without losing context.
+          </p>
+        </div>
+        <div className="ev-page-hero-metrics">
+          <div className="ev-page-metric">
+            <strong>{loading ? '...' : total}</strong>
+            <span>matching models</span>
+          </div>
+          <div className="ev-page-metric">
+            <strong>{compareItems.length}</strong>
+            <span>selected to compare</span>
+          </div>
+        </div>
+      </MotionDiv>
+
+      <div style={{ paddingTop: 4, marginBottom: 20 }}>
         <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 28, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.5px', marginBottom: 4 }}>
           Browse EVs
         </h1>
@@ -86,7 +120,6 @@ export default function BrowsePage() {
         </p>
       </div>
 
-      {/* Category Tabs */}
       <div className="ev-tabs">
         {TABS.map(t => (
           <button
@@ -99,18 +132,14 @@ export default function BrowsePage() {
         ))}
       </div>
 
-      {/* Filter Bar */}
-      <div style={{
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        borderRadius: 12,
-        padding: '12px 16px',
-        display: 'flex',
-        gap: 12,
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        marginBottom: 20,
-      }}>
+      <div className="ev-filter-summary">
+        <span className="label">Active filters</span>
+        {activeSummary.length ? activeSummary.map(item => (
+          <span key={item} className="ev-chip active">{item}</span>
+        )) : <span className="empty">Showing the full catalog right now.</span>}
+      </div>
+
+      <div className="ev-filter-panel">
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '1 1 200px' }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>Sort by:</span>
           <select
@@ -155,7 +184,6 @@ export default function BrowsePage() {
         </button>
       </div>
 
-      {/* Grid */}
       {loading ? (
         <div className="ev-grid-auto">
           {[...Array(12)].map((_, i) => (
@@ -187,30 +215,30 @@ export default function BrowsePage() {
             <VehicleCard
               key={v.id}
               vehicle={v}
-              onCompareToggle={toggleCompare}
+              onCompareToggle={handleToggleCompare}
               isSelected={isSelected(v.id)}
             />
           ))}
         </div>
       )}
 
-      {/* Pagination */}
       {total > filters.limit && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 32 }}>
-          <button className="ev-btn ev-btn-sm" disabled={filters.page <= 1} onClick={() => setFilter('page', filters.page - 1)}>← Prev</button>
-          <span style={{ padding: '7px 14px', fontSize: 14, color: 'var(--text-muted)' }}>
-            Page {filters.page} of {Math.ceil(total / filters.limit)}
-          </span>
-          <button className="ev-btn ev-btn-sm" disabled={filters.page * filters.limit >= total} onClick={() => setFilter('page', filters.page + 1)}>Next →</button>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 32, paddingBottom: compareItems.length > 0 ? 80 : 20 }}>
+          <button className="ev-btn ev-btn-sm" disabled={filters.page <= 1} onClick={() => setPage(filters.page - 1)}>← Prev</button>
+          {Array.from({ length: Math.ceil(total / filters.limit) }, (_, i) => i + 1).map(p => (
+            <button
+              key={p}
+              className={`ev-btn ev-btn-sm ${filters.page === p ? 'ev-btn-primary' : ''}`}
+              onClick={() => setPage(p)}
+              style={{ minWidth: 36 }}
+            >{p}</button>
+          ))}
+          <button className="ev-btn ev-btn-sm" disabled={filters.page * filters.limit >= total} onClick={() => setPage(filters.page + 1)}>Next →</button>
         </div>
       )}
 
-      {/* Compare Drawer */}
-      <CompareBar
-        selected={compareItems}
-        onRemove={id => setCompareItems(prev => prev.filter(x => x.id !== id))}
-        onClear={() => setCompareItems([])}
-      />
+      {/* Adding extra spacer if no pagination but compare bar is active to prevent overlapping with content */}
+      {!(total > filters.limit) && compareItems.length > 0 && <div style={{ height: 80 }} />}
     </div>
   );
 }
