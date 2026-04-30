@@ -1,5 +1,5 @@
 import { startTransition, useDeferredValue, useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Menu, PanelLeftClose, Sparkles } from 'lucide-react';
 
 import { chatAPI } from '../services/api';
@@ -8,19 +8,28 @@ import ChatComposer from '../components/chat/ChatComposer';
 import ChatMessage from '../components/chat/ChatMessage';
 import ChatSidebar from '../components/chat/ChatSidebar';
 import TypingIndicator from '../components/chat/TypingIndicator';
-import { getStoredChatSession, readStoredChatSessions, upsertStoredChatSession } from '../utils/chatSessionStorage';
+import {
+  clearStoredChatSession,
+  getStoredChatSession,
+  readStoredChatSessions,
+  upsertStoredChatSession,
+} from '../utils/chatSessionStorage';
 
 const INITIAL_MESSAGE = {
   role: 'assistant',
   text: "I’m **EViq Expert**. Ask me about EV recommendations, charging, TCO, subsidies, or model comparisons in the current India EV dataset.",
 };
 
-function buildLocalSession(sessionId, messages) {
+function buildSessionTitle(messages) {
   const meaningfulMessages = messages.filter(message => message.text && message !== INITIAL_MESSAGE);
   const firstUserMessage = meaningfulMessages.find(message => message.role === 'user')?.text || 'New Chat';
+  return firstUserMessage.length > 44 ? `${firstUserMessage.slice(0, 44)}...` : firstUserMessage;
+}
+
+function buildLocalSession(sessionId, messages) {
   return {
     id: sessionId,
-    title: firstUserMessage.length > 44 ? `${firstUserMessage.slice(0, 44)}...` : firstUserMessage,
+    title: buildSessionTitle(messages),
     updatedAt: new Date().toISOString(),
     messages,
   };
@@ -54,26 +63,50 @@ export default function ChatPage() {
   const [localSessions, setLocalSessions] = useState(() => readStoredChatSessions());
   const [streamingMessage, setStreamingMessage] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [savingSessionId, setSavingSessionId] = useState(null);
+  const [deletingSessionId, setDeletingSessionId] = useState(null);
   const [hasSpeechRecognition] = useState(
     () => typeof window !== 'undefined' && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition)
   );
+  const isWelcomeState = messages.length <= 1;
 
   const deferredMessages = useDeferredValue(messages);
-  const chatEndRef = useRef(null);
+  const chatScrollRef = useRef(null);
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
 
   const sessions = mergeSessionLists(localSessions, user ? remoteSessions : []);
 
+  async function refreshRemoteSessions() {
+    if (!user) {
+      setRemoteSessions([]);
+      return;
+    }
+
+    try {
+      const response = await chatAPI.getSessions();
+      setRemoteSessions(response.data || []);
+    } catch (error) {
+      console.error('Could not fetch sessions', error);
+    }
+  }
+
   useEffect(() => {
-    if (!user) return;
-    chatAPI.getSessions()
-      .then(response => setRemoteSessions(response.data || []))
-      .catch(error => console.error('Could not fetch sessions', error));
+    refreshRemoteSessions();
   }, [user]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const scrollNode = chatScrollRef.current;
+    if (!scrollNode) return;
+
+    const nextFrame = window.requestAnimationFrame(() => {
+      scrollNode.scrollTo({
+        top: scrollNode.scrollHeight,
+        behavior: streamingMessage ? 'auto' : 'smooth',
+      });
+    });
+
+    return () => window.cancelAnimationFrame(nextFrame);
   }, [messages, loading, streamingMessage]);
 
   useEffect(() => {
@@ -189,9 +222,7 @@ export default function ChatPage() {
 
       if (user && activeSessionId) {
         setTimeout(() => {
-          chatAPI.getSessions()
-            .then(response => setRemoteSessions(response.data || []))
-            .catch(error => console.error('Could not refresh sessions', error));
+          refreshRemoteSessions();
         }, 300);
       }
     } catch (error) {
@@ -215,6 +246,62 @@ export default function ChatPage() {
     setSessionId(null);
     setStreamingMessage(null);
     setSidebarOpen(false);
+  }
+
+  async function handleSaveSession(targetSession) {
+    const targetId = targetSession?.id || sessionId;
+    if (!targetId) return;
+
+    setSavingSessionId(targetId);
+    try {
+      const title = targetId === sessionId
+        ? buildSessionTitle(messages)
+        : (targetSession?.title || 'Saved chat');
+
+      if (user) {
+        await chatAPI.saveSession(targetId, { title });
+        await refreshRemoteSessions();
+      }
+
+      const localSnapshot = targetId === sessionId
+        ? buildLocalSession(targetId, messages.length ? messages : [INITIAL_MESSAGE])
+        : {
+            ...targetSession,
+            title,
+            updatedAt: new Date().toISOString(),
+          };
+      setLocalSessions(upsertStoredChatSession(localSnapshot));
+    } catch (error) {
+      console.error('Could not save chat session', error);
+    } finally {
+      setSavingSessionId(null);
+    }
+  }
+
+  async function handleDeleteSession(targetSession) {
+    const targetId = targetSession?.id;
+    if (!targetId) return;
+
+    const confirmed = window.confirm('Delete this chat permanently? This will remove it from your history.');
+    if (!confirmed) return;
+
+    setDeletingSessionId(targetId);
+    try {
+      if (user) {
+        await chatAPI.deleteSession(targetId);
+        await refreshRemoteSessions();
+      }
+
+      setLocalSessions(clearStoredChatSession(targetId));
+
+      if (targetId === sessionId) {
+        clearChat();
+      }
+    } catch (error) {
+      console.error('Could not delete chat session', error);
+    } finally {
+      setDeletingSessionId(null);
+    }
   }
 
   function handleKeyDown(event) {
@@ -262,9 +349,13 @@ export default function ChatPage() {
         onClose={() => setSidebarOpen(false)}
         onNewChat={clearChat}
         onSelectSession={loadSession}
+        onSaveSession={handleSaveSession}
+        onDeleteSession={handleDeleteSession}
+        savingSessionId={savingSessionId}
+        deletingSessionId={deletingSessionId}
       />
 
-      <main className={`ev-chat-main ${messages.length <= 1 ? 'is-welcome' : ''}`}>
+      <main className={`ev-chat-main ${isWelcomeState ? 'is-welcome' : ''}`}>
         <div className="ev-chat-toolbar">
           <button className="ev-chat-toolbar-btn" onClick={() => setSidebarOpen(previous => !previous)} type="button">
             {sidebarOpen ? <PanelLeftClose size={16} /> : <Menu size={16} />}
@@ -276,24 +367,19 @@ export default function ChatPage() {
           </button>
         </div>
 
-        <div className="ev-chat-scroll-area">
+        <div className="ev-chat-scroll-area" ref={chatScrollRef}>
           <div className="ev-chat-content-limit">
-            {messages.length <= 1 && !loading && (
+            {isWelcomeState && !loading && (
               <div className="ev-chat-welcome-panel">
-                <div className="eyebrow">Ask anything about Indian EVs</div>
-                <h1>Chat like it’s ChatGPT, but grounded in your EV dataset.</h1>
-                <p>
-                  Use natural language. EViq will ask clarifying questions when needed, keep memory inside the session,
-                  and stay conservative about specs, pricing, and subsidies.
-                </p>
-                <div className="ev-welcome-links">
-                  <Link to="/browse" className="ev-welcome-link">Browse EVs</Link>
-                  <Link to="/recommend" className="ev-welcome-link">Guided recommender</Link>
-                </div>
+                <div className="eyebrow">EViq Expert</div>
+                <h1>Ask anything about EVs.</h1>
+                <p>Recommendations, comparisons, charging, subsidies, and TCO in one place.</p>
               </div>
             )}
 
-            {displayMessages.map((message, index) => (
+            {displayMessages
+              .filter(message => !(isWelcomeState && message.role === 'assistant' && message.text === INITIAL_MESSAGE.text))
+              .map((message, index) => (
               <ChatMessage
                 key={`${message.role}-${index}-${message.text?.slice(0, 16)}`}
                 msg={message}
@@ -303,7 +389,6 @@ export default function ChatPage() {
             ))}
             {streamingMessage ? <ChatMessage msg={streamingMessage} onCopy={handleCopy} onRetry={sendMessage} /> : null}
             {loading && !streamingMessage ? <TypingIndicator /> : null}
-            <div ref={chatEndRef} style={{ height: 160 }} />
           </div>
         </div>
 
@@ -380,6 +465,36 @@ export default function ChatPage() {
           display: flex;
           flex-direction: column;
           gap: 14px;
+        }
+        .sidebar-session-toolbar {
+          display: flex;
+          gap: 8px;
+        }
+        .sidebar-session-action {
+          flex: 1;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          border-radius: 10px;
+          border: 1px solid var(--border);
+          background: color-mix(in srgb, var(--bg-card) 92%, white);
+          color: var(--text);
+          padding: 9px 12px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+        .sidebar-session-action:hover:not(:disabled) {
+          border-color: var(--accent);
+          color: var(--accent);
+        }
+        .sidebar-session-action.danger:hover:not(:disabled) {
+          color: #dc2626;
+          border-color: #f3b5b5;
+        }
+        .sidebar-session-action:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
         }
 
         .ev-chat-brand-block {
@@ -459,33 +574,78 @@ export default function ChatPage() {
         .nav-item.disabled {
           opacity: 0.6;
         }
-
-        .ev-chat-side-note {
+        .session-history-row {
           display: flex;
-          flex-direction: column;
-          gap: 10px;
-          padding: 14px;
-          border: 1px solid var(--border);
-          border-radius: 14px;
-          background: color-mix(in srgb, var(--bg-muted) 72%, white);
-          margin: 16px 0;
+          align-items: center;
+          gap: 6px;
+          border-radius: 12px;
         }
-        .note-row {
+        .session-history-row.active {
+          background: color-mix(in srgb, var(--bg-muted) 68%, white);
+        }
+        .session-history-select {
+          flex: 1;
+          min-width: 0;
+        }
+        .session-history-select.active {
+          background: transparent;
+        }
+        .session-history-title {
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .session-history-actions {
           display: flex;
-          align-items: flex-start;
-          gap: 8px;
-          font-size: 12px;
+          align-items: center;
+          gap: 4px;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.18s ease;
+          padding-right: 6px;
+        }
+        .session-history-row:hover .session-history-actions,
+        .session-history-row.active .session-history-actions {
+          opacity: 1;
+          pointer-events: auto;
+        }
+        .session-action-btn {
+          width: 28px;
+          height: 28px;
+          border-radius: 8px;
+          border: 1px solid var(--border);
+          background: var(--bg-card);
           color: var(--text-muted);
-          line-height: 1.6;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .session-action-btn:hover:not(:disabled) {
+          color: var(--accent);
+          border-color: var(--accent);
+        }
+        .session-action-btn.danger:hover:not(:disabled) {
+          color: #dc2626;
+          border-color: #f3b5b5;
+        }
+        .session-action-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
         .sidebar-user {
           border-top: 1px solid var(--border);
-          padding-top: 16px;
+          padding-top: 12px;
           display: flex;
           align-items: center;
           gap: 8px;
           font-size: 13px;
+        }
+        .sidebar-user-minimal {
+          margin-top: 12px;
+          justify-content: space-between;
         }
         .sidebar-user-avatar {
           width: 28px;
@@ -502,11 +662,12 @@ export default function ChatPage() {
         }
         .sidebar-user-meta {
           overflow: hidden;
+          min-width: 0;
         }
         .sidebar-user-name {
           font-size: 12px;
-          font-weight: 700;
-          color: var(--text);
+          font-weight: 600;
+          color: var(--text-muted);
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -521,9 +682,10 @@ export default function ChatPage() {
         .sidebar-guest-copy {
           font-size: 12px;
           color: var(--text-muted);
+          font-weight: 600;
         }
         .sidebar-login-link {
-          font-size: 12px;
+          font-size: 11px;
           color: var(--accent);
           font-weight: 700;
           text-decoration: none;
@@ -531,6 +693,9 @@ export default function ChatPage() {
           align-items: center;
           gap: 4px;
           margin-left: auto;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--accent-soft) 60%, white);
         }
 
         .ev-chat-main {
@@ -539,6 +704,7 @@ export default function ChatPage() {
           flex-direction: column;
           position: relative;
           min-width: 0;
+          min-height: calc(100vh - 64px);
         }
 
         .ev-chat-toolbar {
@@ -551,71 +717,60 @@ export default function ChatPage() {
           flex: 1;
           overflow-y: auto;
           scrollbar-width: thin;
-          padding: 42px 20px 0;
+          padding: 28px 20px 192px;
+          scroll-behavior: smooth;
+          scroll-padding-bottom: 200px;
         }
         .ev-chat-content-limit {
-          max-width: 880px;
+          max-width: 860px;
           margin: 0 auto;
           width: 100%;
         }
 
         .ev-chat-main.is-welcome .ev-chat-scroll-area {
-          padding-top: 8vh;
+          padding-top: 12vh;
         }
         .ev-chat-main.is-welcome .ev-chat-content-limit {
-          padding-bottom: 220px;
+          padding-bottom: 0;
         }
 
         .ev-chat-welcome-panel {
-          max-width: 760px;
-          margin-bottom: 30px;
+          max-width: 640px;
+          margin: 0 auto 18px;
+          text-align: center;
         }
         .ev-chat-welcome-panel .eyebrow {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 7px 12px;
+          justify-content: center;
+          padding: 6px 12px;
           border-radius: 999px;
           background: var(--accent-soft);
           color: var(--accent-dark);
           font-size: 12px;
           font-weight: 700;
-          margin-bottom: 16px;
+          margin-bottom: 14px;
         }
         .ev-chat-welcome-panel h1 {
           font-family: 'Space Grotesk', sans-serif;
-          font-size: clamp(32px, 5vw, 54px);
-          line-height: 1.02;
-          letter-spacing: -1.2px;
-          margin-bottom: 12px;
-          max-width: 760px;
+          font-size: clamp(30px, 5vw, 48px);
+          line-height: 1.04;
+          letter-spacing: -0.8px;
+          margin-bottom: 10px;
         }
         .ev-chat-welcome-panel p {
-          max-width: 660px;
+          max-width: 520px;
+          margin: 0 auto;
           color: var(--text-muted);
-          font-size: 15px;
-          line-height: 1.75;
-        }
-        .ev-welcome-links {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-          margin-top: 18px;
-        }
-        .ev-welcome-link {
-          padding: 9px 14px;
-          border-radius: 999px;
-          border: 1px solid var(--border);
-          background: color-mix(in srgb, var(--bg-card) 88%, white);
-          color: var(--text);
-          font-size: 13px;
-          font-weight: 600;
+          font-size: 14px;
+          line-height: 1.65;
         }
 
         .ev-msg-row {
           display: flex;
           gap: 16px;
-          margin-bottom: 24px;
+          margin-bottom: 18px;
+          width: 100%;
         }
         .ev-msg-row.user {
           justify-content: flex-end;
@@ -641,6 +796,8 @@ export default function ChatPage() {
         .ev-msg-bubble {
           max-width: 85%;
           line-height: 1.6;
+          min-width: 0;
+          overflow-wrap: anywhere;
         }
         .ev-msg-bubble.user {
           background: linear-gradient(135deg, #1f2937, #111827);
@@ -654,8 +811,32 @@ export default function ChatPage() {
           font-size: 15px;
           color: var(--text);
         }
+        .ev-msg-text,
+        .ev-msg-markdown,
+        .ev-msg-markdown p,
+        .ev-msg-markdown li,
+        .ev-msg-markdown code,
+        .ev-msg-markdown strong {
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        }
         .ev-msg-markdown p {
           margin-bottom: 12px;
+        }
+        .ev-msg-markdown ul,
+        .ev-msg-markdown ol {
+          padding-left: 20px;
+          margin: 0 0 12px;
+        }
+        .ev-msg-markdown pre {
+          overflow-x: auto;
+          padding: 12px 14px;
+          border-radius: 12px;
+          background: color-mix(in srgb, var(--bg-card) 92%, black 8%);
+          margin-top: 12px;
+        }
+        .ev-msg-markdown code {
+          font-size: 0.94em;
         }
         .highlight {
           color: var(--accent);
@@ -782,17 +963,23 @@ export default function ChatPage() {
         .typing-dots span:nth-child(3) {
           animation-delay: 0.4s;
         }
+        .typing-indicator-text {
+          font-size: 13px;
+          color: var(--text-muted);
+          margin-bottom: 8px;
+        }
 
         .ev-chat-input-sticky {
-          position: fixed;
+          position: sticky;
           bottom: 0;
-          left: 300px;
-          right: 0;
-          padding: 20px;
-          background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 82%, white) 35%);
+          padding: 16px 20px calc(18px + env(safe-area-inset-bottom));
+          background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 90%, white) 18%, color-mix(in srgb, var(--bg) 97%, white) 100%);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          z-index: 20;
         }
         .ev-chat-input-limit {
-          max-width: 820px;
+          max-width: 860px;
           margin: 0 auto;
           width: 100%;
         }
@@ -846,11 +1033,12 @@ export default function ChatPage() {
         }
         .send-btn {
           background: color-mix(in srgb, var(--bg-muted) 80%, white);
-          color: white;
+          color: var(--text-muted);
           cursor: not-allowed;
         }
         .send-btn.active {
           background: var(--accent);
+          color: white;
           cursor: pointer;
           transform: translateY(-1px);
         }
@@ -890,17 +1078,19 @@ export default function ChatPage() {
           .ev-sidebar-close {
             display: inline-flex;
           }
-          .ev-chat-input-sticky {
-            left: 0;
-          }
           .ev-chat-scroll-area {
             padding-top: 18px;
+            padding-bottom: 184px;
+          }
+          .session-history-actions {
+            opacity: 1;
+            pointer-events: auto;
           }
         }
 
         @media (max-width: 640px) {
           .ev-chat-scroll-area {
-            padding: 18px 14px 0;
+            padding: 18px 14px 176px;
           }
           .ev-chat-input-sticky {
             padding: 14px;

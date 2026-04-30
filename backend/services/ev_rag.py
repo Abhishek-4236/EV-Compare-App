@@ -8,9 +8,14 @@ from core.config import settings
 from .embeddings import start_model_warmup
 from .ev_catalog import load_documents, load_excel_as_documents
 from .ev_chat_knowledge import (
+    build_capabilities_answer,
+    build_identity_answer,
     build_limitations_answer,
     build_policy_answer,
+    extract_supporting_lines,
+    is_capabilities_query,
     is_ev_concept_query,
+    is_identity_query,
     is_limitations_query,
     is_location_query,
     is_policy_query,
@@ -38,6 +43,7 @@ from .ev_chat_retrieval import (
 )
 from .ev_rag_types import ChatAnswer, ParsedQuery, RetrievalMatch, VehicleDocument
 from .faiss_store import FaissStore
+from .llm import generate_chat_response
 from .query_parser import parse_user_query
 from .retrieval import station_answer
 
@@ -76,6 +82,25 @@ SPEC_HINTS = [
     "spec",
     "specs",
 ]
+
+COMPARISON_FOLLOW_UP_HINTS = (
+    "comparison",
+    "compare",
+    "table",
+    "tabular",
+    "side by side",
+    "side-by-side",
+    "which is better",
+    "which one is better",
+    "better fit",
+    "better buy",
+    "difference",
+    "same two",
+    "those two",
+    "these two",
+    "both cars",
+    "both models",
+)
 
 
 @dataclass
@@ -134,11 +159,11 @@ class EVRAGService:
 
         if normalized in SMALLTALK_REPLIES:
             parsed = ParsedQuery(intent="info", rewritten_query=query)
-            return ChatAnswer(answer=SMALLTALK_REPLIES[normalized], intent="info", parsed_query=parsed, matches=[])
+            return ChatAnswer(answer=SMALLTALK_REPLIES[normalized], intent="info", parsed_query=parsed, matches=[], provider=None)
 
         if any(token in normalized for token in OOD_HINTS) and "ev" not in normalized and "electric" not in normalized:
             parsed = ParsedQuery(intent="info", rewritten_query=query)
-            return ChatAnswer(answer=build_out_of_domain_answer(), intent="info", parsed_query=parsed, matches=[])
+            return ChatAnswer(answer=build_out_of_domain_answer(), intent="info", parsed_query=parsed, matches=[], provider=None)
 
         parsed = parse_user_query(query)
         memory = build_session_memory(history)
@@ -146,13 +171,19 @@ class EVRAGService:
 
         inventory_answer = self._inventory_answer(normalized)
         if inventory_answer:
-            return ChatAnswer(answer=inventory_answer, intent="info", parsed_query=parsed, matches=[])
+            return ChatAnswer(answer=inventory_answer, intent="info", parsed_query=parsed, matches=[], provider=None)
+
+        if is_identity_query(query):
+            return ChatAnswer(answer=build_identity_answer(), intent="info", parsed_query=parsed, matches=[], provider=None)
+
+        if is_capabilities_query(query):
+            return ChatAnswer(answer=build_capabilities_answer(), intent="info", parsed_query=parsed, matches=[], provider=None)
 
         if is_limitations_query(query):
-            return ChatAnswer(answer=build_limitations_answer(), intent="info", parsed_query=parsed, matches=[])
+            return ChatAnswer(answer=build_limitations_answer(), intent="info", parsed_query=parsed, matches=[], provider=None)
 
         if is_location_query(query):
-            return ChatAnswer(answer=station_answer(query), intent="info", parsed_query=parsed, matches=[])
+            return ChatAnswer(answer=station_answer(query), intent="info", parsed_query=parsed, matches=[], provider=None)
 
         if is_policy_query(query):
             return ChatAnswer(
@@ -160,6 +191,7 @@ class EVRAGService:
                 intent="info",
                 parsed_query=parsed,
                 matches=[],
+                provider=None,
             )
 
         spec_match = self._spec_answer(query, parsed)
@@ -167,24 +199,70 @@ class EVRAGService:
             spec_match = self._recent_vehicle_from_history(history)
         if spec_match is not None:
             vehicle = spec_match
-            answer = build_spec_answer(vehicle, parsed, query)
             match = RetrievalMatch(vehicle=vehicle, score=1.0, matched_on=["name_exact", "spec"])
-            return ChatAnswer(answer=answer, intent="info", parsed_query=parsed, matches=[match])
+            fallback_answer = build_spec_answer(vehicle, parsed, query)
+            return self._finalize_answer(
+                query=query,
+                parsed=parsed,
+                history=history,
+                matches=[match],
+                fallback_answer=fallback_answer,
+                context_chunks=self._vehicle_context_chunks([match], parsed),
+                general_only=False,
+            )
 
         if parsed.intent == "comparison":
             comparison_matches, clarification = self._comparison_matches(query)
             if clarification:
-                return ChatAnswer(answer=clarification, intent="comparison", parsed_query=parsed, matches=[])
-            answer = build_comparison_answer(comparison_matches, parsed)
-            return ChatAnswer(answer=answer, intent="comparison", parsed_query=parsed, matches=comparison_matches)
+                follow_up_matches = self._follow_up_comparison_matches(query, parsed, history)
+                if follow_up_matches:
+                    comparison_matches = follow_up_matches
+                    clarification = None
+                else:
+                    return ChatAnswer(answer=clarification, intent="comparison", parsed_query=parsed, matches=[], provider=None)
+            parsed = parsed.model_copy(update={"vehicle_names": [match.vehicle.name for match in comparison_matches]})
+            fallback_answer = build_comparison_answer(comparison_matches, parsed)
+            return self._finalize_answer(
+                query=query,
+                parsed=parsed,
+                history=history,
+                matches=comparison_matches,
+                fallback_answer=fallback_answer,
+                context_chunks=self._vehicle_context_chunks(comparison_matches, parsed),
+                general_only=False,
+            )
+
+        follow_up_comparison_matches = self._follow_up_comparison_matches(query, parsed, history)
+        if follow_up_comparison_matches:
+            parsed = parsed.model_copy(
+                update={
+                    "intent": "comparison",
+                    "vehicle_names": [match.vehicle.name for match in follow_up_comparison_matches],
+                }
+            )
+            fallback_answer = build_comparison_answer(follow_up_comparison_matches, parsed)
+            return self._finalize_answer(
+                query=query,
+                parsed=parsed,
+                history=history,
+                matches=follow_up_comparison_matches,
+                fallback_answer=fallback_answer,
+                context_chunks=self._vehicle_context_chunks(follow_up_comparison_matches, parsed),
+                general_only=False,
+            )
 
         if parsed.intent == "info" and is_ev_concept_query(query) and not self._looks_like_vehicle_request(query):
-            article = next(iter(retrieve_knowledge_articles(query, self._articles, top_k=1)), None)
-            return ChatAnswer(
-                answer=build_knowledge_answer(query, article),
-                intent="info",
-                parsed_query=parsed,
+            articles = retrieve_knowledge_articles(query, self._articles, top_k=settings.RAG_TOP_K)
+            article = next(iter(articles), None)
+            fallback_answer = build_knowledge_answer(query, article)
+            return self._finalize_answer(
+                query=query,
+                parsed=parsed,
+                history=history,
                 matches=[],
+                fallback_answer=fallback_answer,
+                context_chunks=self._article_context_chunks(articles, query),
+                general_only=not articles,
             )
 
         if needs_recommendation_clarification(query, parsed):
@@ -193,6 +271,7 @@ class EVRAGService:
                 intent=parsed.intent,
                 parsed_query=parsed,
                 matches=[],
+                provider=None,
             )
 
         matches = hybrid_retrieve(
@@ -200,23 +279,43 @@ class EVRAGService:
             parsed=parsed,
             vehicles=self.artifacts.vehicles,
             store=self.artifacts.faiss_store,
-            top_k=5,
+            top_k=settings.RAG_TOP_K,
         )
         if not matches:
-            return ChatAnswer(
-                answer=build_no_match_answer(parsed),
-                intent=parsed.intent,
-                parsed_query=parsed,
+            fallback_answer = self._build_general_no_context_answer(parsed)
+            return self._finalize_answer(
+                query=query,
+                parsed=parsed,
+                history=history,
                 matches=[],
+                fallback_answer=fallback_answer,
+                context_chunks=[],
+                general_only=True,
             )
 
         if parsed.intent == "recommendation":
-            answer = build_recommendation_answer(query, parsed, matches)
-            return ChatAnswer(answer=answer, intent="recommendation", parsed_query=parsed, matches=matches)
+            fallback_answer = build_recommendation_answer(query, parsed, matches)
+            return self._finalize_answer(
+                query=query,
+                parsed=parsed,
+                history=history,
+                matches=matches,
+                fallback_answer=fallback_answer,
+                context_chunks=self._vehicle_context_chunks(matches, parsed),
+                general_only=False,
+            )
 
         first = matches[0].vehicle
-        answer = build_spec_answer(first, parsed, query)
-        return ChatAnswer(answer=answer, intent="info", parsed_query=parsed, matches=[matches[0]])
+        fallback_answer = build_spec_answer(first, parsed, query)
+        return self._finalize_answer(
+            query=query,
+            parsed=parsed,
+            history=history,
+            matches=[matches[0]],
+            fallback_answer=fallback_answer,
+            context_chunks=self._vehicle_context_chunks([matches[0]], parsed),
+            general_only=False,
+        )
 
     def inventory_summary(self) -> str:
         vehicles = self.artifacts.vehicles
@@ -243,7 +342,7 @@ class EVRAGService:
         user_messages = [
             item.get("content") or item.get("text") or ""
             for item in reversed(chat_history)
-            if (item.get("role") or "").lower() == "user"
+            if (item.get("role") or "").lower() in {"user", "assistant"}
         ]
         for message in user_messages:
             named = resolve_named_vehicles(message, self.artifacts.vehicles)
@@ -285,11 +384,119 @@ class EVRAGService:
 
         return [], "I can compare EVs, but I need the exact two model names from the current dataset."
 
+    def _follow_up_comparison_matches(
+        self,
+        query: str,
+        parsed: ParsedQuery,
+        history: list[dict[str, str]],
+    ) -> list[RetrievalMatch]:
+        normalized = normalize_text(query)
+        if not any(hint in normalized for hint in COMPARISON_FOLLOW_UP_HINTS):
+            return []
+
+        recent_pair = self._recent_comparison_pair_from_history(history)
+        if len(recent_pair) < 2:
+            return []
+
+        return [
+            RetrievalMatch(vehicle=vehicle, score=1.0, matched_on=["history", "comparison_follow_up"])
+            for vehicle in recent_pair[:2]
+        ]
+
+    def _recent_comparison_pair_from_history(self, chat_history: list[dict[str, str]]) -> list[VehicleDocument]:
+        prioritized_history = sorted(
+            enumerate(chat_history),
+            key=lambda item: (0 if (item[1].get("role") or "").lower() == "user" else 1, -item[0]),
+        )
+        for _, item in prioritized_history:
+            text = item.get("content") or item.get("text") or ""
+            named = self._ordered_named_vehicles(text)
+            if len(named) >= 2:
+                return named[:2]
+        return []
+
+    def _ordered_named_vehicles(self, text: str) -> list[VehicleDocument]:
+        normalized_text_value = normalize_text(text)
+        named = resolve_named_vehicles(text, self.artifacts.vehicles)
+        if len(named) < 2:
+            return named
+
+        def first_position(vehicle: VehicleDocument) -> int:
+            positions = [
+                normalized_text_value.find(alias)
+                for alias in vehicle_aliases(vehicle)
+                if alias and normalized_text_value.find(alias) >= 0
+            ]
+            return min(positions) if positions else 10**9
+
+        return sorted(named, key=first_position)
+
     def _looks_like_vehicle_request(self, query: str) -> bool:
         q = (query or "").lower()
         if any(token in q for token in ["best", "recommend", "buy", "compare", "under ", "which ev"]):
             return True
         return any(contains_vehicle_mention(q, vehicle) for vehicle in self.artifacts.vehicles)
+
+    def _finalize_answer(
+        self,
+        *,
+        query: str,
+        parsed: ParsedQuery,
+        history: list[dict[str, str]],
+        matches: list[RetrievalMatch],
+        fallback_answer: str,
+        context_chunks: list[str],
+        general_only: bool,
+    ) -> ChatAnswer:
+        answer, provider = generate_chat_response(
+            query=query,
+            context_chunks=context_chunks,
+            draft_answer=fallback_answer,
+            history=history,
+            general_only=general_only,
+        )
+        return ChatAnswer(
+            answer=answer or fallback_answer,
+            intent=parsed.intent,
+            parsed_query=parsed,
+            matches=matches,
+            provider=provider,
+        )
+
+    def _vehicle_context_chunks(self, matches: list[RetrievalMatch], parsed: ParsedQuery) -> list[str]:
+        chunks: list[str] = []
+        for match in matches[: settings.RAG_TOP_K]:
+            vehicle = match.vehicle
+            details = [
+                f"{vehicle.name} ({vehicle.vehicle_type})",
+                f"price ₹{vehicle.price_inr:,}" if vehicle.price_inr is not None else "price unavailable",
+                f"range {vehicle.range_km} km" if vehicle.range_km is not None else "range unavailable",
+                f"battery {vehicle.battery_kwh:.1f} kWh" if vehicle.battery_kwh is not None else "battery unavailable",
+                f"charging {vehicle.charging_time}" if vehicle.charging_time else None,
+                f"charging type {vehicle.charging_type}" if vehicle.charging_type else None,
+            ]
+            if vehicle.features:
+                details.append("features: " + ", ".join(vehicle.features[:4]))
+            if parsed.filters.state:
+                details.append(f"state context: {parsed.filters.state}")
+            chunks.append(". ".join(part for part in details if part))
+        return chunks
+
+    def _article_context_chunks(self, articles, query: str) -> list[str]:
+        chunks: list[str] = []
+        for article in articles[: settings.RAG_TOP_K]:
+            support_lines = extract_supporting_lines(article, query, limit=2)
+            if support_lines:
+                chunks.append(f"{article.title}. " + " ".join(support_lines))
+            else:
+                chunks.append(f"{article.title}. {article.content[:320]}")
+        return chunks
+
+    def _build_general_no_context_answer(self, parsed: ParsedQuery) -> str:
+        return (
+            "I could not find strong matching context in the current dataset, so this is general EV guidance.\n\n"
+            f"{build_no_match_answer(parsed)}"
+        )
 
 
 ev_rag_service = EVRAGService()

@@ -134,9 +134,13 @@ function LiveStationFetcher({ setStations, setLoading, setError, setIsZoomValid 
 }
 
 // A small component to dynamically update map view based on selected city
-function ChangeView({ center, zoom }) {
+function ChangeView({ lat, lng, zoom }) {
   const map = useMap();
-  map.setView(center, zoom);
+
+  useEffect(() => {
+    map.setView([lat, lng], zoom);
+  }, [map, lat, lng, zoom]);
+
   return null;
 }
 
@@ -231,7 +235,7 @@ export default function ChargingMapPage() {
         style={{ width: '100%', height: '100%', zIndex: 0 }}
         zoomControl={false}
       >
-        <ChangeView center={[activeCity.lat, activeCity.lng]} zoom={zoomLevel} />
+        <ChangeView lat={activeCity.lat} lng={activeCity.lng} zoom={zoomLevel} />
         
         {/* API Fetcher Agent */}
         <LiveStationFetcher 

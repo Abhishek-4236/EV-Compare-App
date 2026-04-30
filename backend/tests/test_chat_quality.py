@@ -176,12 +176,67 @@ class ChatQualityTests(unittest.TestCase):
         self.assertIn("charging locations", body["answer"].lower())
         self.assertEqual(body["sources"], [])
 
+    def test_identity_query_does_not_return_vehicle_sources(self):
+        response = self.client.post("/api/chat/", json={"message": "who are you?"})
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertIn("EViq Expert", body["answer"])
+        self.assertEqual(body["sources"], [])
+
+    def test_capabilities_query_does_not_return_vehicle_sources(self):
+        response = self.client.post("/api/chat/", json={"message": "what can you do?"})
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertIn("recommend", body["answer"].lower())
+        self.assertEqual(body["sources"], [])
+
+    def test_follow_up_it_can_use_assistant_vehicle_context(self):
+        first = self.client.post("/api/chat/", json={"message": "Cheapest 3-wheeler EV?"})
+        self.assertEqual(first.status_code, 200)
+        session_id = first.json()["session_id"]
+
+        second = self.client.post("/api/chat/", json={"message": "what are the features of it?", "session_id": session_id})
+        self.assertEqual(second.status_code, 200)
+        body = second.json()
+        self.assertGreaterEqual(len(body["sources"]), 1)
+        first_source_name = body["sources"][0]["name"]
+        self.assertIn(first_source_name.split()[0], body["answer"])
+
     def test_difference_between_models_returns_two_sources(self):
         response = self.client.post("/api/chat/", json={"message": "difference between Ola S1 Air and Ola S1 Pro"})
         self.assertEqual(response.status_code, 200)
         body = response.json()
         names = [(item["brand"], item["model"]) for item in body["sources"][:2]]
         self.assertEqual(names, [("Ola", "S1 Air"), ("Ola", "S1 Pro")])
+
+    def test_comparison_follow_up_table_format_keeps_same_models(self):
+        first = self.client.post("/api/chat/", json={"message": "Compare Tata Nexon EV vs MG ZS EV"})
+        self.assertEqual(first.status_code, 200)
+        session_id = first.json()["session_id"]
+
+        second = self.client.post("/api/chat/", json={"message": "give the comparison in table format", "session_id": session_id})
+        self.assertEqual(second.status_code, 200)
+        body = second.json()
+
+        self.assertEqual(body["intent"], "comparison")
+        names = [item["name"] for item in body["sources"][:2]]
+        self.assertEqual(names, ["Tata Nexon EV", "MG ZS EV"])
+        self.assertIn("Tata Nexon EV", body["answer"])
+        self.assertIn("MG ZS EV", body["answer"])
+        self.assertNotIn("Ola S1 X+", body["answer"])
+
+    def test_comparison_follow_up_which_is_better_reuses_recent_pair(self):
+        first = self.client.post("/api/chat/", json={"message": "Compare Ather 450X vs Ola S1 Pro"})
+        self.assertEqual(first.status_code, 200)
+        session_id = first.json()["session_id"]
+
+        second = self.client.post("/api/chat/", json={"message": "which one is better for value?", "session_id": session_id})
+        self.assertEqual(second.status_code, 200)
+        body = second.json()
+
+        self.assertEqual(body["intent"], "comparison")
+        names = [item["name"] for item in body["sources"][:2]]
+        self.assertEqual(names, ["Ather 450X", "Ola S1 Pro"])
 
 
 if __name__ == "__main__":

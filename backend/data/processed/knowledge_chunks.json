@@ -1,0 +1,1810 @@
+[
+  {
+    "chunk_id": "vehicle-0",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ola S1 X",
+    "text": "Vehicle: Ola S1 X. Type: scooter. Price: Rs 90,000. Range: 108 km. Battery: 2.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 105.0; Market Status: Available; Gps: No; Tyre Size: Front :-90/90-12, Rear :-90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ola",
+      "model": "S1 X",
+      "vehicle_type": "scooter",
+      "price_inr": 90000,
+      "range_km": 108
+    }
+  },
+  {
+    "chunk_id": "vehicle-1",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ola S1 X+",
+    "text": "Vehicle: Ola S1 X+. Type: scooter. Price: Rs 133,500. Range: 242 km. Battery: 4.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 125.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ola",
+      "model": "S1 X+",
+      "vehicle_type": "scooter",
+      "price_inr": 133500,
+      "range_km": 242
+    }
+  },
+  {
+    "chunk_id": "vehicle-2",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ola S1 Air",
+    "text": "Vehicle: Ola S1 Air. Type: scooter. Price: Rs 121,000. Range: 151 km. Battery: 4.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 85.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ola",
+      "model": "S1 Air",
+      "vehicle_type": "scooter",
+      "price_inr": 121000,
+      "range_km": 151
+    }
+  },
+  {
+    "chunk_id": "vehicle-3",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ola S1 Z",
+    "text": "Vehicle: Ola S1 Z. Type: Scooter. Price: Rs 61,000. Range: 146 km. Battery: 3.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 70.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ola",
+      "model": "S1 Z",
+      "vehicle_type": "Scooter",
+      "price_inr": 61000,
+      "range_km": 146
+    }
+  },
+  {
+    "chunk_id": "vehicle-4",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ola S1 Pro",
+    "text": "Vehicle: Ola S1 Pro. Type: Scooter. Price: Rs 130,000. Range: 176 km. Battery: 4.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 120.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ola",
+      "model": "S1 Pro",
+      "vehicle_type": "Scooter",
+      "price_inr": 130000,
+      "range_km": 176
+    }
+  },
+  {
+    "chunk_id": "vehicle-5",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ather Rizta Z",
+    "text": "Vehicle: Ather Rizta Z. Type: scooter. Price: Rs 186,000. Range: 160 km. Battery: 3.7 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 80.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ather",
+      "model": "Rizta Z",
+      "vehicle_type": "scooter",
+      "price_inr": 186000,
+      "range_km": 160
+    }
+  },
+  {
+    "chunk_id": "vehicle-6",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ather Rizta S",
+    "text": "Vehicle: Ather Rizta S. Type: scooter. Price: Rs 140,000. Range: 123 km. Battery: 2.9 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 80.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ather",
+      "model": "Rizta S",
+      "vehicle_type": "scooter",
+      "price_inr": 140000,
+      "range_km": 123
+    }
+  },
+  {
+    "chunk_id": "vehicle-7",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ather 450X",
+    "text": "Vehicle: Ather 450X. Type: Scooter. Price: Rs 147,000. Range: 161 km. Battery: 2.9 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 90.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ather",
+      "model": "450X",
+      "vehicle_type": "Scooter",
+      "price_inr": 147000,
+      "range_km": 161
+    }
+  },
+  {
+    "chunk_id": "vehicle-8",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "TVS iQube",
+    "text": "Vehicle: TVS iQube. Type: Scooter. Price: Rs 108,000. Range: 140 km. Battery: 3.4 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 82.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "TVS",
+      "model": "iQube",
+      "vehicle_type": "Scooter",
+      "price_inr": 108000,
+      "range_km": 140
+    }
+  },
+  {
+    "chunk_id": "vehicle-9",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Bajaj Chetak",
+    "text": "Vehicle: Bajaj Chetak. Type: Scooter. Price: Rs 91,000. Range: 100 km. Battery: 3.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 73.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Bajaj",
+      "model": "Chetak",
+      "vehicle_type": "Scooter",
+      "price_inr": 91000,
+      "range_km": 100
+    }
+  },
+  {
+    "chunk_id": "vehicle-10",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Hero Vida VX2 Plus",
+    "text": "Vehicle: Hero Vida VX2 Plus. Type: scooter. Price: Rs 118,000. Range: 142 km. Battery: 3.4 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 80.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Hero",
+      "model": "Vida VX2 Plus",
+      "vehicle_type": "scooter",
+      "price_inr": 118000,
+      "range_km": 142
+    }
+  },
+  {
+    "chunk_id": "vehicle-11",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Hero Vida VX2 Go",
+    "text": "Vehicle: Hero Vida VX2 Go. Type: scooter. Price: Rs 110,000. Range: 92 km. Battery: 3.4 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 70.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Hero",
+      "model": "Vida VX2 Go",
+      "vehicle_type": "scooter",
+      "price_inr": 110000,
+      "range_km": 92
+    }
+  },
+  {
+    "chunk_id": "vehicle-12",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Hero Vida V1",
+    "text": "Vehicle: Hero Vida V1. Type: Scooter. Price: Rs 120,000. Range: 165 km. Battery: 3.9 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 80.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Hero",
+      "model": "Vida V1",
+      "vehicle_type": "Scooter",
+      "price_inr": 120000,
+      "range_km": 165
+    }
+  },
+  {
+    "chunk_id": "vehicle-13",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ampere Nexus",
+    "text": "Vehicle: Ampere Nexus. Type: scooter. Price: Rs 127,800. Range: 100 km. Battery: 3.3 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 93.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ampere",
+      "model": "Nexus",
+      "vehicle_type": "scooter",
+      "price_inr": 127800,
+      "range_km": 100
+    }
+  },
+  {
+    "chunk_id": "vehicle-14",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ampere Magnus",
+    "text": "Vehicle: Ampere Magnus. Type: scooter. Price: Rs 93,500. Range: 95 km. Battery: 1.5 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 65.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ampere",
+      "model": "Magnus",
+      "vehicle_type": "scooter",
+      "price_inr": 93500,
+      "range_km": 95
+    }
+  },
+  {
+    "chunk_id": "vehicle-15",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ampere Reo LI plus",
+    "text": "Vehicle: Ampere Reo LI plus. Type: scooter. Price: Rs 59,300. Range: 70 km. Battery: 1.3 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 25.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ampere",
+      "model": "Reo LI plus",
+      "vehicle_type": "scooter",
+      "price_inr": 59300,
+      "range_km": 70
+    }
+  },
+  {
+    "chunk_id": "vehicle-16",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Hero Electric Photon",
+    "text": "Vehicle: Hero Electric Photon. Type: scooter. Price: Rs 115,000. Range: 90 km. Battery: 1.87 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 45.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Hero Electric",
+      "model": "Photon",
+      "vehicle_type": "scooter",
+      "price_inr": 115000,
+      "range_km": 90
+    }
+  },
+  {
+    "chunk_id": "vehicle-17",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Hero Electric Optima",
+    "text": "Vehicle: Hero Electric Optima. Type: scooter. Price: Rs 87,100. Range: 89 km. Battery: 2.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 48.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Hero Electric",
+      "model": "Optima",
+      "vehicle_type": "scooter",
+      "price_inr": 87100,
+      "range_km": 89
+    }
+  },
+  {
+    "chunk_id": "vehicle-18",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Hero Electric Flash",
+    "text": "Vehicle: Hero Electric Flash. Type: scooter. Price: Rs 63,100. Range: 85 km. Battery: 1.54 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 25.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Hero Electric",
+      "model": "Flash",
+      "vehicle_type": "scooter",
+      "price_inr": 63100,
+      "range_km": 85
+    }
+  },
+  {
+    "chunk_id": "vehicle-19",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "BGauss BG RUV 350 Max",
+    "text": "Vehicle: BGauss BG RUV 350 Max. Type: scooter. Price: Rs 143,300. Range: 145 km. Battery: 3.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 75.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "BGauss",
+      "model": "BG RUV 350 Max",
+      "vehicle_type": "scooter",
+      "price_inr": 143300,
+      "range_km": 145
+    }
+  },
+  {
+    "chunk_id": "vehicle-20",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "BGauss C12 I Max 2.0",
+    "text": "Vehicle: BGauss C12 I Max 2.0. Type: scooter. Price: Rs 125,100. Range: 123 km. Battery: 2.7 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 60.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "BGauss",
+      "model": "C12 I Max 2.0",
+      "vehicle_type": "scooter",
+      "price_inr": 125100,
+      "range_km": 123
+    }
+  },
+  {
+    "chunk_id": "vehicle-21",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "BGauss Oowah",
+    "text": "Vehicle: BGauss Oowah. Type: scooter. Price: Rs 96,600. Range: 105 km. Battery: 2.3 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 60.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "BGauss",
+      "model": "Oowah",
+      "vehicle_type": "scooter",
+      "price_inr": 96600,
+      "range_km": 105
+    }
+  },
+  {
+    "chunk_id": "vehicle-22",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Okinawa OKHI-90",
+    "text": "Vehicle: Okinawa OKHI-90. Type: scooter. Price: Rs 158,500. Range: 160 km. Battery: 3.6 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 90.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Okinawa",
+      "model": "OKHI-90",
+      "vehicle_type": "scooter",
+      "price_inr": 158500,
+      "range_km": 160
+    }
+  },
+  {
+    "chunk_id": "vehicle-23",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Okinawa R30",
+    "text": "Vehicle: Okinawa R30. Type: scooter. Price: Rs 66,500. Range: 60 km. Battery: 1.34 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 25.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Okinawa",
+      "model": "R30",
+      "vehicle_type": "scooter",
+      "price_inr": 66500,
+      "range_km": 60
+    }
+  },
+  {
+    "chunk_id": "vehicle-24",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Bounce Infinity E1",
+    "text": "Vehicle: Bounce Infinity E1. Type: scooter. Price: Rs 114,000. Range: 100 km. Battery: 2.5 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 55.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Bounce",
+      "model": "Infinity E1",
+      "vehicle_type": "scooter",
+      "price_inr": 114000,
+      "range_km": 100
+    }
+  },
+  {
+    "chunk_id": "vehicle-25",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Bounce Infinity E1 Plus",
+    "text": "Vehicle: Bounce Infinity E1 Plus. Type: scooter. Price: Rs 112,000. Range: 70 km. Battery: 1.9 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 65.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Bounce",
+      "model": "Infinity E1 Plus",
+      "vehicle_type": "scooter",
+      "price_inr": 112000,
+      "range_km": 70
+    }
+  },
+  {
+    "chunk_id": "vehicle-26",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Pure EV ETrance Neo",
+    "text": "Vehicle: Pure EV ETrance Neo. Type: scooter. Price: Rs 81,000. Range: 101 km. Battery: 1.8 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 47.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Pure EV",
+      "model": "ETrance Neo",
+      "vehicle_type": "scooter",
+      "price_inr": 81000,
+      "range_km": 101
+    }
+  },
+  {
+    "chunk_id": "vehicle-27",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Okaya Freedum",
+    "text": "Vehicle: Okaya Freedum. Type: scooter. Price: Rs 73,600. Range: 75 km. Battery: 1.44 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 25.0; Market Status: Available; Gps: No; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Okaya",
+      "model": "Freedum",
+      "vehicle_type": "scooter",
+      "price_inr": 73600,
+      "range_km": 75
+    }
+  },
+  {
+    "chunk_id": "vehicle-28",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ola Roadster X",
+    "text": "Vehicle: Ola Roadster X. Type: Motorcycle. Price: Rs 148,200. Range: 252 km. Battery: 4.5 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 118.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ola",
+      "model": "Roadster X",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 148200,
+      "range_km": 252
+    }
+  },
+  {
+    "chunk_id": "vehicle-29",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ola Roadster",
+    "text": "Vehicle: Ola Roadster. Type: Motorcycle. Price: Rs 141,000. Range: 248 km. Battery: 6.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 126.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ola",
+      "model": "Roadster",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 141000,
+      "range_km": 248
+    }
+  },
+  {
+    "chunk_id": "vehicle-30",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ultraviolette F77 Mach 2 recon",
+    "text": "Vehicle: Ultraviolette F77 Mach 2 recon. Type: Motorcycle. Price: Rs 466,050. Range: 323 km. Battery: 10.3 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 155.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ultraviolette",
+      "model": "F77 Mach 2 recon",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 466050,
+      "range_km": 323
+    }
+  },
+  {
+    "chunk_id": "vehicle-31",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ultraviolette F77 Mach 2 std",
+    "text": "Vehicle: Ultraviolette F77 Mach 2 std. Type: Motorcycle. Price: Rs 359,260. Range: 211 km. Battery: 7.1 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 155.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ultraviolette",
+      "model": "F77 Mach 2 std",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 359260,
+      "range_km": 211
+    }
+  },
+  {
+    "chunk_id": "vehicle-32",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ultraviolette F77",
+    "text": "Vehicle: Ultraviolette F77. Type: Motorcycle. Price: Rs 380,000. Range: 206 km. Battery: 7.1 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 140.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ultraviolette",
+      "model": "F77",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 380000,
+      "range_km": 206
+    }
+  },
+  {
+    "chunk_id": "vehicle-33",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Revolt RV400",
+    "text": "Vehicle: Revolt RV400. Type: Motorcycle. Price: Rs 140,000. Range: 150 km. Battery: 3.2 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 85.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Revolt",
+      "model": "RV400",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 140000,
+      "range_km": 150
+    }
+  },
+  {
+    "chunk_id": "vehicle-34",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Revolt RV400 BRZ",
+    "text": "Vehicle: Revolt RV400 BRZ. Type: Motorcycle. Price: Rs 135,542. Range: 150 km. Battery: 3.24 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 85.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Revolt",
+      "model": "RV400 BRZ",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 135542,
+      "range_km": 150
+    }
+  },
+  {
+    "chunk_id": "vehicle-35",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Revolt RV BlazeX",
+    "text": "Vehicle: Revolt RV BlazeX. Type: Motorcycle. Price: Rs 127,673. Range: 150 km. Battery: 3.24 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 85.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Revolt",
+      "model": "RV BlazeX",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 127673,
+      "range_km": 150
+    }
+  },
+  {
+    "chunk_id": "vehicle-36",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Revolt RV1",
+    "text": "Vehicle: Revolt RV1. Type: Motorcycle. Price: Rs 113,923. Range: 160 km. Battery: 3.24 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 70.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Revolt",
+      "model": "RV1",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 113923,
+      "range_km": 160
+    }
+  },
+  {
+    "chunk_id": "vehicle-37",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Oben Rorr",
+    "text": "Vehicle: Oben Rorr. Type: Motorcycle. Price: Rs 156,683. Range: 187 km. Battery: 4.4 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 100.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Oben",
+      "model": "Rorr",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 156683,
+      "range_km": 187
+    }
+  },
+  {
+    "chunk_id": "vehicle-38",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Oben Rorr EZ",
+    "text": "Vehicle: Oben Rorr EZ. Type: Motorcycle. Price: Rs 131,048. Range: 140 km. Battery: 3.4 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 95.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Oben",
+      "model": "Rorr EZ",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 131048,
+      "range_km": 140
+    }
+  },
+  {
+    "chunk_id": "vehicle-39",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Oben Rorr EZ Sigma",
+    "text": "Vehicle: Oben Rorr EZ Sigma. Type: Motorcycle. Price: Rs 133,068. Range: 175 km. Battery: 4.4 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 95.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Oben",
+      "model": "Rorr EZ Sigma",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 133068,
+      "range_km": 175
+    }
+  },
+  {
+    "chunk_id": "vehicle-40",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Matter Aera 5000",
+    "text": "Vehicle: Matter Aera 5000. Type: Motorcycle. Price: Rs 193,654. Range: 172 km. Battery: 5.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 105.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Matter",
+      "model": "Aera 5000",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 193654,
+      "range_km": 172
+    }
+  },
+  {
+    "chunk_id": "vehicle-41",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Matter Aera 5000+",
+    "text": "Vehicle: Matter Aera 5000+. Type: Motorcycle. Price: Rs 206,437. Range: 172 km. Battery: 5.0 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 105.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Matter",
+      "model": "Aera 5000+",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 206437,
+      "range_km": 172
+    }
+  },
+  {
+    "chunk_id": "vehicle-42",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Pure EV Etryst 350 X",
+    "text": "Vehicle: Pure EV Etryst 350 X. Type: Motorcycle. Price: Rs 153,500. Range: 171 km. Battery: 3.5 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 93.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Pure EV",
+      "model": "Etryst 350 X",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 153500,
+      "range_km": 171
+    }
+  },
+  {
+    "chunk_id": "vehicle-43",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Pure EV EcoDryfft",
+    "text": "Vehicle: Pure EV EcoDryfft. Type: Motorcycle. Price: Rs 120,807. Range: 151 km. Battery: 3.5 kWh. Charging time: 4-6 hrs. Charging type: AC. Additional details: Top Speed: 75.0; Market Status: Available; Gps: yes; Tyre Size: Front 90/90-12, Rear 90/90-12; Wheel Size: 12 inch; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Pure EV",
+      "model": "EcoDryfft",
+      "vehicle_type": "Motorcycle",
+      "price_inr": 120807,
+      "range_km": 151
+    }
+  },
+  {
+    "chunk_id": "vehicle-44",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra Treo",
+    "text": "Vehicle: Mahindra Treo. Type: Passenger. Price: Rs 320,000. Range: 141 km. Battery: 7.4 kWh. Charging time: 3-5 hrs. Charging type: AC. Additional details: Top Speed: 55.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12 Commercial; Wheel Size: 12 inch steel; Sunroof: not applicable; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Mahindra",
+      "model": "Treo",
+      "vehicle_type": "Passenger",
+      "price_inr": 320000,
+      "range_km": 141
+    }
+  },
+  {
+    "chunk_id": "vehicle-45",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Piaggio Ape E-City FX Max",
+    "text": "Vehicle: Piaggio Ape E-City FX Max. Type: Passenger. Price: Rs 388,000. Range: 150 km. Battery: 8.0 kWh. Charging time: 3-5 hrs. Charging type: AC. Additional details: Top Speed: 45.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12 Commercial; Wheel Size: 12 inch steel; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 5 Years.",
+    "metadata": {
+      "brand": "Piaggio",
+      "model": "Ape E-City FX Max",
+      "vehicle_type": "Passenger",
+      "price_inr": 388000,
+      "range_km": 150
+    }
+  },
+  {
+    "chunk_id": "vehicle-46",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Piaggio Ape E-City Ultra",
+    "text": "Vehicle: Piaggio Ape E-City Ultra. Type: Passenger. Price: Rs 393,000. Range: 236 km. Battery: 10.2 kWh. Charging time: 3-4 hrs. Charging type: AC. Additional details: Top Speed: 55.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12 Commercial; Wheel Size: 12 inch steel; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 5 Years/200000km.",
+    "metadata": {
+      "brand": "Piaggio",
+      "model": "Ape E-City Ultra",
+      "vehicle_type": "Passenger",
+      "price_inr": 393000,
+      "range_km": 236
+    }
+  },
+  {
+    "chunk_id": "vehicle-47",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Omega Seiki Stream city",
+    "text": "Vehicle: Omega Seiki Stream city. Type: Auto/Cargo. Price: Rs 355,000. Range: 300 km. Battery: 15.0 kWh. Charging time: 4 hr/45min. Charging type: AC+DC fast. Additional details: Top Speed: 48.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: yes; Safety Rating: Not eligible; Vehicle Warranty: 5 Years/200000km.",
+    "metadata": {
+      "brand": "Omega Seiki",
+      "model": "Stream city",
+      "vehicle_type": "Auto/Cargo",
+      "price_inr": 355000,
+      "range_km": 300
+    }
+  },
+  {
+    "chunk_id": "vehicle-48",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Omega Seiki Stream",
+    "text": "Vehicle: Omega Seiki Stream. Type: Auto/Cargo. Price: Rs 345,000. Range: 160 km. Battery: 10.5 kWh. Charging time: 3 hr. Charging type: AC. Additional details: Top Speed: 45.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: yes; Safety Rating: Not eligible; Vehicle Warranty: 3 Years/80000km.",
+    "metadata": {
+      "brand": "Omega Seiki",
+      "model": "Stream",
+      "vehicle_type": "Auto/Cargo",
+      "price_inr": 345000,
+      "range_km": 160
+    }
+  },
+  {
+    "chunk_id": "vehicle-49",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Euler Motors Neo HIRANGE",
+    "text": "Vehicle: Euler Motors Neo HIRANGE. Type: Auto/Cargo. Price: Rs 408,000. Range: 261 km. Battery: 3.44 kWh. Charging time: 3-5 hrs. Charging type: AC. Additional details: Top Speed: 60.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: yes; Safety Rating: Not eligible; Vehicle Warranty: 6 years/175000km.",
+    "metadata": {
+      "brand": "Euler Motors",
+      "model": "Neo HIRANGE",
+      "vehicle_type": "Auto/Cargo",
+      "price_inr": 408000,
+      "range_km": 261
+    }
+  },
+  {
+    "chunk_id": "vehicle-50",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra Electric ZEO",
+    "text": "Vehicle: Mahindra Electric ZEO. Type: Auto/Cargo. Price: Rs 800,000. Range: 160 km. Battery: 21.3 kWh. Charging time: 3-6hrs/1-2hrs. Charging type: AC+DC Fast. Additional details: Top Speed: 60.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: yes; Safety Rating: Not eligible; Vehicle Warranty: 7 years/150000km.",
+    "metadata": {
+      "brand": "Mahindra Electric",
+      "model": "ZEO",
+      "vehicle_type": "Auto/Cargo",
+      "price_inr": 800000,
+      "range_km": 160
+    }
+  },
+  {
+    "chunk_id": "vehicle-51",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Altigreen HIGH DECK",
+    "text": "Vehicle: Altigreen HIGH DECK. Type: Auto/Cargo. Price: Rs 455,000. Range: 120 km. Battery: 11.0 kWh. Charging time: 3-4 hrs. Charging type: AC. Additional details: Top Speed: 54.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: yes; Safety Rating: Not eligible; Vehicle Warranty: 3 Years/100000km.",
+    "metadata": {
+      "brand": "Altigreen",
+      "model": "HIGH DECK",
+      "vehicle_type": "Auto/Cargo",
+      "price_inr": 455000,
+      "range_km": 120
+    }
+  },
+  {
+    "chunk_id": "vehicle-52",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra Electric Treo Zor",
+    "text": "Vehicle: Mahindra Electric Treo Zor. Type: Auto/Cargo. Price: Rs 347,848. Range: 130 km. Battery: 10.24 kWh. Charging time: 4 hr. Charging type: AC. Additional details: Top Speed: 50.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: yes; Safety Rating: Not eligible; Vehicle Warranty: 3 Years/80000km.",
+    "metadata": {
+      "brand": "Mahindra Electric",
+      "model": "Treo Zor",
+      "vehicle_type": "Auto/Cargo",
+      "price_inr": 347848,
+      "range_km": 130
+    }
+  },
+  {
+    "chunk_id": "vehicle-53",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Piaggio Ape E-Xtra",
+    "text": "Vehicle: Piaggio Ape E-Xtra. Type: Cargo. Price: Rs 365,000. Range: 115 km. Battery: 9.55 kWh. Charging time: 3-4 hrs. Charging type: AC. Additional details: Top Speed: 50.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12 Commercial; Wheel Size: 12 inch steel; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 5 Years/200000km.",
+    "metadata": {
+      "brand": "Piaggio",
+      "model": "Ape E-Xtra",
+      "vehicle_type": "Cargo",
+      "price_inr": 365000,
+      "range_km": 115
+    }
+  },
+  {
+    "chunk_id": "vehicle-54",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Omega Seiki Rage+",
+    "text": "Vehicle: Omega Seiki Rage+. Type: Cargo. Price: Rs 370,000. Range: 120 km. Battery: 10.8 kWh. Charging time: 3-4 hrs. Charging type: AC. Additional details: Top Speed: 50.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12 Commercial; Wheel Size: 12 inch steel; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Omega Seiki",
+      "model": "Rage+",
+      "vehicle_type": "Cargo",
+      "price_inr": 370000,
+      "range_km": 120
+    }
+  },
+  {
+    "chunk_id": "vehicle-55",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Altigreen LOW DECK",
+    "text": "Vehicle: Altigreen LOW DECK. Type: Cargo. Price: Rs 412,000. Range: 120 km. Battery: 11.0 kWh. Charging time: 3-4 hrs. Charging type: AC. Additional details: Top Speed: 53.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12 Commercial; Wheel Size: 12 inch steel; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 3 Years/100000km.",
+    "metadata": {
+      "brand": "Altigreen",
+      "model": "LOW DECK",
+      "vehicle_type": "Cargo",
+      "price_inr": 412000,
+      "range_km": 120
+    }
+  },
+  {
+    "chunk_id": "vehicle-56",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra Electric E-Alfa Cargo",
+    "text": "Vehicle: Mahindra Electric E-Alfa Cargo. Type: Cargo. Price: Rs 160,000. Range: 95 km. Battery: 1.6 kWh. Charging time: 8 hr. Charging type: AC. Additional details: Top Speed: 25.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: yes; Safety Rating: Not eligible; Vehicle Warranty: 12-18 months.",
+    "metadata": {
+      "brand": "Mahindra Electric",
+      "model": "E-Alfa Cargo",
+      "vehicle_type": "Cargo",
+      "price_inr": 160000,
+      "range_km": 95
+    }
+  },
+  {
+    "chunk_id": "vehicle-57",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra Treo Zor",
+    "text": "Vehicle: Mahindra Treo Zor. Type: Light Commercial. Price: Rs 362,000. Range: 80 km. Battery: 7.37 kWh. Charging time: 4 hrs AC. Charging type: AC. Additional details: Top Speed: 50.0; Market Status: Available; Gps: yes; Tyre Size: 3.75-12 4PR 66E; Wheel Size: 12 inch; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Mahindra",
+      "model": "Treo Zor",
+      "vehicle_type": "Light Commercial",
+      "price_inr": 362000,
+      "range_km": 80
+    }
+  },
+  {
+    "chunk_id": "vehicle-58",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Euler Motors High load EV",
+    "text": "Vehicle: Euler Motors High load EV. Type: Cargo. Price: Rs 451,000. Range: 150 km. Battery: 13.44 kWh. Charging time: 3-6 hrs. Charging type: AC. Additional details: Top Speed: 55.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: yes; Safety Rating: Not eligible; Vehicle Warranty: 5 Years.",
+    "metadata": {
+      "brand": "Euler Motors",
+      "model": "High load EV",
+      "vehicle_type": "Cargo",
+      "price_inr": 451000,
+      "range_km": 150
+    }
+  },
+  {
+    "chunk_id": "vehicle-59",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Euler Motors Storm EV",
+    "text": "Vehicle: Euler Motors Storm EV. Type: Mini truck. Price: Rs 1,300,000. Range: 210 km. Battery: 6.6 kWh. Charging time: 5 hrs. Charging type: AC. Additional details: Top Speed: 70.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5 Years/150000km.",
+    "metadata": {
+      "brand": "Euler Motors",
+      "model": "Storm EV",
+      "vehicle_type": "Mini truck",
+      "price_inr": 1300000,
+      "range_km": 210
+    }
+  },
+  {
+    "chunk_id": "vehicle-60",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Euler Motors Turbo EV 1000",
+    "text": "Vehicle: Euler Motors Turbo EV 1000. Type: Mini truck. Price: Rs 600,000. Range: 180 km. Battery: 19.2 kWh. Charging time: 4-5 hrs. Charging type: AC. Additional details: Top Speed: 70.0; Market Status: Available; Gps: yes; Tyre Size: 90/90-12; Wheel Size: 12 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5 Years/150000km.",
+    "metadata": {
+      "brand": "Euler Motors",
+      "model": "Turbo EV 1000",
+      "vehicle_type": "Mini truck",
+      "price_inr": 600000,
+      "range_km": 180
+    }
+  },
+  {
+    "chunk_id": "vehicle-61",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Tiago EV XE MR",
+    "text": "Vehicle: Tata Tiago EV XE MR. Type: Hatchback. Price: Rs 800,000. Range: 250 km. Battery: 19.2 kWh. Charging time: 6-8 hrs AC / 1 hr DC. Charging type: AC+DC fast. Additional details: Top Speed: 120.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch alloy; Sunroof: no; Safety Rating: 5 Star; Vehicle Warranty: 3 Years / 125000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Tiago EV XE MR",
+      "vehicle_type": "Hatchback",
+      "price_inr": 800000,
+      "range_km": 250
+    }
+  },
+  {
+    "chunk_id": "vehicle-62",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Tiago XZ plus Tech",
+    "text": "Vehicle: Tata Tiago XZ plus Tech. Type: Hatchback. Price: Rs 1,114,000. Range: 315 km. Battery: 24.0 kWh. Charging time: 3-4hrs. Charging type: AC+DC. Additional details: Top Speed: 120.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch alloy; Sunroof: no; Safety Rating: 5 Star; Vehicle Warranty: 3 Years / 125000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Tiago XZ plus Tech",
+      "vehicle_type": "Hatchback",
+      "price_inr": 1114000,
+      "range_km": 315
+    }
+  },
+  {
+    "chunk_id": "vehicle-63",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Hyundai Ioniq 5 N",
+    "text": "Vehicle: Hyundai Ioniq 5 N. Type: Hatchback. Price: Rs 4,650,000. Range: 352 km. Battery: 84.0 kWh. Charging time: 7 hrs AC/0.5-1 hrs DC. Charging type: DC Fast. Additional details: Top Speed: 260.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch; Sunroof: yes; Safety Rating: 4 Star; Vehicle Warranty: 5 years.",
+    "metadata": {
+      "brand": "Hyundai",
+      "model": "Ioniq 5 N",
+      "vehicle_type": "Hatchback",
+      "price_inr": 4650000,
+      "range_km": 352
+    }
+  },
+  {
+    "chunk_id": "vehicle-64",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Kia EV6",
+    "text": "Vehicle: Kia EV6. Type: Hatchback. Price: Rs 6,600,000. Range: 663 km. Battery: 77.4 kWh. Charging time: 8 hr / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 260.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "Kia",
+      "model": "EV6",
+      "vehicle_type": "Hatchback",
+      "price_inr": 6600000,
+      "range_km": 663
+    }
+  },
+  {
+    "chunk_id": "vehicle-65",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "MG Comet EV",
+    "text": "Vehicle: MG Comet EV. Type: Hatchback. Price: Rs 1,040,000. Range: 230 km. Battery: 17.4 kWh. Charging time: 7 hrs AC / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 105.0; Market Status: Available; Gps: yes; Tyre Size: 145/70 R12; Wheel Size: 12 inch; Sunroof: no; Safety Rating: 5 Star; Vehicle Warranty: 8 years/120000 km.",
+    "metadata": {
+      "brand": "MG",
+      "model": "Comet EV",
+      "vehicle_type": "Hatchback",
+      "price_inr": 1040000,
+      "range_km": 230
+    }
+  },
+  {
+    "chunk_id": "vehicle-66",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "MG Windsor EV",
+    "text": "Vehicle: MG Windsor EV. Type: CUV. Price: Rs 2,030,000. Range: 449 km. Battery: 52.9 kWh. Charging time: 9.5 hr / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 157.0; Market Status: Available; Gps: yes; Tyre Size: 215/55 R18; Wheel Size: 18 inch; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 years(unlimited km ).",
+    "metadata": {
+      "brand": "MG",
+      "model": "Windsor EV",
+      "vehicle_type": "CUV",
+      "price_inr": 2030000,
+      "range_km": 449
+    }
+  },
+  {
+    "chunk_id": "vehicle-67",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "MG Cyberster",
+    "text": "Vehicle: MG Cyberster. Type: sport. Price: Rs 7,880,000. Range: 580 km. Battery: 77.0 kWh. Charging time: 40 min DC. Charging type: DC fast. Additional details: Top Speed: 215.0; Market Status: Available; Gps: yes; Tyre Size: F:245/40 R20;R:275/35 R20; Wheel Size: 20 inch; Sunroof: no; Safety Rating: 5 Star; Vehicle Warranty: 3 years(unlimited km ).",
+    "metadata": {
+      "brand": "MG",
+      "model": "Cyberster",
+      "vehicle_type": "sport",
+      "price_inr": 7880000,
+      "range_km": 580
+    }
+  },
+  {
+    "chunk_id": "vehicle-68",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "MG ZS EV",
+    "text": "Vehicle: MG ZS EV. Type: SUV. Price: Rs 2,202,300. Range: 461 km. Battery: 50.3 kWh. Charging time: 9 hr / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 175.0; Market Status: Available; Gps: yes; Tyre Size: 215/55 R17; Wheel Size: 17 inch; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "MG",
+      "model": "ZS EV",
+      "vehicle_type": "SUV",
+      "price_inr": 2202300,
+      "range_km": 461
+    }
+  },
+  {
+    "chunk_id": "vehicle-69",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "MG M9",
+    "text": "Vehicle: MG M9. Type: MPV. Price: Rs 7,451,500. Range: 548 km. Battery: 90.0 kWh. Charging time: 1.5 hr DC. Charging type: DC fast. Additional details: Top Speed: 180.0; Market Status: Available; Gps: yes; Tyre Size: 235/55 R19; Wheel Size: 19 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 years(unlimited km ).",
+    "metadata": {
+      "brand": "MG",
+      "model": "M9",
+      "vehicle_type": "MPV",
+      "price_inr": 7451500,
+      "range_km": 548
+    }
+  },
+  {
+    "chunk_id": "vehicle-70",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "BYD Emax 7",
+    "text": "Vehicle: BYD Emax 7. Type: MPV. Price: Rs 3,175,000. Range: 530 km. Battery: 71.8 kWh. Charging time: 1 hr DC. Charging type: DC Fast. Additional details: Top Speed: 180.0; Market Status: Available; Gps: yes; Tyre Size: 225/55 R17; Wheel Size: 17 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "BYD",
+      "model": "Emax 7",
+      "vehicle_type": "MPV",
+      "price_inr": 3175000,
+      "range_km": 530
+    }
+  },
+  {
+    "chunk_id": "vehicle-71",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "BYD sealion 7",
+    "text": "Vehicle: BYD sealion 7. Type: SUV. Price: Rs 5,809,000. Range: 567 km. Battery: 82.56 kWh. Charging time: 8 hr / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 215.0; Market Status: Available; Gps: yes; Tyre Size: 245/45 R19; Wheel Size: 19 inch alloy; Sunroof: yes; Safety Rating: 4 Star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "BYD",
+      "model": "sealion 7",
+      "vehicle_type": "SUV",
+      "price_inr": 5809000,
+      "range_km": 567
+    }
+  },
+  {
+    "chunk_id": "vehicle-72",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra XEV 9S",
+    "text": "Vehicle: Mahindra XEV 9S. Type: SUV. Price: Rs 3,219,000. Range: 679 km. Battery: 79.0 kWh. Charging time: 8 hr AC fast / 40 min DC fast. Charging type: AC+DC fast. Additional details: Top Speed: 202.0; Market Status: Available; Gps: yes; Tyre Size: 235/60 R18; Wheel Size: 18 inch; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 10 years/200000 km.",
+    "metadata": {
+      "brand": "Mahindra",
+      "model": "XEV 9S",
+      "vehicle_type": "SUV",
+      "price_inr": 3219000,
+      "range_km": 679
+    }
+  },
+  {
+    "chunk_id": "vehicle-73",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra BE 6 FE",
+    "text": "Vehicle: Mahindra BE 6 FE. Type: Hatchback. Price: Rs 2,608,000. Range: 682 km. Battery: 79.0 kWh. Charging time: 8 hrs AC/40 min DC. Charging type: DC Fast. Additional details: Top Speed: 202.0; Market Status: Available; Gps: yes; Tyre Size: 245/55 R19; Wheel Size: 19 inch; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 10 years/200000 km.",
+    "metadata": {
+      "brand": "Mahindra",
+      "model": "BE 6 FE",
+      "vehicle_type": "Hatchback",
+      "price_inr": 2608000,
+      "range_km": 682
+    }
+  },
+  {
+    "chunk_id": "vehicle-74",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata curvv EV",
+    "text": "Vehicle: Tata curvv EV. Type: Hatchback. Price: Rs 2,353,000. Range: 502 km. Battery: 55.0 kWh. Charging time: 8 hr AC / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 160.0; Market Status: Available; Gps: yes; Tyre Size: 215/55 R18; Wheel Size: 18 inch; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 15 years/250000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "curvv EV",
+      "vehicle_type": "Hatchback",
+      "price_inr": 2353000,
+      "range_km": 502
+    }
+  },
+  {
+    "chunk_id": "vehicle-75",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Tiago EV",
+    "text": "Vehicle: Tata Tiago EV. Type: Hatchback. Price: Rs 2,082,182. Range: 490 km. Battery: 22.68 kWh. Charging time: 8 hr / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 106.02; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch; Sunroof: yes; Safety Rating: 4 Star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Tiago EV",
+      "vehicle_type": "Hatchback",
+      "price_inr": 2082182,
+      "range_km": 490
+    }
+  },
+  {
+    "chunk_id": "vehicle-76",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata harrier EV",
+    "text": "Vehicle: Tata harrier EV. Type: Hatchback. Price: Rs 2,821,939. Range: 627 km. Battery: 75.0 kWh. Charging time: 10.7hr / 30 min DC. Charging type: AC+DC. Additional details: Top Speed: 180.0; Market Status: Available; Gps: yes; Tyre Size: 245/55 R19; Wheel Size: 19 inch alloy; Sunroof: yes; Safety Rating: 5 star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "harrier EV",
+      "vehicle_type": "Hatchback",
+      "price_inr": 2821939,
+      "range_km": 627
+    }
+  },
+  {
+    "chunk_id": "vehicle-77",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Nexon EV",
+    "text": "Vehicle: Tata Nexon EV. Type: SUV. Price: Rs 1,650,000. Range: 460 km. Battery: 40.5 kWh. Charging time: 6-8 hrs AC / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 120.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 Years / 125000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Nexon EV",
+      "vehicle_type": "SUV",
+      "price_inr": 1650000,
+      "range_km": 460
+    }
+  },
+  {
+    "chunk_id": "vehicle-78",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Punch EV",
+    "text": "Vehicle: Tata Punch EV. Type: micro SUV. Price: Rs 1,200,000. Range: 421 km. Battery: 35.0 kWh. Charging time: 6-8 hrs AC / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 120.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 Years / 125000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Punch EV",
+      "vehicle_type": "micro SUV",
+      "price_inr": 1200000,
+      "range_km": 421
+    }
+  },
+  {
+    "chunk_id": "vehicle-79",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra BE 6",
+    "text": "Vehicle: Mahindra BE 6. Type: SUV. Price: Rs 2,200,000. Range: 620 km. Battery: 59.0 kWh. Charging time: 6-8 hrs AC / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 160.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 Years / 125000 km.",
+    "metadata": {
+      "brand": "Mahindra",
+      "model": "BE 6",
+      "vehicle_type": "SUV",
+      "price_inr": 2200000,
+      "range_km": 620
+    }
+  },
+  {
+    "chunk_id": "vehicle-80",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra XEV 9e",
+    "text": "Vehicle: Mahindra XEV 9e. Type: SUV. Price: Rs 2,500,000. Range: 542 km. Battery: 59.0 kWh. Charging time: 6-8 hrs AC / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 180.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 Years / 125000 km.",
+    "metadata": {
+      "brand": "Mahindra",
+      "model": "XEV 9e",
+      "vehicle_type": "SUV",
+      "price_inr": 2500000,
+      "range_km": 542
+    }
+  },
+  {
+    "chunk_id": "vehicle-81",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "BYD Atto 3",
+    "text": "Vehicle: BYD Atto 3. Type: SUV. Price: Rs 3,600,000. Range: 521 km. Battery: 60.48 kWh. Charging time: 8-10 hrs AC / 1 hr DC. Charging type: AC+DC fast. Additional details: Top Speed: 160.0; Market Status: Available; Gps: yes; Tyre Size: 215/55 R18; Wheel Size: 18 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 8 years/160000 km.",
+    "metadata": {
+      "brand": "BYD",
+      "model": "Atto 3",
+      "vehicle_type": "SUV",
+      "price_inr": 3600000,
+      "range_km": 521
+    }
+  },
+  {
+    "chunk_id": "vehicle-82",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Kia EV6",
+    "text": "Vehicle: Kia EV6. Type: SUV. Price: Rs 6,600,000. Range: 500 km. Battery: 77.0 kWh. Charging time: 6-8 hrs AC / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 192.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 Years / 125000 km.",
+    "metadata": {
+      "brand": "Kia",
+      "model": "EV6",
+      "vehicle_type": "SUV",
+      "price_inr": 6600000,
+      "range_km": 500
+    }
+  },
+  {
+    "chunk_id": "vehicle-83",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra XUV 3XO EV",
+    "text": "Vehicle: Mahindra XUV 3XO EV. Type: SUV. Price: Rs 1,643,000. Range: 456 km. Battery: 39.4 kWh. Charging time: 7 hr AC / 1.5 hr DC. Charging type: AC+DC fast. Additional details: Top Speed: 150.0; Market Status: Available; Gps: yes; Tyre Size: 215/55 R17; Wheel Size: 17 inch; Sunroof: yes; Safety Rating: 4 Star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "Mahindra",
+      "model": "XUV 3XO EV",
+      "vehicle_type": "SUV",
+      "price_inr": 1643000,
+      "range_km": 456
+    }
+  },
+  {
+    "chunk_id": "vehicle-84",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata tigor EV",
+    "text": "Vehicle: Tata tigor EV. Type: sedan. Price: Rs 1,600,000. Range: 315 km. Battery: 26.0 kWh. Charging time: 9 hr / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 120.0; Market Status: Available; Gps: yes; Tyre Size: 175/65 R14; Wheel Size: 14 inch; Sunroof: yes; Safety Rating: 5 star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "tigor EV",
+      "vehicle_type": "sedan",
+      "price_inr": 1600000,
+      "range_km": 315
+    }
+  },
+  {
+    "chunk_id": "vehicle-85",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mahindra XUV400",
+    "text": "Vehicle: Mahindra XUV400. Type: SUV. Price: Rs 1,920,000. Range: 456 km. Battery: 39.4 kWh. Charging time: 7 hr / 1.5 hr DC. Charging type: AC+DC fast. Additional details: Top Speed: 150.0; Market Status: Available; Gps: yes; Tyre Size: 205/65 R16; Wheel Size: 16 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "Mahindra",
+      "model": "XUV400",
+      "vehicle_type": "SUV",
+      "price_inr": 1920000,
+      "range_km": 456
+    }
+  },
+  {
+    "chunk_id": "vehicle-86",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Hyundai creta EV",
+    "text": "Vehicle: Hyundai creta EV. Type: SUV. Price: Rs 2,500,000. Range: 510 km. Battery: 51.4 kWh. Charging time: 5 hr / 1 hr DC. Charging type: AC+DC fast. Additional details: Top Speed: 180.0; Market Status: Available; Gps: yes; Tyre Size: 215/60 R17; Wheel Size: 17 inch; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 8 Years / 160000 km.",
+    "metadata": {
+      "brand": "Hyundai",
+      "model": "creta EV",
+      "vehicle_type": "SUV",
+      "price_inr": 2500000,
+      "range_km": 510
+    }
+  },
+  {
+    "chunk_id": "vehicle-87",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "BYD Seal",
+    "text": "Vehicle: BYD Seal. Type: Sedan. Price: Rs 5,626,000. Range: 580 km. Battery: 82.56 kWh. Charging time: 9 hrs AC / 1 hr DC. Charging type: AC+DC fast. Additional details: Top Speed: 180.0; Market Status: Available; Gps: yes; Tyre Size: 235/45 R19; Wheel Size: 19 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 8 years/160000 km.",
+    "metadata": {
+      "brand": "BYD",
+      "model": "Seal",
+      "vehicle_type": "Sedan",
+      "price_inr": 5626000,
+      "range_km": 580
+    }
+  },
+  {
+    "chunk_id": "vehicle-88",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Xpres T EV",
+    "text": "Vehicle: Tata Xpres T EV. Type: Sedan. Price: Rs 1,374,557. Range: 391 km. Battery: 32.0 kWh. Charging time: 4.6hr/ 30 min DC. Charging type: AC+DC. Additional details: Top Speed: 80.0; Market Status: Available; Gps: yes; Tyre Size: R14 175/65 86T; Wheel Size: 14 inch; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 years/125000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Xpres T EV",
+      "vehicle_type": "Sedan",
+      "price_inr": 1374557,
+      "range_km": 391
+    }
+  },
+  {
+    "chunk_id": "vehicle-89",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "BMW i4",
+    "text": "Vehicle: BMW i4. Type: Sedan. Price: Rs 7,500,000. Range: 590 km. Battery: 83.0 kWh. Charging time: 6-8 hrs AC / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 190.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 Years / 125000 km.",
+    "metadata": {
+      "brand": "BMW",
+      "model": "i4",
+      "vehicle_type": "Sedan",
+      "price_inr": 7500000,
+      "range_km": 590
+    }
+  },
+  {
+    "chunk_id": "vehicle-90",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Mercedes EQS",
+    "text": "Vehicle: Mercedes EQS. Type: Sedan. Price: Rs 15,500,000. Range: 677 km. Battery: 108.0 kWh. Charging time: 6-8 hrs AC / 1 hr DC. Charging type: AC+DC. Additional details: Top Speed: 210.0; Market Status: Available; Gps: yes; Tyre Size: 195/60 R16; Wheel Size: 16 inch alloy; Sunroof: yes; Safety Rating: 5 Star; Vehicle Warranty: 3 Years / 125000 km.",
+    "metadata": {
+      "brand": "Mercedes",
+      "model": "EQS",
+      "vehicle_type": "Sedan",
+      "price_inr": 15500000,
+      "range_km": 677
+    }
+  },
+  {
+    "chunk_id": "vehicle-91",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Ace EV 1000",
+    "text": "Vehicle: Tata Ace EV 1000. Type: Light Commercial. Price: Rs 1,150,000. Range: 167 km. Battery: 21.3 kWh. Charging time: 7 hr AC. Charging type: AC. Additional details: Top Speed: 60.0; Market Status: Available; Gps: yes; Tyre Size: 155 R13 LT 8PR; Wheel Size: 20 inch; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 7 years/175000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Ace EV 1000",
+      "vehicle_type": "Light Commercial",
+      "price_inr": 1150000,
+      "range_km": 167
+    }
+  },
+  {
+    "chunk_id": "vehicle-92",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Ace EV pro",
+    "text": "Vehicle: Tata Ace EV pro. Type: SCV commercial. Price: Rs 650,000. Range: 155 km. Battery: 14.4 kWh. Charging time: 6 hr AC. Charging type: AC+DC. Additional details: Top Speed: 50.0; Market Status: Available; Gps: yes; Tyre Size: 145 R12 LT 8PR; Wheel Size: 12 inch; Sunroof: no; Safety Rating: 5 star; Vehicle Warranty: 8 years/1750000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Ace EV pro",
+      "vehicle_type": "SCV commercial",
+      "price_inr": 650000,
+      "range_km": 155
+    }
+  },
+  {
+    "chunk_id": "vehicle-93",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Olectra X2",
+    "text": "Vehicle: Olectra X2. Type: Electric Bus. Price: Rs 17,500,000. Range: 300 km. Battery: 180.0 kWh. Charging time: 5 hr DC. Charging type: DC fast charger. Additional details: Top Speed: 70.0; Market Status: Available; Gps: yes; Tyre Size: 295/80 R22.5; Wheel Size: 22.5 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5000 charge cycle.",
+    "metadata": {
+      "brand": "Olectra",
+      "model": "X2",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 17500000,
+      "range_km": 300
+    }
+  },
+  {
+    "chunk_id": "vehicle-94",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Olectra V2",
+    "text": "Vehicle: Olectra V2. Type: Electric Bus. Price: Rs 20,000,000. Range: 150 km. Battery: 180.0 kWh. Charging time: 3-4 hrs AC. Charging type: AC fast charger. Additional details: Top Speed: 70.0; Market Status: Available; Gps: yes; Tyre Size: 215/75 R17.5; Wheel Size: 17.5 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5000 charge cycle.",
+    "metadata": {
+      "brand": "Olectra",
+      "model": "V2",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 20000000,
+      "range_km": 150
+    }
+  },
+  {
+    "chunk_id": "vehicle-95",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Olectra C9",
+    "text": "Vehicle: Olectra C9. Type: Electric Bus. Price: Rs 25,000,000. Range: 300 km. Battery: 360.0 kWh. Charging time: 2-3 AC. Charging type: AC fast charger. Additional details: Top Speed: 100.0; Market Status: Available; Gps: yes; Tyre Size: 295/80 R22.5; Wheel Size: 22.5 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5000 charge cycle.",
+    "metadata": {
+      "brand": "Olectra",
+      "model": "C9",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 25000000,
+      "range_km": 300
+    }
+  },
+  {
+    "chunk_id": "vehicle-96",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ashok Leyland Circuit",
+    "text": "Vehicle: Ashok Leyland Circuit. Type: Electric Bus. Price: Rs 11,500,000. Range: 200 km. Battery: 180.0 kWh. Charging time: 2-4 hrs DC. Charging type: DC Fast. Additional details: Top Speed: 70.0; Market Status: Available; Gps: yes; Tyre Size: 275/70 R22.5; Wheel Size: 22.5 inch; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ashok Leyland",
+      "model": "Circuit",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 11500000,
+      "range_km": 200
+    }
+  },
+  {
+    "chunk_id": "vehicle-97",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ashok Leyland Verse EV",
+    "text": "Vehicle: Ashok Leyland Verse EV. Type: Electric Bus. Price: Rs 10,004,000. Range: 300 km. Battery: 400.0 kWh. Charging time: 1.5-3 hr AC. Charging type: AC fast charger. Additional details: Top Speed: 95.0; Market Status: Available; Gps: yes; Tyre Size: 275/80 R22.5; Wheel Size: 22.5 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 6 years/2000 charge cycle.",
+    "metadata": {
+      "brand": "Ashok Leyland",
+      "model": "Verse EV",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 10004000,
+      "range_km": 300
+    }
+  },
+  {
+    "chunk_id": "vehicle-98",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ashok Leyland EiV12",
+    "text": "Vehicle: Ashok Leyland EiV12. Type: Electric Bus. Price: Rs 10,005,000. Range: 300 km. Battery: 400.0 kWh. Charging time: 1.5-3 hr AC. Charging type: AC fast charger. Additional details: Top Speed: 80.0; Market Status: Available; Gps: yes; Tyre Size: 295/80 R22.5; Wheel Size: 22.5 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5 Years/500000 km.",
+    "metadata": {
+      "brand": "Ashok Leyland",
+      "model": "EiV12",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 10005000,
+      "range_km": 300
+    }
+  },
+  {
+    "chunk_id": "vehicle-99",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Magna EV",
+    "text": "Vehicle: Tata Magna EV. Type: Electric Bus. Price: Rs 12,000,000. Range: 300 km. Battery: 400.0 kWh. Charging time: 2.5-3 hr DC. Charging type: DC fast. Additional details: Top Speed: 85.0; Market Status: Available; Gps: yes; Tyre Size: 295/80 R22.5 16 PR; Wheel Size: 22.5 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 4 years/400000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Magna EV",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 12000000,
+      "range_km": 300
+    }
+  },
+  {
+    "chunk_id": "vehicle-100",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Starbus EV",
+    "text": "Vehicle: Tata Starbus EV. Type: Electric Bus. Price: Rs 22,000,000. Range: 400 km. Battery: 200.0 kWh. Charging time: 2-3 hrs DC. Charging type: DC Fast. Additional details: Top Speed: 75.0; Market Status: Available; Gps: yes; Tyre Size: 295/80 R22.5; Wheel Size: 22.5 inch; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 4 years/400000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Starbus EV",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 22000000,
+      "range_km": 400
+    }
+  },
+  {
+    "chunk_id": "vehicle-101",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Ultra EV 9M",
+    "text": "Vehicle: Tata Ultra EV 9M. Type: Electric Bus. Price: Rs 16,000,000. Range: 200 km. Battery: 200.0 kWh. Charging time: 2 hr. Charging type: DC Fast. Additional details: Top Speed: 75.0; Market Status: Available; Gps: yes; Tyre Size: 245/70 R17.5; Wheel Size: 17.5 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 4 years/400000 km.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Ultra EV 9M",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 16000000,
+      "range_km": 200
+    }
+  },
+  {
+    "chunk_id": "vehicle-102",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Ultra EV 9",
+    "text": "Vehicle: Tata Ultra EV 9. Type: Electric Bus. Price: Rs 16,000,000. Range: 180 km. Battery: 200.0 kWh. Charging time: 2 hr. Charging type: DC Fast. Additional details: Top Speed: 75.0; Market Status: Available; Gps: yes; Tyre Size: 245/70 R17.5; Wheel Size: 17.5 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 6 years/2000 charge cycle.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Ultra EV 9",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 16000000,
+      "range_km": 180
+    }
+  },
+  {
+    "chunk_id": "vehicle-103",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "JBM Galaxy(Luxury coach)",
+    "text": "Vehicle: JBM Galaxy(Luxury coach). Type: Electric Bus. Price: Rs 15,000,000. Range: 1000 km. Battery: 400.0 kWh. Charging time: 1 hr DC. Charging type: DC Fast. Additional details: Top Speed: 80.0; Market Status: Available; Gps: yes; Tyre Size: 295/80 R22.5; Wheel Size: 22.5 inch; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 5 years.",
+    "metadata": {
+      "brand": "JBM",
+      "model": "Galaxy(Luxury coach)",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 15000000,
+      "range_km": 1000
+    }
+  },
+  {
+    "chunk_id": "vehicle-104",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "JBM Ecolife(city bus)",
+    "text": "Vehicle: JBM Ecolife(city bus). Type: Electric Bus. Price: Rs 20,000,000. Range: 300 km. Battery: 400.0 kWh. Charging time: 45min-1.5hr DC. Charging type: DC Fast. Additional details: Top Speed: 80.0; Market Status: Available; Gps: yes; Tyre Size: 285/70 R22.5; Wheel Size: 22.5 inch; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 5 years.",
+    "metadata": {
+      "brand": "JBM",
+      "model": "Ecolife(city bus)",
+      "vehicle_type": "Electric Bus",
+      "price_inr": 20000000,
+      "range_km": 300
+    }
+  },
+  {
+    "chunk_id": "vehicle-105",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ashok Leyland Boss EV",
+    "text": "Vehicle: Ashok Leyland Boss EV. Type: Medium Truck. Price: Rs 18,000,000. Range: 250 km. Battery: 280.0 kWh. Charging time: 2-4 hrs DC. Charging type: DC Fast. Additional details: Top Speed: 80.0; Market Status: Available; Gps: yes; Tyre Size: 295/90 R20; Wheel Size: 20 inch; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Ashok Leyland",
+      "model": "Boss EV",
+      "vehicle_type": "Medium Truck",
+      "price_inr": 18000000,
+      "range_km": 250
+    }
+  },
+  {
+    "chunk_id": "vehicle-106",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Ultra T.7 EV",
+    "text": "Vehicle: Tata Ultra T.7 EV. Type: Heavy Truck. Price: Rs 20,000,000. Range: 200 km. Battery: 300.0 kWh. Charging time: 2-4 hrs DC. Charging type: DC Fast. Additional details: Top Speed: 85.0; Market Status: Available; Gps: yes; Tyre Size: 295/90 R20; Wheel Size: 20 inch; Sunroof: no; Safety Rating: Not Rated; Vehicle Warranty: 3 Years.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Ultra T.7 EV",
+      "vehicle_type": "Heavy Truck",
+      "price_inr": 20000000,
+      "range_km": 200
+    }
+  },
+  {
+    "chunk_id": "vehicle-107",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Ashok Leyland Verse",
+    "text": "Vehicle: Ashok Leyland Verse. Type: Commercial. Price: Rs 5,378,414. Range: 209 km. Battery: 179.52 kWh. Charging time: 2-4 hr DC. Charging type: DC Fast. Additional details: Top Speed: 263.2; Market Status: Available; Gps: yes; Tyre Size: 295/90 R20; Wheel Size: 20 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5 Years.",
+    "metadata": {
+      "brand": "Ashok Leyland",
+      "model": "Verse",
+      "vehicle_type": "Commercial",
+      "price_inr": 5378414,
+      "range_km": 209
+    }
+  },
+  {
+    "chunk_id": "vehicle-108",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Tata Vehicle 109",
+    "text": "Vehicle: Tata Vehicle 109. Type: Commercial. Price: Rs 5,811,531. Range: 297 km. Battery: 250.61 kWh. Charging time: 2-4 hr DC. Charging type: DC Fast. Additional details: Top Speed: 278.14; Market Status: Available; Gps: yes; Tyre Size: 295/90 R20; Wheel Size: 20 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5 Years.",
+    "metadata": {
+      "brand": "Tata",
+      "model": "Vehicle 109",
+      "vehicle_type": "Commercial",
+      "price_inr": 5811531,
+      "range_km": 297
+    }
+  },
+  {
+    "chunk_id": "vehicle-109",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "JBM Vehicle 110",
+    "text": "Vehicle: JBM Vehicle 110. Type: Commercial. Price: Rs 9,320,733. Range: 152 km. Battery: 207.9 kWh. Charging time: 2-4 hr DC. Charging type: DC Fast. Additional details: Top Speed: 252.86; Market Status: Available; Gps: yes; Tyre Size: 295/90 R20; Wheel Size: 20 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5 Years.",
+    "metadata": {
+      "brand": "JBM",
+      "model": "Vehicle 110",
+      "vehicle_type": "Commercial",
+      "price_inr": 9320733,
+      "range_km": 152
+    }
+  },
+  {
+    "chunk_id": "vehicle-110",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Olectra Vehicle 111",
+    "text": "Vehicle: Olectra Vehicle 111. Type: Commercial. Price: Rs 9,498,993. Range: 224 km. Battery: 268.1 kWh. Charging time: 2-4 hr DC. Charging type: DC Fast. Additional details: Top Speed: 239.64; Market Status: Available; Gps: yes; Tyre Size: 295/90 R20; Wheel Size: 20 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5 Years.",
+    "metadata": {
+      "brand": "Olectra",
+      "model": "Vehicle 111",
+      "vehicle_type": "Commercial",
+      "price_inr": 9498993,
+      "range_km": 224
+    }
+  },
+  {
+    "chunk_id": "vehicle-111",
+    "source_type": "dataset",
+    "source_name": "India_EV_All_Segments_Dataset_2026_filled.xlsx",
+    "title": "Eicher Vehicle 112",
+    "text": "Vehicle: Eicher Vehicle 112. Type: Commercial. Price: Rs 10,865,820. Range: 266 km. Battery: 144.38 kWh. Charging time: 2-4 hr DC. Charging type: DC Fast. Additional details: Top Speed: 204.97; Market Status: Available; Gps: yes; Tyre Size: 295/90 R20; Wheel Size: 20 inch; Sunroof: no; Safety Rating: Not eligible; Vehicle Warranty: 5 Years.",
+    "metadata": {
+      "brand": "Eicher",
+      "model": "Vehicle 112",
+      "vehicle_type": "Commercial",
+      "price_inr": 10865820,
+      "range_km": 266
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-0",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "# API & Frontend Contract",
+    "metadata": {
+      "section": 1
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-1",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "This document maps the FastAPI backend routes to the UI elements in the React/Vite frontend.",
+    "metadata": {
+      "section": 2
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-2",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "## Backend Routers",
+    "metadata": {
+      "section": 3
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-3",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "1. **`auth.py`** - **Frontend:** AuthContext, Login/Register modals (pending UI). - **Purpose:** JWT generation, refresh, user creation.",
+    "metadata": {
+      "section": 4
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-4",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "2. **`vehicles.py`** - **Frontend:** `BrowsePage.jsx`, `VehicleDetailPage.jsx` - **Purpose:** Listing EVs, filtering, pagination, fetching single vehicle details.",
+    "metadata": {
+      "section": 5
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-5",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "3. **`compare.py`** - **Frontend:** `ComparePage.jsx` - **Purpose:** Returns a normalized payload comparing 2-3 requested vehicle IDs.",
+    "metadata": {
+      "section": 6
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-6",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "4. **`recommend.py`** - **Frontend:** `RecommendPage.jsx` - **Purpose:** Accepts parameters (budget, daily km, state) and returns scored vehicle lists.",
+    "metadata": {
+      "section": 7
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-7",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "5. **`chat.py`** - **Frontend:** `ChatPage.jsx` - **Purpose:** Intents parsing, vector retrieval, domain-specific AI chatbot.",
+    "metadata": {
+      "section": 8
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-8",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "6. **`subsidies.py`** - **Frontend:** Used dynamically in `VehicleDetailPage.jsx` & `ComparePage.jsx` - **Purpose:** Calculates real-time TCO and exact subsidy deductions by state.",
+    "metadata": {
+      "section": 9
+    }
+  },
+  {
+    "chunk_id": "doc-api-contract-9",
+    "source_type": "document",
+    "source_name": "api-contract.md",
+    "title": "Api Contract",
+    "text": "7. **`map.py`** - **Frontend:** `StationsPage.jsx` - **Purpose:** Geospatial search for charging stations.",
+    "metadata": {
+      "section": 10
+    }
+  },
+  {
+    "chunk_id": "doc-data-dictionary-0",
+    "source_type": "document",
+    "source_name": "data-dictionary.md",
+    "title": "Data Dictionary",
+    "text": "# Data Dictionary",
+    "metadata": {
+      "section": 1
+    }
+  },
+  {
+    "chunk_id": "doc-data-dictionary-1",
+    "source_type": "document",
+    "source_name": "data-dictionary.md",
+    "title": "Data Dictionary",
+    "text": "## Core Entities",
+    "metadata": {
+      "section": 2
+    }
+  },
+  {
+    "chunk_id": "doc-data-dictionary-2",
+    "source_type": "document",
+    "source_name": "data-dictionary.md",
+    "title": "Data Dictionary",
+    "text": "### `vehicles` The primary table storing the catalog of EVs. - **segment**: TWO_WHEELER, THREE_WHEELER, FOUR_WHEELER, etc. - **brand, model, category, wheel_type** - **approx_price_inr**: Base cost - **range_km**: Rated range - **battery_kwh**: Capacity - **fame2_subsidy_inr**, **state_subsidy_inr**: Pre-calculated or cached subsidy values. - **embedding**: Vector field for semantic search.",
+    "metadata": {
+      "section": 3
+    }
+  },
+  {
+    "chunk_id": "doc-data-dictionary-3",
+    "source_type": "document",
+    "source_name": "data-dictionary.md",
+    "title": "Data Dictionary",
+    "text": "### `users` Tracks signed-up users. - **full_name, email, password_hash** - **role**: guest, user, admin - **auth_provider**: Standard email or OAuth.",
+    "metadata": {
+      "section": 4
+    }
+  },
+  {
+    "chunk_id": "doc-data-dictionary-4",
+    "source_type": "document",
+    "source_name": "data-dictionary.md",
+    "title": "Data Dictionary",
+    "text": "### `saved_comparisons` [Upcoming] Allows users to save a custom comparison for later viewing. - **user_id**: References `users` - **vehicle_ids**: Array of references to `vehicles`.",
+    "metadata": {
+      "section": 5
+    }
+  },
+  {
+    "chunk_id": "doc-data-dictionary-5",
+    "source_type": "document",
+    "source_name": "data-dictionary.md",
+    "title": "Data Dictionary",
+    "text": "### `charging_stations` [Upcoming] Physical locations of charging points to be plotted on Leaflet. - **name, provider** - **latitude, longitude**: Numeric fields for map rendering. - **connector_types**: E.g., CCS2, CHAdeMO. - **fast_charging_available**: Boolean.",
+    "metadata": {
+      "section": 6
+    }
+  },
+  {
+    "chunk_id": "doc-data-dictionary-6",
+    "source_type": "document",
+    "source_name": "data-dictionary.md",
+    "title": "Data Dictionary",
+    "text": "### `subsidy_rules` [Upcoming] Dynamic lookup table for calculating subsidies per state rather than static code logic. - **state**: e.g., Telangana, Delhi - **segment**: Vehicle category - **subsidy_per_kwh**, **max_subsidy**: Numeric limits based on policy.",
+    "metadata": {
+      "section": 7
+    }
+  },
+  {
+    "chunk_id": "doc-data-dictionary-7",
+    "source_type": "document",
+    "source_name": "data-dictionary.md",
+    "title": "Data Dictionary",
+    "text": "### `chat_sessions` & `chat_messages` Stores historical domain conversation for the user. - **session_id**, **user_id** - **role** (user/assistant) and **content**.",
+    "metadata": {
+      "section": 8
+    }
+  },
+  {
+    "chunk_id": "doc-roadmap-0",
+    "source_type": "document",
+    "source_name": "roadmap.md",
+    "title": "Roadmap",
+    "text": "# EV-Compare-App Roadmap",
+    "metadata": {
+      "section": 1
+    }
+  },
+  {
+    "chunk_id": "doc-roadmap-1",
+    "source_type": "document",
+    "source_name": "roadmap.md",
+    "title": "Roadmap",
+    "text": "This document outlines the 16-step roadmap towards a production-ready EV platform.",
+    "metadata": {
+      "section": 2
+    }
+  },
+  {
+    "chunk_id": "doc-roadmap-2",
+    "source_type": "document",
+    "source_name": "roadmap.md",
+    "title": "Roadmap",
+    "text": "## Phase 1: Planning and Foundation (In Progress) - [x] Audit current backend routes and match each to a real frontend page. - [x] Create a feature matrix. - [x] Normalize EV data fields from the Excel file in the schema. - [x] Decide user roles: guest, registered user, admin. - [x] Decide external providers: maps (Leaflet/OSM), LLM (Ollama), DB (Postgres/pgvector). - [x] Add `.env.example` for all secrets and config.",
+    "metadata": {
+      "section": 3
+    }
+  },
+  {
+    "chunk_id": "doc-roadmap-3",
+    "source_type": "document",
+    "source_name": "roadmap.md",
+    "title": "Roadmap",
+    "text": "## Phase 2: Data Pipeline First (In Progress) - [ ] Convert `India_EV_All_Segments_Dataset_2026.xlsx` into a reproducible ETL pipeline. - [ ] Create Python script that validates columns, cleans units, standardizes brands, and loads into Postgres. - [ ] Add derived fields: price_onroad_est, cost_per_km, fast_charge_supported. - [ ] Store source metadata.",
+    "metadata": {
+      "section": 4
+    }
+  },
+  {
+    "chunk_id": "doc-roadmap-4",
+    "source_type": "document",
+    "source_name": "roadmap.md",
+    "title": "Roadmap",
+    "text": "## Phase 3: Backend Completion (Pending) - [ ] Refactor FastAPI routes. - [ ] Setup full JWT Auth. - [ ] Add pagination / searching. - [ ] Solidify `/api/compare` and `/api/recommend`.",
+    "metadata": {
+      "section": 5
+    }
+  },
+  {
+    "chunk_id": "doc-roadmap-5",
+    "source_type": "document",
+    "source_name": "roadmap.md",
+    "title": "Roadmap",
+    "text": "## Phases 4-16 (Pending) - Recommendation Engine - Chatbot Design - Frontend Completion - EV Comparison Experience - TCO and Subsidy Engine - Charging Stations Map - UI & UX Redesign - SEO & PWA - Performance Optimization - Testing - Security - Production Deployment - Monitoring",
+    "metadata": {
+      "section": 6
+    }
+  }
+]

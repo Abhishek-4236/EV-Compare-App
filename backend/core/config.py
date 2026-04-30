@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
     OPENAI_EMBEDDING_DIMENSIONS: int = 1536
     OPENAI_TIMEOUT_SECONDS: int = 30
+    GROQ_API_KEY: str | None = None
+    GROQ_MODEL: str = "meta-llama/Llama-3.1-8B-Instruct:novita"
+    HF_API_KEY: str | None = None
+    HF_MODEL: str = "katanemo/Arch-Router-1.5B:hf-inference"
+    LLM_TIMEOUT_SECONDS: int = 8
+    RAG_TOP_K: int = 3
 
     # Local startup helpers
     AUTO_IMPORT_DATA_ON_STARTUP: bool = True

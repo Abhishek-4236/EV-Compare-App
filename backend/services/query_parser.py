@@ -73,10 +73,14 @@ USE_CASE_HINTS = {
 
 COMPARISON_PATTERNS = [
     r"\bcompare\b",
+    r"\bcomparison\b",
     r"\bversus\b",
     r"\bvs\b",
+    r"\bside\s+by\s+side\b",
     r"\bdifference\s+between\b",
     r"\bbetter than\b",
+    r"\bwhich\s+is\s+better\b",
+    r"\bwhich\s+one\s+is\s+better\b",
 ]
 
 INFO_PATTERNS = [

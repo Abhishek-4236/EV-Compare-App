@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LogIn, RefreshCw, Sparkles, User, X } from 'lucide-react';
+import { Bookmark, LogIn, RefreshCw, Sparkles, Trash2, X } from 'lucide-react';
 
 export default function ChatSidebar({
   user,
@@ -9,7 +9,13 @@ export default function ChatSidebar({
   onClose,
   onNewChat,
   onSelectSession,
+  onSaveSession,
+  onDeleteSession,
+  savingSessionId,
+  deletingSessionId,
 }) {
+  const activeSession = sessions.find(session => session.id === sessionId) || null;
+
   return (
     <aside className={`ev-chat-sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
@@ -26,6 +32,26 @@ export default function ChatSidebar({
         <button className="new-chat-btn" onClick={onNewChat} type="button">
           <RefreshCw size={14} /> New Chat
         </button>
+        {activeSession ? (
+          <div className="sidebar-session-toolbar">
+            <button
+              className="sidebar-session-action"
+              onClick={() => onSaveSession(activeSession)}
+              type="button"
+              disabled={savingSessionId === activeSession.id || deletingSessionId === activeSession.id}
+            >
+              <Bookmark size={13} /> Save
+            </button>
+            <button
+              className="sidebar-session-action danger"
+              onClick={() => onDeleteSession(activeSession)}
+              type="button"
+              disabled={deletingSessionId === activeSession.id}
+            >
+              <Trash2 size={13} /> Delete
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div className="sidebar-nav">
@@ -34,37 +60,57 @@ export default function ChatSidebar({
           New Chat
         </button>
         {sessions.length > 0 ? sessions.map(session => (
-          <button
-            key={session.id}
-            className={`nav-item nav-button ${sessionId === session.id ? 'active' : ''}`}
-            onClick={() => onSelectSession(session.id)}
-            type="button"
-          >
-            {session.title || 'Untitled chat'}
-          </button>
+          <div key={session.id} className={`session-history-row ${sessionId === session.id ? 'active' : ''}`}>
+            <button
+              className={`nav-item nav-button session-history-select ${sessionId === session.id ? 'active' : ''}`}
+              onClick={() => onSelectSession(session.id)}
+              type="button"
+            >
+              <span className="session-history-title">{session.title || 'Untitled chat'}</span>
+            </button>
+            <div className="session-history-actions">
+              <button
+                className="session-action-btn"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onSaveSession(session);
+                }}
+                type="button"
+                title="Save chat"
+                disabled={savingSessionId === session.id || deletingSessionId === session.id}
+              >
+                <Bookmark size={13} />
+              </button>
+              <button
+                className="session-action-btn danger"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDeleteSession(session);
+                }}
+                type="button"
+                title="Delete chat"
+                disabled={deletingSessionId === session.id}
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+          </div>
         )) : (
           <div className="nav-item disabled">Your recent chats will appear here.</div>
         )}
       </div>
 
-      <div className="ev-chat-side-note">
-        <div className="note-row"><Sparkles size={12} /> Retrieval-first EV guidance</div>
-        <div className="note-row">Recommendations stay inside the current dataset and policy snapshot instead of inventing specs or prices.</div>
-      </div>
-
-      <div className="sidebar-user">
+      <div className="sidebar-user sidebar-user-minimal">
         {user ? (
           <>
-            <div className="sidebar-user-avatar">{(user.full_name || user.email)[0].toUpperCase()}</div>
             <div className="sidebar-user-meta">
               <div className="sidebar-user-name">{user.full_name || 'User'}</div>
-              <div className="sidebar-user-email">{user.email}</div>
+              <div className="sidebar-user-email">Signed in</div>
             </div>
           </>
         ) : (
           <>
-            <User size={14} />
-            <span className="sidebar-guest-copy">Guest · local history saved in this browser</span>
+            <span className="sidebar-guest-copy">Guest mode</span>
             <Link to="/login" className="sidebar-login-link">
               <LogIn size={12} /> Sign In
             </Link>

@@ -1,171 +1,235 @@
+from __future__ import annotations
+
+import json
 import logging
 import re
+from typing import Any
+from urllib import error, request
 
-from google import genai
-from google.genai import types
 from core.config import settings
-
-from models import KnowledgeArticle, Vehicle
-from .chat_analysis import QueryPlan
 
 logger = logging.getLogger(__name__)
 
-GEMINI_API_KEY = settings.GEMINI_API_KEY
+SYSTEM_PROMPT = """You are an expert EV assistant.
 
-if GEMINI_API_KEY:
-    client = genai.Client(
-        api_key=GEMINI_API_KEY,
-        http_options=types.HttpOptions(timeout=8),
-    )
-else:
-    client = None
+- Answer like a real human expert
+- Start with a direct answer
+- Then explain clearly
+- Use bullet points if needed
+- Keep responses clean and readable
 
-def format_price(price: int | float | None) -> str:
-    if not price:
-        return "N/A"
-    if price >= 10000000:
-        return f"₹{price / 10000000:.2f}Cr"
-    if price >= 100000:
-        return f"₹{price / 100000:.1f}L"
-    return f"₹{price / 1000:.0f}K"
+Rules:
+- Use dataset context when available
+- If not found -> say honestly and give general EV info
+- Never hallucinate
+- Handle unclear or broken questions
+- Ask clarification if needed
+- Keep tone natural and helpful"""
 
-def build_specs(vehicle: Vehicle) -> str:
-    parts = [
-        f"Price: {format_price(vehicle.approx_price_inr)}",
-        f"Range: {vehicle.range_km} km" if vehicle.range_km else None,
-        f"Battery: {vehicle.battery_kwh} kWh" if vehicle.battery_kwh else None,
-        f"Top speed: {vehicle.top_speed_kmh} kmph" if vehicle.top_speed_kmh else None,
-        f"Charging: {vehicle.charging_type}" if vehicle.charging_type else None,
-    ]
-    if vehicle.extra_info:
-        for k, v in vehicle.extra_info.items():
-            parts.append(f"{k}: {v}")
-    return "; ".join([part for part in parts if part])
 
-def _article_reference(articles: list[KnowledgeArticle] | None) -> str:
-    if not articles:
-        return ""
-    article = articles[0]
-    snippet = re.sub(r"\s+", " ", (article.content or "")).strip()
-    snippet = snippet[:220].rstrip(" .,;:")
-    if snippet:
-        return f"\n\nWhy/Reference: {article.title}. {snippet}..."
-    return f"\n\nWhy/Reference: {article.title}."
+def _clean_text_block(text: str, max_chars: int = 420) -> str:
+    cleaned = re.sub(r"```.*?```", " ", text or "", flags=re.DOTALL)
+    cleaned = re.sub(r"[ \t]+", " ", cleaned)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    cleaned = cleaned.strip(" \n-*")
+    if len(cleaned) > max_chars:
+        cleaned = cleaned[:max_chars].rsplit(" ", 1)[0].rstrip(" ,;:.-") + "..."
+    return cleaned
 
-def _general_knowledge_answer(query: str, articles: list[KnowledgeArticle] | None) -> str:
-    label = "General EV knowledge answer, not model-specific dataset data."
-    q = (query or "").lower()
 
-    if "regen" in q or "regenerative braking" in q:
-        return f"{label} Regenerative braking lets an EV recover some energy during deceleration and feed it back into the battery. It helps improve efficiency, reduces brake wear, and is most useful in city traffic with frequent slowing."
-    if {"ac", "dc"}.issubset(set(re.findall(r"[a-z0-9]+", q))) and ("charging" in q or "batter" in q):
-        return f"{label} AC charging sends alternating current to the car, and the onboard charger converts it to DC for the battery. DC fast charging converts power outside the vehicle and sends DC directly to the battery, so it charges much faster but usually costs more and creates more heat."
-    if "lfp" in q and "nmc" in q:
-        return f"{label} LFP batteries are usually safer, more thermally stable, and better for hot conditions and frequent charging. NMC batteries usually offer better energy density and stronger range for the same battery size, but need tighter thermal management."
-    if "fast charging" in q and "battery life" in q:
-        return f"{label} Frequent fast charging can increase battery heat and slightly accelerate degradation over time, especially in hot weather. It is usually fine for occasional highway use, while slow or overnight charging is gentler for daily charging."
-    if "cell balancing" in q or "bms" in q:
-        return f"{label} Cell balancing is a battery-management-system function that keeps battery cells at similar voltage levels. That improves safety, usable capacity, and long-term battery health because one weak or overcharged cell can limit the whole pack."
-    if "petrol" in q and "ev" in q and "running cost" in q:
-        return f"{label} EVs usually have much lower per-kilometer running cost than petrol vehicles because electricity is cheaper than fuel and EV maintenance is simpler. The exact savings depend on tariff, efficiency, annual kilometers, and whether you mostly charge at home or rely on public fast charging."
-    if "fire" in q and "rain" in q:
-        return f"{label} A healthy EV battery should not catch fire just because of rain. Modern EV packs are sealed and designed for water exposure, but flood damage, poor-quality aftermarket work, or a battery fault can still create risk and should be inspected."
-    if "pm e-drive" in q and "fame" in q:
-        return f"{label} PM E-Drive is not exactly the same program as FAME II. They are related central EV support schemes, but they can differ in period, scope, and incentive structure, so policy details should be verified from the latest government notification."
+def prepare_context_chunks(chunks: list[str], top_k: int | None = None) -> list[str]:
+    limit = top_k or settings.RAG_TOP_K
+    prepared: list[str] = []
+    seen: set[str] = set()
+    for chunk in chunks:
+        cleaned = _clean_text_block(chunk)
+        if len(cleaned) < 24:
+            continue
+        dedupe_key = cleaned.lower()
+        if dedupe_key in seen:
+            continue
+        seen.add(dedupe_key)
+        prepared.append(cleaned)
+        if len(prepared) >= limit:
+            break
+    return prepared
 
-    if articles:
-        article = articles[0]
-        cleaned = re.sub(r"\s+", " ", article.content or "").strip()
+
+def _format_history(history: list[dict[str, str]] | None, max_items: int = 6) -> str:
+    if not history:
+        return "None"
+    lines: list[str] = []
+    for item in history[-max_items:]:
+        role = (item.get("role") or "user").strip().lower()
+        content = item.get("content") or item.get("text") or ""
+        cleaned = _clean_text_block(content, max_chars=220)
         if cleaned:
-            summary = cleaned[:320].rstrip(" .,;:")
-            return f"{label} {summary}...{_article_reference(articles)}"
-    return f"{label} I do not have a strong supporting article match, so please verify the latest manufacturer or policy source for this topic."
+            lines.append(f"{role.title()}: {cleaned}")
+    return "\n".join(lines) if lines else "None"
 
-def fallback_answer(query: str, vehicles: list[Vehicle], articles: list[KnowledgeArticle] | None = None, plan: QueryPlan | None = None) -> str:
-    plan_intent = plan.intent if plan else None
-    q = (query or "").lower().strip()
-    q = re.sub(r'[?.,!:]', '', q)
 
-    if plan_intent == "inventory":
-        return "I can summarize the EV inventory, but that response should come from the inventory handler."
+def _build_user_prompt(
+    *,
+    query: str,
+    context_chunks: list[str],
+    history: list[dict[str, str]] | None,
+    general_only: bool,
+    draft_answer: str,
+) -> str:
+    context_block = "\n".join(f"{index}. {chunk}" for index, chunk in enumerate(context_chunks, start=1)) or "None"
+    grounding_note = (
+        "No relevant dataset context was found. Answer using general EV knowledge only, and clearly say it is general guidance."
+        if general_only or not context_chunks
+        else "Use the retrieved context for any model-specific, pricing, charging, or policy claims."
+    )
+    return (
+        "You are improving a grounded EV answer so it feels natural and conversational.\n\n"
+        "Your job:\n"
+        "- Rewrite the draft answer in a more human, ChatGPT-like way.\n"
+        "- Keep the same facts, numbers, caveats, and meaning as the draft.\n"
+        "- Do not add new facts that are not already supported by the draft or retrieved context.\n"
+        "- Preserve the exact vehicle names from the draft and context.\n"
+        "- Never replace a compared vehicle with a different model, even if names seem similar.\n"
+        "- If the draft contains a markdown table, preserve the same rows, values, and model order.\n"
+        "- If the user asks for table format, keep the answer in markdown table format.\n"
+        "- If you are not fully confident, stay very close to the draft instead of improvising.\n"
+        "- Start with a direct answer.\n"
+        "- Then explain clearly.\n"
+        "- Use bullets only when they genuinely help readability.\n"
+        "- Do not output labels like 'User question:' or overly robotic section headings.\n"
+        "- If the draft already says context is general, preserve that honesty.\n"
+        f"- {grounding_note}\n\n"
+        f"User question:\n{query}\n\n"
+        f"Grounded draft answer to rewrite:\n{draft_answer}\n\n"
+        f"Recent chat context:\n{_format_history(history)}\n\n"
+        f"Retrieved EV context (top {settings.RAG_TOP_K} chunks max):\n{context_block}"
+    )
 
-    if plan_intent in {"knowledge", "concept_compare"}:
-        return _general_knowledge_answer(query, articles)
 
-    if not vehicles:
-        if plan_intent == "spec":
-            return "That specific data is not available in my current dataset."
-        if plan_intent == "vehicle_compare":
-            return "That specific comparison is not available in my current dataset. Please share two model names that exist in the current EV database."
-        return "I could not find matching EVs in the current dataset. Please share a specific model, segment, or budget."
+def _generate_with_hf_router_chat(model: str, messages: list[dict[str, str]]) -> str:
+    if not settings.HF_API_KEY:
+        raise RuntimeError("HF_API_KEY is not configured")
+    payload = json.dumps(
+        {
+            "model": model,
+            "messages": messages,
+            "temperature": 0.25,
+            "max_tokens": 420,
+        }
+    ).encode("utf-8")
+    req = request.Request(
+        "https://router.huggingface.co/v1/chat/completions",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {settings.HF_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with request.urlopen(req, timeout=settings.LLM_TIMEOUT_SECONDS) as response:
+            body = json.loads(response.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="ignore")
+        raise RuntimeError(f"HF router request failed: {exc.code} {detail}") from exc
 
-    if plan_intent == "vehicle_compare":
-        rows = vehicles[:3]
-        lead = ""
-        if "range" in q:
-            best = max(rows, key=lambda item: item.range_km or 0)
-            lead = f"{best.brand} {best.model} has the highest listed range in the current dataset at about {best.range_km} km.\n\n"
-        elif "charging" in q:
-            charging_types = {f"{vehicle.brand} {vehicle.model}: {vehicle.charging_type or 'N/A'}" for vehicle in rows}
-            if len({vehicle.charging_type for vehicle in rows}) == 1:
-                lead = "Both models show the same charging type in the current dataset, so I cannot claim one is better on DC fast charging from the available data.\n\n"
-            lead += "Charging snapshot: " + "; ".join(sorted(charging_types)) + "\n\n"
-        
-        table = [
-            f"{lead}Here is a side-by-side comparison:",
-            "",
-            "| Vehicle | Price | Range | Battery | Top Speed |",
-            "|---|---:|---:|---:|---:|",
-        ]
-        for vehicle in rows:
-            table.append(
-                f"| {vehicle.brand} {vehicle.model} | {format_price(vehicle.approx_price_inr)} | "
-                f"{vehicle.range_km or 0} km | {vehicle.battery_kwh or 0} kWh | {vehicle.top_speed_kmh or 0} kmph |"
-            )
-        return "\n".join(table)
+    choices = body.get("choices") or []
+    if not choices:
+        raise RuntimeError("HF router returned no choices")
+    content = ((choices[0] or {}).get("message") or {}).get("content") or ""
+    return str(content).strip()
 
-    if plan_intent == "spec":
-        vehicle = vehicles[0]
-        return f"{vehicle.brand} {vehicle.model} key specs: {build_specs(vehicle)}"
 
-    if any(token in q for token in ["cheapest", "lowest price", "budget"]):
-        vehicle = sorted(vehicles, key=lambda item: item.approx_price_inr or 10**9)[0]
-        return f"Best budget option from current matches is {vehicle.brand} {vehicle.model} at {format_price(vehicle.approx_price_inr)}."
+def _generate_with_groq_direct(messages: list[dict[str, str]]) -> str:
+    if not settings.GROQ_API_KEY:
+        raise RuntimeError("GROQ_API_KEY is not configured")
+    payload = json.dumps(
+        {
+            "model": settings.GROQ_MODEL,
+            "messages": messages,
+            "temperature": 0.25,
+            "max_tokens": 420,
+        }
+    ).encode("utf-8")
+    req = request.Request(
+        "https://api.groq.com/openai/v1/chat/completions",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {settings.GROQ_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with request.urlopen(req, timeout=settings.LLM_TIMEOUT_SECONDS) as response:
+            body = json.loads(response.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="ignore")
+        raise RuntimeError(f"Groq request failed: {exc.code} {detail}") from exc
 
-    if any(token in q for token in ["longest range", "best range", "maximum range", "top range"]):
-        vehicle = sorted(vehicles, key=lambda item: item.range_km or 0, reverse=True)[0]
-        return f"Top range option is {vehicle.brand} {vehicle.model} with about {vehicle.range_km} km range."
+    choices = body.get("choices") or []
+    if not choices:
+        raise RuntimeError("Groq returned no choices")
+    content = ((choices[0] or {}).get("message") or {}).get("content") or ""
+    return str(content).strip()
 
-    if plan_intent == "subsidy" or any(token in q for token in ["subsidy", "fame", "pm e-drive"]):
-        ranked = sorted(vehicles, key=lambda item: item.approx_price_inr or 0, reverse=True)[:3]
-        lines = [f"{vehicle.brand} {vehicle.model}" for vehicle in ranked]
-        return "Subsidy snapshot from the current dataset (verify latest policy circular): " + "; ".join(lines)
 
-    if plan_intent == "recommend":
-        lines = [f"{vehicle.brand} {vehicle.model} ({format_price(vehicle.approx_price_inr)})" for vehicle in vehicles[:5]]
-        return "Here are the best matches from the current dataset: " + ", ".join(lines)
+def generate_chat_response(
+    *,
+    query: str,
+    context_chunks: list[str],
+    draft_answer: str,
+    history: list[dict[str, str]] | None = None,
+    general_only: bool = False,
+) -> tuple[str | None, str | None]:
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": _build_user_prompt(
+                query=query,
+                context_chunks=prepare_context_chunks(context_chunks),
+                history=history,
+                general_only=general_only,
+                draft_answer=draft_answer,
+            ),
+        },
+    ]
 
-    lines = [f"{vehicle.brand} {vehicle.model} ({format_price(vehicle.approx_price_inr)})" for vehicle in vehicles[:5]]
-    return "Here are relevant EVs from the current dataset: " + ", ".join(lines)
-
-def generate_answer(prompt: str, query: str, vehicles: list[Vehicle], articles: list[KnowledgeArticle] | None = None, plan: QueryPlan | None = None) -> str:
-    if client:
+    if settings.HF_API_KEY and settings.GROQ_MODEL:
         try:
-            response = client.models.generate_content(
-                model='gemini-2.0-flash',
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction="You are an Indian EV expert. Reply in a natural chat style, answer the user's actual intent first, use only the provided context for model-specific claims, and if data is missing say you do not know.",
-                    temperature=0.4,
-                    max_output_tokens=320,
-                ),
-            )
-            answer = response.text.strip()
+            answer = _generate_with_hf_router_chat(settings.GROQ_MODEL, messages)
             if answer:
-                return answer
-        except Exception as e:
-            logger.error(f"Gemini generation failed: {e}")
-            print(f"Gemini generation failed: {e}")
+                return answer, f"hf-router:{settings.GROQ_MODEL}"
+        except Exception as exc:
+            logger.warning("Primary routed generation failed: %s", exc)
 
-    # Fallback to pure offline DB answers if API fails or key is missing
-    return fallback_answer(query, vehicles, articles, plan)
+    if settings.GROQ_API_KEY and ":" not in (settings.GROQ_MODEL or ""):
+        try:
+            answer = _generate_with_groq_direct(messages)
+            if answer:
+                return answer, f"groq:{settings.GROQ_MODEL}"
+        except Exception as exc:
+            logger.warning("Direct Groq generation failed: %s", exc)
+
+    if settings.HF_API_KEY and settings.HF_MODEL:
+        try:
+            answer = _generate_with_hf_router_chat(settings.HF_MODEL, messages)
+            if answer:
+                return answer, f"hf-router:{settings.HF_MODEL}"
+        except Exception as exc:
+            logger.warning("Fallback routed generation failed: %s", exc)
+
+    return None, None
+
+
+def configured_provider_summary() -> dict[str, Any]:
+    return {
+        "primary_model": settings.GROQ_MODEL,
+        "fallback_model": settings.HF_MODEL,
+        "groq_configured": bool(settings.GROQ_API_KEY),
+        "groq_model": settings.GROQ_MODEL,
+        "hf_configured": bool(settings.HF_API_KEY),
+        "hf_model": settings.HF_MODEL,
+        "top_k": settings.RAG_TOP_K,
+    }

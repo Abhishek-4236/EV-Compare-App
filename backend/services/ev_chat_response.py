@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from .ev_chat_knowledge import KnowledgeArticle, extract_supporting_lines
 from .ev_policy import estimate_segment_support, get_state_policy_note
 from .ev_rag_types import ParsedQuery, RetrievalMatch, VehicleDocument
@@ -104,23 +106,103 @@ def build_spec_answer(vehicle: VehicleDocument, parsed: ParsedQuery, query: str 
     return "\n".join(lines)
 
 
-def build_comparison_answer(matches: list[RetrievalMatch], parsed: ParsedQuery) -> str:
-    rows = [
-        "| Vehicle | Type | Price | Range | Battery | Charging |",
-        "|---|---|---:|---:|---:|---|",
-    ]
-    for match in matches[:2]:
-        vehicle = match.vehicle
-        rows.append(
-            f"| {vehicle.name} | {vehicle.vehicle_type} | ₹{vehicle.price_inr or 0:,} | "
-            f"{vehicle.range_km or 0} km | {vehicle.battery_kwh or 0} kWh | {vehicle.charging_time or 'N/A'} |"
+def _comparison_value(value: object, fallback: str = "Unavailable") -> str:
+    if value is None:
+        return fallback
+    text = str(value).strip()
+    return text or fallback
+
+
+def _extract_dc_charge_time(charging_time: str | None) -> str | None:
+    if not charging_time:
+        return None
+    match = re.search(r"(\d+(?:\.\d+)?)\s*(hr|hrs|hour|hours|min|mins|minute|minutes)\s*dc", charging_time, flags=re.IGNORECASE)
+    if not match:
+        return None
+    amount = match.group(1)
+    unit = match.group(2).lower()
+    normalized_unit = "min" if unit.startswith("min") else "hr"
+    return f"{amount} {normalized_unit}"
+
+
+def _build_comparison_lead(left: VehicleDocument, right: VehicleDocument) -> str:
+    if (
+        left.price_inr is not None
+        and right.price_inr is not None
+        and left.range_km is not None
+        and right.range_km is not None
+    ):
+        cheaper, pricier = (left, right) if left.price_inr <= right.price_inr else (right, left)
+        range_gap = abs((left.range_km or 0) - (right.range_km or 0))
+        if range_gap <= 20:
+            return (
+                f"Short answer: {cheaper.name} looks like the stronger value pick, while {pricier.name} is the more premium option."
+            )
+    return (
+        f"Short answer: {left.name} and {right.name} are a trade-off, so the better pick depends on whether you care more about price, range, battery size, or charging setup."
+    )
+
+
+def _build_comparison_highlights(left: VehicleDocument, right: VehicleDocument) -> list[str]:
+    notes: list[str] = []
+
+    if left.price_inr is not None and right.price_inr is not None:
+        cheaper, pricier = (left, right) if left.price_inr <= right.price_inr else (right, left)
+        price_gap_lakh = abs(left.price_inr - right.price_inr) / 100000
+        notes.append(f"Price: {cheaper.name} is lower by about ₹{price_gap_lakh:.2f} lakh.")
+
+    if left.range_km is not None and right.range_km is not None:
+        if left.range_km == right.range_km:
+            notes.append(f"Range: both are listed at {left.range_km} km in the current dataset.")
+        else:
+            winner, loser = (left, right) if left.range_km > right.range_km else (right, left)
+            range_gap = abs(left.range_km - right.range_km)
+            qualifier = "slightly" if range_gap <= 20 else "clearly"
+            notes.append(f"Range: {winner.name} is ahead {qualifier} by {range_gap} km.")
+
+    if left.battery_kwh is not None and right.battery_kwh is not None and left.battery_kwh != right.battery_kwh:
+        winner, loser = (left, right) if left.battery_kwh > right.battery_kwh else (right, left)
+        battery_gap = abs(left.battery_kwh - right.battery_kwh)
+        notes.append(f"Battery: {winner.name} has the larger pack by {battery_gap:.1f} kWh.")
+
+    left_dc = _extract_dc_charge_time(left.charging_time)
+    right_dc = _extract_dc_charge_time(right.charging_time)
+    if left_dc and right_dc and left_dc == right_dc:
+        notes.append(f"DC fast charging: both are listed at about {left_dc} DC, so AC charging time matters more here.")
+    elif left.charging_time or right.charging_time:
+        notes.append(
+            f"Charging: {left.name} is listed at {_comparison_value(left.charging_time)}; {right.name} is listed at {_comparison_value(right.charging_time)}."
         )
 
+    return notes
+
+
+def build_comparison_answer(matches: list[RetrievalMatch], parsed: ParsedQuery) -> str:
+    vehicles = [match.vehicle for match in matches[:2]]
+    if len(vehicles) < 2:
+        return "I can compare EVs, but I need two grounded models from the current dataset."
+
+    left, right = vehicles
+    rows = [
+        f"| Feature | {left.name} | {right.name} |",
+        "|---|---|---|",
+        f"| Type | {left.vehicle_type.title()} | {right.vehicle_type.title()} |",
+        f"| Price | {format_price(left.price_inr)} | {format_price(right.price_inr)} |",
+        f"| Range | {_comparison_value(left.range_km, 'Unavailable')} km | {_comparison_value(right.range_km, 'Unavailable')} km |",
+        f"| Battery | {_comparison_value(f'{left.battery_kwh:.1f} kWh' if left.battery_kwh is not None else None)} | {_comparison_value(f'{right.battery_kwh:.1f} kWh' if right.battery_kwh is not None else None)} |",
+        f"| Charging time | {_comparison_value(left.charging_time)} | {_comparison_value(right.charging_time)} |",
+        f"| Charging type | {_comparison_value(left.charging_type)} | {_comparison_value(right.charging_type)} |",
+    ]
+
     state_note = get_state_policy_note(parsed.filters.state)
-    lead = "Here is the grounded side-by-side view from the current EViq dataset."
+    lead = _build_comparison_lead(left, right)
+    highlights = _build_comparison_highlights(left, right)
     caveat = "Caveat: missing or policy-sensitive fields should still be verified before purchase."
-    follow_up = "Follow-up: tell me whether you care most about price, charging, highway range, or family use and I’ll name the better fit."
+    follow_up = "Follow-up: tell me what matters most to you like price, charging speed, highway use, or family comfort, and I’ll name the better fit."
     pieces = [lead, "", *rows]
+    if highlights:
+        pieces.extend(["", "Quick take:"])
+        pieces.extend(f"- {item}" for item in highlights)
     if state_note:
         pieces.extend(["", f"State context: {state_note}"])
     pieces.extend(["", caveat, "", follow_up])

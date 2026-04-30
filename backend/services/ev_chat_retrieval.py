@@ -260,11 +260,11 @@ def hybrid_retrieve(
     if not filtered:
         return []
 
-    lexical_ranked = sorted(
-        filtered,
-        key=lambda vehicle: candidate_score(vehicle, parsed, query),
-        reverse=True,
-    )
+    lexical_scored = [
+        (candidate_score(vehicle, parsed, query), vehicle)
+        for vehicle in filtered
+    ]
+    lexical_scored.sort(key=lambda item: item[0], reverse=True)
 
     vector_scores: dict[str, float] = {}
     if store is not None:
@@ -277,8 +277,8 @@ def hybrid_retrieve(
             vector_scores = {}
 
     matches: list[RetrievalMatch] = []
-    for vehicle in lexical_ranked[: max(top_k * 3, 12)]:
-        combined_score = candidate_score(vehicle, parsed, query) + vector_scores.get(vehicle.id, 0.0) * 0.4
+    for lexical_score, vehicle in lexical_scored[: max(top_k * 3, 12)]:
+        combined_score = lexical_score + vector_scores.get(vehicle.id, 0.0) * 0.4
         matched_on = ["rank"]
         if parsed.filters.vehicle_type:
             matched_on.append("segment")

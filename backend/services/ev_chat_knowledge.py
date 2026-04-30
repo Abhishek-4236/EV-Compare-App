@@ -63,6 +63,20 @@ def is_limitations_query(query: str) -> bool:
     return "limitation" in q or "what can you not" in q or "what are your boundaries" in q
 
 
+def is_identity_query(query: str) -> bool:
+    q = re.sub(r"\s+", " ", (query or "").lower()).strip()
+    return q in {"who are you", "who r you", "who are u", "what are you"} or "who are you?" in q or "who are u?" in q
+
+
+def is_capabilities_query(query: str) -> bool:
+    q = re.sub(r"\s+", " ", (query or "").lower()).strip()
+    return (
+        q in {"what can you do", "what do you do", "help me", "what all can you do"}
+        or "what can you do?" in q
+        or "how can you help" in q
+    )
+
+
 def is_ev_concept_query(query: str) -> bool:
     q = (query or "").lower()
     concept_tokens = [
@@ -181,4 +195,20 @@ def build_limitations_answer() -> str:
         "I stay grounded in the current EV dataset and EViq knowledge articles.\n\n"
         "That means I can compare listed specs, explain EV concepts, and build shortlists from the available data, but I should not guess missing specs, live prices, live subsidies, dealer stock, or route-specific charging availability.\n\n"
         "If you want, I can still help by showing the closest grounded shortlist and clearly marking the caveats."
+    )
+
+
+def build_identity_answer() -> str:
+    return (
+        "I’m EViq Expert, your EV assistant for this app.\n\n"
+        "I help with Indian EV recommendations, comparisons, charging, TCO, subsidies, and model-specific questions using the current dataset and EV knowledge base.\n\n"
+        "If a detail is missing, I’ll say that clearly instead of making it up."
+    )
+
+
+def build_capabilities_answer() -> str:
+    return (
+        "I can help with both EV advice and dataset-based lookups.\n\n"
+        "For example, I can recommend EVs by budget or use case, compare two models, explain charging or battery topics, answer TCO questions, and summarize what is available in the current EV dataset.\n\n"
+        "If you want, ask me something like `best EV car under 15 lakh`, `compare Nexon EV vs MG ZS EV`, or `explain TCO`."
     )

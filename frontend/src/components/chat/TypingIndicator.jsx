@@ -5,6 +5,7 @@ export default function TypingIndicator() {
     <div className="ev-msg-row bot">
       <div className="ev-avatar bot"><Bot size={16} /></div>
       <div className="ev-msg-bubble bot typing">
+        <div className="typing-indicator-text">Bot is typing...</div>
         <div className="typing-dots"><span></span><span></span><span></span></div>
       </div>
     </div>

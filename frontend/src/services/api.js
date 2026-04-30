@@ -62,6 +62,8 @@ export const chatAPI = {
   send: (payload) => chatApi.post('/chat/', payload),
   getSessions: () => chatApi.get('/chat/sessions'),
   getHistory: (sessionId) => chatApi.get(`/chat/history/${sessionId}`),
+  saveSession: (sessionId, payload) => chatApi.put(`/chat/sessions/${sessionId}`, payload),
+  deleteSession: (sessionId) => chatApi.delete(`/chat/sessions/${sessionId}`),
   sendStream: async (payload, handlers = {}) => {
     const token = localStorage.getItem('eviq_token');
     const response = await fetch(`${API_BASE}/chat/stream`, {

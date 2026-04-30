@@ -11,6 +11,10 @@ from .query_parser import parse_user_query
 FOLLOW_UP_PREFIXES = (
     "and ",
     "also ",
+    "give ",
+    "show ",
+    "put ",
+    "convert ",
     "what about",
     "now ",
     "make it",

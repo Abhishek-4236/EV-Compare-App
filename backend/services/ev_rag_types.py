@@ -58,3 +58,4 @@ class ChatAnswer(BaseModel):
     intent: ChatIntent
     parsed_query: ParsedQuery
     matches: list[RetrievalMatch] = Field(default_factory=list)
+    provider: str | None = None

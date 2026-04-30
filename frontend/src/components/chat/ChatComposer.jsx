@@ -19,6 +19,8 @@ export default function ChatComposer({
   onToggleListen,
   showSuggestions,
 }) {
+  const canSend = input.trim() && !loading;
+
   return (
     <div className="ev-chat-input-limit">
       {!loading && showSuggestions && (
@@ -38,7 +40,7 @@ export default function ChatComposer({
           value={input}
           onChange={event => onInputChange(event.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Message EViq about EVs..."
+          placeholder="Ask about EV price, range, charging, TCO, or what to buy..."
         />
         <button
           className={`mic-btn ${isListening ? 'active' : ''}`}
@@ -49,7 +51,7 @@ export default function ChatComposer({
         >
           {isListening ? <MicOff size={18} /> : <Mic size={18} />}
         </button>
-        <button className={`send-btn ${input.trim() ? 'active' : ''}`} onClick={() => onSubmit()} disabled={loading} type="button">
+        <button className={`send-btn ${canSend ? 'active' : ''}`} onClick={() => onSubmit()} disabled={!canSend} type="button">
           <Send size={18} />
         </button>
       </div>

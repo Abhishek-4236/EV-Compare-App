@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import ChatFeedback, ChatMessage, ChatSession, Vehicle
 from services.ev_rag import ev_rag_service
+from services.llm import configured_provider_summary
 from .auth import JWT_ALG, JWT_SECRET, read_bearer_token
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
@@ -30,6 +31,10 @@ class FeedbackRequest(BaseModel):
     note: str | None = None
 
 
+class SessionSaveRequest(BaseModel):
+    title: str | None = None
+
+
 def get_optional_user_id(authorization: str | None = Header(default=None)) -> int | None:
     if not authorization:
         return None
@@ -42,6 +47,20 @@ def get_optional_user_id(authorization: str | None = Header(default=None)) -> in
         return int(user_id) if user_id else None
     except JWTError:
         return None
+
+
+def get_owned_session_or_404(session_id: str, user_id: int | None, db: Session) -> ChatSession:
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Sign in required")
+
+    session = (
+        db.query(ChatSession)
+        .filter(ChatSession.id == session_id, ChatSession.user_id == user_id)
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Chat session not found")
+    return session
 
 
 def get_or_create_session(request: ChatRequest, user_id: int | None, db: Session) -> ChatSession:
@@ -103,6 +122,17 @@ def build_history_context(db: Session, session_id: str) -> list[dict[str, str]]:
 
 
 def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session):
+    if not (request.message or "").strip():
+        return {
+            "success": False,
+            "session_id": request.session_id,
+            "answer": "Please type an EV question and I’ll help.",
+            "intent": "info",
+            "parsed_query": None,
+            "sources": [],
+            "provider": None,
+        }
+
     session = get_or_create_session(request, user_id, db)
     try:
         db.add(ChatMessage(session_id=session.id, role="user", content=request.message))
@@ -123,6 +153,7 @@ def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session
             "intent": "info",
             "parsed_query": None,
             "sources": [],
+            "provider": None,
         }
     try:
         result = ev_rag_service.answer(request.message, history)
@@ -139,6 +170,7 @@ def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session
             "intent": "info",
             "parsed_query": None,
             "sources": [],
+            "provider": None,
         }
 
     save_assistant_message(db, session.id, result.answer)
@@ -195,6 +227,7 @@ def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session
         "intent": result.intent,
         "parsed_query": result.parsed_query.model_dump(),
         "sources": source_payload,
+        "provider": result.provider,
     }
 
 
@@ -209,12 +242,13 @@ async def chat_stream(request: ChatRequest, user_id: int | None = Depends(get_op
     answer = payload["answer"]
     session_id = payload["session_id"]
     sources = payload.get("sources", [])
+    provider = payload.get("provider")
 
     async def event_stream():
         yield f"data: {json.dumps({'type': 'session', 'session_id': session_id})}\n\n"
         for token in answer.split(" "):
             yield f"data: {json.dumps({'type': 'chunk', 'content': token + ' '})}\n\n"
-        yield f"data: {json.dumps({'type': 'done', 'sources': sources})}\n\n"
+        yield f"data: {json.dumps({'type': 'done', 'sources': sources, 'provider': provider})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
@@ -251,6 +285,43 @@ def get_user_sessions(user_id: int | None = Depends(get_optional_user_id), db: S
         return [{"id": session["id"], "title": session["title"], "created_at": session["created_at"]} for session in sessions]
 
 
+@router.put("/sessions/{session_id}")
+def save_session(
+    session_id: str,
+    request: SessionSaveRequest,
+    user_id: int | None = Depends(get_optional_user_id),
+    db: Session = Depends(get_db),
+):
+    session = get_owned_session_or_404(session_id, user_id, db)
+    next_title = (request.title or session.title or "Saved chat").strip() or "Saved chat"
+    session.title = next_title[:200]
+    try:
+        db.commit()
+        db.refresh(session)
+        return {"success": True, "id": session.id, "title": session.title, "created_at": session.created_at}
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Could not save chat session")
+
+
+@router.delete("/sessions/{session_id}")
+def delete_session(
+    session_id: str,
+    user_id: int | None = Depends(get_optional_user_id),
+    db: Session = Depends(get_db),
+):
+    session = get_owned_session_or_404(session_id, user_id, db)
+    try:
+        db.query(ChatFeedback).filter(ChatFeedback.session_id == session_id).delete(synchronize_session=False)
+        db.query(ChatMessage).filter(ChatMessage.session_id == session_id).delete(synchronize_session=False)
+        db.delete(session)
+        db.commit()
+        return {"success": True, "id": session_id}
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Could not delete chat session")
+
+
 @router.get("/history/{session_id}")
 def get_session_history(session_id: str, db: Session = Depends(get_db)):
     try:
@@ -259,3 +330,8 @@ def get_session_history(session_id: str, db: Session = Depends(get_db)):
     except Exception:
         db.rollback()
         return [{"role": message["role"], "text": message["content"]} for message in _MEMORY_MESSAGES.get(session_id, [])]
+
+
+@router.get("/provider-status")
+def provider_status():
+    return configured_provider_summary()

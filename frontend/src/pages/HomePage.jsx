@@ -156,7 +156,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="ev-shell" style={{ paddingTop: 0 }}>
+        <section className="ev-shell" style={{ paddingTop: 0, paddingBottom: 40 }}>
           <div style={{ marginBottom: 24 }}>
             <div className="ev-section-label">All Segments</div>
             <h2 className="ev-section-title">Browse by Category</h2>
@@ -177,7 +177,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="ev-shell" style={{ paddingTop: 0, marginTop: 48 }}>
+        <section className="ev-shell" style={{ paddingTop: 0, paddingBottom: 18, marginTop: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
             <div>
               <div className="ev-section-label">Top Rated</div>
@@ -212,7 +212,7 @@ export default function HomePage() {
         </section>
 
         {/* Why EViq - Minimalist version */}
-        <section className="ev-shell" style={{ paddingTop: 0, marginTop: 48 }}>
+        <section className="ev-shell" style={{ paddingTop: 0, paddingBottom: 12, marginTop: 8 }}>
           <div className="ev-card" style={{ padding: '24px 32px', background: 'var(--accent-soft)', border: 'none' }}>
             <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
               <div style={{ textAlign: 'center' }}>
@@ -233,7 +233,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="ev-shell" style={{ paddingTop: 0, marginTop: 64 }}>
+        <section className="ev-shell" style={{ paddingTop: 0, paddingBottom: 32, marginTop: 24 }}>
           <div className="ev-home-tool-grid">
             <div className="ev-card ev-home-tool-card" style={{ padding: 28, background: 'linear-gradient(135deg, var(--accent-soft), var(--bg-card))' }}>
               <div style={{ marginBottom: 16 }}>
@@ -293,7 +293,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="ev-shell" style={{ paddingTop: 0, marginTop: 48 }}>
+        <section className="ev-shell" style={{ paddingTop: 0, paddingBottom: 32, marginTop: 24 }}>
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <h2 className="ev-section-title" style={{ fontSize: 24 }}>Common Questions</h2>
           </div>
