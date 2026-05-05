@@ -171,22 +171,28 @@ def build_policy_answer(query: str, state: str | None) -> str:
 
     if state_note:
         return (
-            f"State filter applied. {state_note}\n\n"
-            "That policy context can change the affordability picture, but dealer-final subsidy and eligibility still need verification.\n\n"
-            "If you want, I can now shortlist EVs in that budget and label which ones are strongest on price, charging, and range."
+            f"{state_note}\n\n"
+            f"- Location used: {state}.\n"
+            "- Subsidies are policy-sensitive and can change the affordability picture.\n\n"
+            "Use this as policy context, but verify dealer-final subsidy and eligibility before purchase.\n\n"
+            "Tell me your budget and segment and I can shortlist EVs with price, charging, and range trade-offs."
         )
 
     if "scooter" in q or "2w" in q or "two wheeler" in q:
         return (
             "For electric scooters, subsidy is policy-sensitive rather than one fixed amount for every model.\n\n"
-            "The safe way to use it here is as a policy snapshot: compare segment, battery size, and your state before trusting a final rupee number.\n\n"
-            "Tell me your state and budget and I’ll keep the shortlist grounded."
+            "- Vehicle type used: 2W/scooter.\n"
+            "- Final benefit depends on state, model eligibility, and current policy snapshot.\n\n"
+            "Compare segment, battery size, and your state before trusting a final rupee number.\n\n"
+            "Which state and budget should I use?"
         )
 
     return (
         "Subsidy answers are policy-sensitive, so I keep them conservative.\n\n"
-        "I can use the EViq policy snapshot for state context, but you should still verify the latest notification and dealer quote before relying on the final number.\n\n"
-        "Tell me your state and vehicle segment if you want a grounded shortlist."
+        "- Location and vehicle segment are not fully specified.\n"
+        "- Final subsidy can depend on state, segment, model eligibility, and dealer quote.\n\n"
+        "Tell me your state and vehicle segment if you want a grounded shortlist.\n\n"
+        "Which state and vehicle type should I use?"
     )
 
 

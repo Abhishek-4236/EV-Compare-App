@@ -1,4 +1,4 @@
-import { startTransition, useDeferredValue, useEffect, useRef, useState } from 'react';
+import { startTransition, useCallback, useDeferredValue, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Menu, PanelLeftClose, Sparkles } from 'lucide-react';
 
@@ -77,7 +77,7 @@ export default function ChatPage() {
 
   const sessions = mergeSessionLists(localSessions, user ? remoteSessions : []);
 
-  async function refreshRemoteSessions() {
+  const refreshRemoteSessions = useCallback(async () => {
     if (!user) {
       setRemoteSessions([]);
       return;
@@ -89,11 +89,11 @@ export default function ChatPage() {
     } catch (error) {
       console.error('Could not fetch sessions', error);
     }
-  }
+  }, [user]);
 
   useEffect(() => {
     refreshRemoteSessions();
-  }, [user]);
+  }, [refreshRemoteSessions]);
 
   useEffect(() => {
     const scrollNode = chatScrollRef.current;
@@ -137,7 +137,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!sessionId) return;
-    setLocalSessions(current => upsertStoredChatSession(buildLocalSession(sessionId, messages.length ? messages : [INITIAL_MESSAGE])));
+    setLocalSessions(upsertStoredChatSession(buildLocalSession(sessionId, messages.length ? messages : [INITIAL_MESSAGE])));
   }, [messages, sessionId]);
 
   async function loadSession(id) {
@@ -212,6 +212,10 @@ export default function ChatPage() {
                 role: 'assistant',
                 text: collected || 'I could not generate a reply this time. Please try again.',
                 sources: data?.sources || [],
+                provider: data?.provider || null,
+                confidence: data?.confidence || null,
+                queryType: data?.query_type || null,
+                userLevel: data?.user_level || null,
                 retryText: text,
               },
             ]);
@@ -378,7 +382,7 @@ export default function ChatPage() {
             )}
 
             {displayMessages
-              .filter(message => !(isWelcomeState && message.role === 'assistant' && message.text === INITIAL_MESSAGE.text))
+              .filter(message => !(message.role === 'assistant' && message.text === INITIAL_MESSAGE.text))
               .map((message, index) => (
               <ChatMessage
                 key={`${message.role}-${index}-${message.text?.slice(0, 16)}`}
@@ -946,6 +950,27 @@ export default function ChatPage() {
           color: var(--accent);
           font-weight: 600;
           margin-top: 2px;
+        }
+        .source-match-reason {
+          font-size: 10px;
+          color: var(--text-muted);
+          margin-top: 3px;
+          text-transform: capitalize;
+        }
+        .ev-answer-meta {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-top: 10px;
+        }
+        .ev-answer-meta span {
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          color: var(--text-muted);
+          font-size: 10px;
+          font-weight: 700;
+          padding: 4px 8px;
+          text-transform: capitalize;
         }
 
         .typing-dots span {

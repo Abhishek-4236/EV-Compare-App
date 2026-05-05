@@ -6,10 +6,21 @@ from pydantic import BaseModel, Field
 
 
 ChatIntent = Literal["recommendation", "comparison", "info"]
+QueryType = Literal[
+    "conceptual",
+    "technical",
+    "dataset",
+    "repository",
+    "decision",
+    "short_factual",
+    "emotional",
+]
+UserLevel = Literal["beginner", "intermediate", "advanced"]
 
 
 class VehicleDocument(BaseModel):
     id: str
+    content: str | None = None
     name: str
     brand: str
     model: str
@@ -29,6 +40,8 @@ class QueryFilters(BaseModel):
     max_price_inr: int | None = None
     min_range_km: int | None = None
     vehicle_type: str | None = None
+    location: str | None = None
+    location_tier: str | None = None
     brand: str | None = None
     charging_type: str | None = None
     fast_charging: bool | None = None
@@ -36,11 +49,14 @@ class QueryFilters(BaseModel):
     daily_distance_km: int | None = None
     home_charging: bool | None = None
     use_cases: list[str] = Field(default_factory=list)
+    priority: str | None = None
 
 
 class ParsedQuery(BaseModel):
     intent: ChatIntent = "info"
     rewritten_query: str
+    query_type: QueryType = "dataset"
+    user_level: UserLevel = "intermediate"
     filters: QueryFilters = Field(default_factory=QueryFilters)
     vehicle_names: list[str] = Field(default_factory=list)
     sort_by: str | None = None
@@ -59,3 +75,4 @@ class ChatAnswer(BaseModel):
     parsed_query: ParsedQuery
     matches: list[RetrievalMatch] = Field(default_factory=list)
     provider: str | None = None
+    confidence: str = "grounded"

@@ -102,6 +102,15 @@ def _normalize_vehicle_type(value: str | None) -> str:
     return text or "ev"
 
 
+def _row_metadata(row: pd.Series) -> dict[str, object]:
+    metadata: dict[str, object] = {}
+    for column, value in row.items():
+        cleaned = _safe_str(value)
+        if cleaned is not None:
+            metadata[column] = cleaned
+    return metadata
+
+
 def load_excel_as_documents(excel_path: str | Path) -> list[VehicleDocument]:
     path = Path(excel_path)
     if not path.exists():
@@ -133,31 +142,26 @@ def load_excel_as_documents(excel_path: str | Path) -> list[VehicleDocument]:
         vehicle_type = _normalize_vehicle_type(_safe_str(row.get(col_type)) if col_type else None)
         features = _split_features(row.get(col_features)) if col_features else []
 
-        metadata: dict[str, object] = {}
-        for column, value in row.items():
-            if column in {col_name, col_brand, col_model, col_type, col_price, col_range, col_battery, col_charge_time, col_charge_type, col_features}:
-                continue
-            cleaned = _safe_str(value)
-            if cleaned is not None:
-                metadata[column] = cleaned
+        metadata = _row_metadata(row)
+        metadata["source_row"] = int(idx)
 
-        documents.append(
-            VehicleDocument(
-                id=f"{_slug(full_name)}-{idx}",
-                name=full_name,
-                brand=brand or full_name.split()[0],
-                model=model or full_name,
-                vehicle_type=vehicle_type,
-                price_inr=_safe_int(row.get(col_price)) if col_price else None,
-                range_km=_safe_int(row.get(col_range)) if col_range else None,
-                battery_kwh=_safe_float(row.get(col_battery)) if col_battery else None,
-                charging_time=_safe_str(row.get(col_charge_time)) if col_charge_time else None,
-                charging_type=_safe_str(row.get(col_charge_type)) if col_charge_type else None,
-                features=features,
-                source_row=idx,
-                metadata=metadata,
-            )
+        document = VehicleDocument(
+            id=f"{_slug(full_name)}-{idx}",
+            name=full_name,
+            brand=brand or full_name.split()[0],
+            model=model or full_name,
+            vehicle_type=vehicle_type,
+            price_inr=_safe_int(row.get(col_price)) if col_price else None,
+            range_km=_safe_int(row.get(col_range)) if col_range else None,
+            battery_kwh=_safe_float(row.get(col_battery)) if col_battery else None,
+            charging_time=_safe_str(row.get(col_charge_time)) if col_charge_time else None,
+            charging_type=_safe_str(row.get(col_charge_type)) if col_charge_type else None,
+            features=features,
+            source_row=idx,
+            metadata=metadata,
         )
+        document.content = build_vehicle_text(document)
+        documents.append(document)
 
     return documents
 
@@ -165,17 +169,16 @@ def load_excel_as_documents(excel_path: str | Path) -> list[VehicleDocument]:
 def build_vehicle_text(vehicle: VehicleDocument) -> str:
     feature_text = ", ".join(vehicle.features) if vehicle.features else "No highlighted features listed"
     meta_text = ", ".join(f"{key}: {value}" for key, value in vehicle.metadata.items())
+    price = f"₹{vehicle.price_inr:,}" if vehicle.price_inr is not None else "not available"
+    range_text = f"{vehicle.range_km} km" if vehicle.range_km is not None else "not available"
+    battery_text = f"{vehicle.battery_kwh} kWh" if vehicle.battery_kwh is not None else "not available"
     return (
-        f"Vehicle: {vehicle.name}. "
-        f"Brand: {vehicle.brand}. "
-        f"Type: {vehicle.vehicle_type}. "
-        f"Price: ₹{vehicle.price_inr or 'unknown'}. "
-        f"Range: {vehicle.range_km or 'unknown'} km. "
-        f"Battery: {vehicle.battery_kwh or 'unknown'} kWh. "
-        f"Charging time: {vehicle.charging_time or 'unknown'}. "
-        f"Charging type: {vehicle.charging_type or 'unknown'}. "
-        f"Features: {feature_text}. "
-        + (f"Extra details: {meta_text}." if meta_text else "")
+        f"{vehicle.name} is a {vehicle.vehicle_type} from {vehicle.brand}. "
+        f"The listed model is {vehicle.model}. "
+        f"Its dataset price is {price}, claimed range is {range_text}, and battery capacity is {battery_text}. "
+        f"Charging time is {vehicle.charging_time or 'not available'} and charging type is {vehicle.charging_type or 'not available'}. "
+        f"Key listed features include {feature_text}. "
+        + (f"Original dataset fields: {meta_text}." if meta_text else "")
     )
 
 

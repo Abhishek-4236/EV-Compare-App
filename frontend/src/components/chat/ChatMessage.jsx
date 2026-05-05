@@ -24,6 +24,9 @@ function SourceChips({ sources }) {
               <div className="name">{source.brand} {source.model}</div>
               <div className="price">{source.price ? `₹${(source.price / 100000).toFixed(1)}L` : 'Dataset match'}</div>
               <div className="view-hint">{vehicleId ? 'View details →' : 'From current EV dataset'}</div>
+              {source.matched_on?.length ? (
+                <div className="source-match-reason">{source.matched_on.slice(0, 3).join(' · ')}</div>
+              ) : null}
             </div>
           </>
         );
@@ -94,6 +97,12 @@ export default function ChatMessage({ msg, onCopy, onRetry }) {
             >
               {msg.text}
             </ReactMarkdown>
+            {msg.confidence || msg.queryType ? (
+              <div className="ev-answer-meta" aria-label="Answer grounding">
+                {msg.confidence ? <span>{msg.confidence === 'grounded' ? 'Grounded' : msg.confidence}</span> : null}
+                {msg.queryType ? <span>{msg.queryType.replace('_', ' ')}</span> : null}
+              </div>
+            ) : null}
             <SourceChips sources={msg.sources} />
             <div className="ev-message-actions">
               <button className="ev-inline-action" onClick={toggleSpeak} type="button">

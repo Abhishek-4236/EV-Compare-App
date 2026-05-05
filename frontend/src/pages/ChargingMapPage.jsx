@@ -1,8 +1,9 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { BatteryCharging, Zap, Navigation, Info, Loader, AlertTriangle } from 'lucide-react';
+import { BatteryCharging, Zap, Navigation, Loader, AlertTriangle, Route } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+import { vehicleAPI } from '../services/api';
 
 // Fix for default Leaflet marker icons not rendering properly in React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -151,11 +152,45 @@ export default function ChargingMapPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isZoomValid, setIsZoomValid] = useState(true);
+  const [source, setSource] = useState('Bengaluru');
+  const [destination, setDestination] = useState('Pune');
+  const [vehicleRange, setVehicleRange] = useState(280);
+  const [routePlan, setRoutePlan] = useState(null);
+  const [routeLoading, setRouteLoading] = useState(false);
   
   const handleCitySelect = (city) => {
     setActiveCity(city);
     setZoomLevel(11); // Zoom into the city securely to trigger API fetch
   };
+
+  const planRoute = async () => {
+    setRouteLoading(true);
+    setError(null);
+    try {
+      const response = await vehicleAPI.planRoute({
+        source,
+        destination,
+        range_km: Number(vehicleRange),
+        start_soc_percent: 90,
+        reserve_percent: 15,
+      });
+      setRoutePlan(response.data);
+      const coords = response.data?.route?.source_coords;
+      if (coords) {
+        setActiveCity({ name: source, lat: coords.lat, lng: coords.lng });
+        setZoomLevel(6);
+      }
+    } catch (err) {
+      setError(err?.response?.data?.detail || 'Could not plan this route from bundled data.');
+    } finally {
+      setRouteLoading(false);
+    }
+  };
+
+  const routePolyline = routePlan?.route?.polyline?.map(point => [point.lat, point.lng]) || [];
+  const plannedStations = routePlan?.stations_along_route || [];
+  const plannedStopIds = new Set((routePlan?.recommended_stops || []).map(stop => stop.id));
+  const mapStations = routePlan ? plannedStations : stations;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 72px)', width: '100%', position: 'relative' }}>
@@ -177,6 +212,34 @@ export default function ChargingMapPage() {
             </h2>
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{stations.length} Mapped Providers Data</span>
           </div>
+        </div>
+
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginBottom: 16 }}>
+          <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8, display: 'block' }}>
+            Route + Charging Planner
+          </label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+            <select className="ev-select" value={source} onChange={(e) => setSource(e.target.value)}>
+              {CITIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+            </select>
+            <select className="ev-select" value={destination} onChange={(e) => setDestination(e.target.value)}>
+              {CITIES.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+            </select>
+          </div>
+          <div className="ev-input-box" style={{ marginBottom: 8 }}>
+            <label>Vehicle range (km)</label>
+            <input type="number" min="50" max="900" value={vehicleRange} onChange={(e) => setVehicleRange(e.target.value)} />
+          </div>
+          <button className="btn-primary" type="button" onClick={planRoute} disabled={routeLoading} style={{ width: '100%', justifyContent: 'center' }}>
+            {routeLoading ? <Loader size={16} className="ev-spin" /> : <Route size={16} />}
+            Plan charging stops
+          </button>
+          {routePlan && (
+            <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              <strong style={{ color: 'var(--text)' }}>{routePlan.route.estimated_distance_km} km</strong> estimated route.
+              {routePlan.route.charging_needed ? ` ${routePlan.recommended_stops.length || 'No'} charging stop(s) suggested.` : ' No charging stop needed at 90% start SOC.'}
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: 16 }}>
@@ -215,12 +278,12 @@ export default function ChargingMapPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text)' }}>
             <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png" style={{ height: 20 }} alt="DC Fast" />
             <span style={{ flex: 1 }}>DC Fast Nodes</span>
-            <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{stations.filter(s => s.isFast).length}</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{mapStations.filter(s => s.isFast || s.power_kw >= 25).length}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text)' }}>
             <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png" style={{ height: 20 }} alt="AC Standard" />
             <span style={{ flex: 1 }}>AC Standard Nodes</span>
-            <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{stations.filter(s => !s.isFast).length}</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{mapStations.filter(s => !(s.isFast || s.power_kw >= 25)).length}</span>
           </div>
           <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4, textAlign: 'right' }}>
             Data: © OpenStreetMap contributors
@@ -251,32 +314,38 @@ export default function ChargingMapPage() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {stations.map(station => (
+        {routePolyline.length > 1 && (
+          <Polyline positions={routePolyline} pathOptions={{ color: '#0ea5a4', weight: 5, opacity: 0.85 }} />
+        )}
+
+        {mapStations.map(station => (
           <Marker 
             key={station.id} 
             position={[station.lat, station.lng]}
-            icon={station.isFast ? evFastIcon : evIcon}
+            icon={(station.isFast || station.power_kw >= 25 || plannedStopIds.has(station.id)) ? evFastIcon : evIcon}
           >
             <Popup className="ev-map-popup">
               <div style={{ minWidth: 200 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, borderBottom: '1px solid var(--border)', paddingBottom: 8, marginBottom: 8 }}>
                   {station.isFast ? <Zap size={16} color="#8b5cf6" /> : <BatteryCharging size={16} color="#10b981" />}
-                  <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{station.name}</h4>
+                  <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
+                    {station.name}{plannedStopIds.has(station.id) ? ' · stop' : ''}
+                  </h4>
                 </div>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: 'var(--text-muted)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Operator:</span>
-                    <strong style={{ color: 'var(--text)' }}>{station.provider}</strong>
+                    <strong style={{ color: 'var(--text)' }}>{station.provider || station.city}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Speed:</span>
-                    <strong style={{ color: 'var(--text)' }}>{station.type}</strong>
+                    <strong style={{ color: 'var(--text)' }}>{station.type || `${station.power_kw} kW`}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Listed Ports:</span>
-                    <strong style={{ color: station.ports > 0 ? '#10b981' : 'inherit' }}>
-                      {station.ports}
+                    <strong style={{ color: station.ports > 0 || station.connector ? '#10b981' : 'inherit' }}>
+                      {station.ports || station.connector || 'N/A'}
                     </strong>
                   </div>
                 </div>

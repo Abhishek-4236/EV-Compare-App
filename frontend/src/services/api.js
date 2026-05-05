@@ -33,6 +33,7 @@ export const vehicleAPI = {
     getSubsidies: (params) => api.get('/subsidies/', { params }),
     getSubsidyPolicy: () => api.get('/subsidies/policy'),
     getMapStations: (params) => api.get('/map/stations', { params }),
+    planRoute: (data) => api.post('/map/route-plan', data),
 };
 
 export const authAPI = {

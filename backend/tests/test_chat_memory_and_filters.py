@@ -8,12 +8,22 @@ if str(BACKEND_DIR) not in sys.path:
 
 from services.ev_rag import EVRAGService
 from services.ev_chat_retrieval import vehicle_supports_fast_charging
+from core.config import settings
 
 
 class ChatMemoryAndFiltersTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._original_nvidia_enabled = settings.NVIDIA_RERANK_ENABLED
+        cls._original_nvidia_key = settings.NVIDIA_API_KEY
+        settings.NVIDIA_RERANK_ENABLED = False
+        settings.NVIDIA_API_KEY = None
         cls.rag = EVRAGService()
+
+    @classmethod
+    def tearDownClass(cls):
+        settings.NVIDIA_RERANK_ENABLED = cls._original_nvidia_enabled
+        settings.NVIDIA_API_KEY = cls._original_nvidia_key
 
     def test_follow_up_inherits_budget_segment_and_state_filters(self):
         history = []
@@ -47,7 +57,7 @@ class ChatMemoryAndFiltersTests(unittest.TestCase):
         result = self.rag.answer("Who won yesterday's cricket match?")
         self.assertEqual(result.intent, "info")
         self.assertEqual(result.matches, [])
-        self.assertIn("specialized for EV questions", result.answer)
+        self.assertEqual("Not enough data available", result.answer)
 
     def test_explicit_fast_charging_filter_returns_fast_charging_matches(self):
         result = self.rag.answer("Best EV cars under 20 lakh with fast charging only")

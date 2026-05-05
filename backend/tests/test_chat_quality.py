@@ -14,13 +14,23 @@ from services.chat_analysis import build_query_plan, normalize_query_text
 from services.retrieval import station_answer
 from database import SessionLocal
 from models import Vehicle
+from core.config import settings
 from services.query_parser import parse_user_query
 
 
 class ChatQualityTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._original_nvidia_enabled = settings.NVIDIA_RERANK_ENABLED
+        cls._original_nvidia_key = settings.NVIDIA_API_KEY
+        settings.NVIDIA_RERANK_ENABLED = False
+        settings.NVIDIA_API_KEY = None
         cls.client = TestClient(app)
+
+    @classmethod
+    def tearDownClass(cls):
+        settings.NVIDIA_RERANK_ENABLED = cls._original_nvidia_enabled
+        settings.NVIDIA_API_KEY = cls._original_nvidia_key
 
     def test_list_all_evs_is_inventory_not_compare(self):
         db = SessionLocal()
@@ -147,6 +157,9 @@ class ChatQualityTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertEqual(body["intent"], "recommendation")
+        self.assertEqual(body["query_type"], "decision")
+        self.assertEqual(body["user_level"], "intermediate")
+        self.assertEqual(body["confidence"], "medium")
         self.assertGreaterEqual(len(body["sources"]), 3)
         prices = [item["price"] for item in body["sources"][:3]]
         self.assertEqual(prices, sorted(prices))
@@ -156,6 +169,8 @@ class ChatQualityTests(unittest.TestCase):
         self.assertNotIn("Tata Ace EV 1000", names)
         for source in body["sources"][:5]:
             self.assertEqual(source["type"], "car")
+            self.assertIn("matched_on", source)
+        self.assertIn("Since daily usage and charging access are not specified", body["answer"])
 
     def test_cheapest_three_wheeler_is_sorted_by_price(self):
         response = self.client.post("/api/chat/", json={"message": "Cheapest 3-wheeler EV?"})
@@ -225,6 +240,27 @@ class ChatQualityTests(unittest.TestCase):
         self.assertIn("MG ZS EV", body["answer"])
         self.assertNotIn("Ola S1 X+", body["answer"])
 
+    def test_price_priority_sorts_by_lowest_price_inside_category(self):
+        response = self.client.post("/api/chat/", json={"message": "cheapest scooter under 1 lakh"})
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["parsed_query"]["filters"]["vehicle_type"], "scooter")
+        self.assertEqual(body["parsed_query"]["filters"]["priority"], "price")
+        prices = [source["price"] for source in body["sources"][:3]]
+        self.assertEqual(prices, sorted(prices))
+        self.assertIn("Ranking basis: lowest listed price", body["answer"])
+
+    def test_performance_priority_stays_inside_category_and_budget(self):
+        response = self.client.post("/api/chat/", json={"message": "best performance car under 25 lakh"})
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["confidence"], "high")
+        self.assertEqual(body["parsed_query"]["filters"]["priority"], "performance")
+        for source in body["sources"]:
+            self.assertEqual(source["type"], "car")
+            self.assertLessEqual(source["price"], 2500000)
+        self.assertIn("Ranking basis: performance proxy", body["answer"])
+
     def test_comparison_follow_up_which_is_better_reuses_recent_pair(self):
         first = self.client.post("/api/chat/", json={"message": "Compare Ather 450X vs Ola S1 Pro"})
         self.assertEqual(first.status_code, 200)
@@ -237,6 +273,24 @@ class ChatQualityTests(unittest.TestCase):
         self.assertEqual(body["intent"], "comparison")
         names = [item["name"] for item in body["sources"][:2]]
         self.assertEqual(names, ["Ather 450X", "Ola S1 Pro"])
+
+    def test_budget_correction_follow_up_keeps_previous_car_segment(self):
+        first = self.client.post("/api/chat/", json={"message": "So tell me the best car under 50lakhs?"})
+        self.assertEqual(first.status_code, 200)
+        session_id = first.json()["session_id"]
+
+        second = self.client.post("/api/chat/", json={"message": "Are you sure i said 20lakhs?", "session_id": session_id})
+        self.assertEqual(second.status_code, 200)
+        body = second.json()
+
+        self.assertEqual(body["intent"], "recommendation")
+        self.assertEqual(body["parsed_query"]["filters"]["vehicle_type"], "car")
+        self.assertEqual(body["parsed_query"]["filters"]["max_price_inr"], 2000000)
+        self.assertGreaterEqual(len(body["sources"]), 1)
+        for source in body["sources"]:
+            self.assertEqual(source["type"], "car")
+            self.assertLessEqual(source["price"], 2000000)
+        self.assertNotIn("Ola S1 X+", body["answer"])
 
 
 if __name__ == "__main__":

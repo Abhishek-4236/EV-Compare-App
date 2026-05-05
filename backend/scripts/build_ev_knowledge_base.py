@@ -12,6 +12,7 @@ from services.faiss_store import FaissStore
 
 
 def main() -> None:
+    skip_embeddings = "--skip-embeddings" in sys.argv
     documents = load_excel_as_documents(settings.EV_EXCEL_PATH)
     if not documents:
         raise RuntimeError("No vehicle rows were parsed from the Excel dataset.")
@@ -20,7 +21,11 @@ def main() -> None:
     save_documents(documents, settings.EV_JSON_PATH)
     print(f"Saved structured JSON to {settings.EV_JSON_PATH}")
 
-    payloads = [build_vehicle_text(document) for document in documents]
+    if skip_embeddings:
+        print("Skipped embedding and FAISS rebuild; existing index files were left unchanged.")
+        return
+
+    payloads = [document.content or build_vehicle_text(document) for document in documents]
     vectors = embed_texts(payloads)
     print(f"Generated {len(vectors)} local embeddings using BAAI/bge-small-en-v1.5")
 

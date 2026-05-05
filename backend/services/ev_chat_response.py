@@ -26,19 +26,101 @@ def format_vehicle_snapshot(vehicle: VehicleDocument) -> str:
     return ", ".join(parts)
 
 
+def _format_advisor_answer(
+    *,
+    answer: str,
+    why: list[str] | str,
+    suggestion: str,
+    optional: str | None = None,
+) -> str:
+    why_text = "\n".join(f"- {item}" for item in why) if isinstance(why, list) else why
+    lines = [answer.strip()]
+    if why_text.strip():
+        lines.extend(["", why_text.strip()])
+    lines.extend(["", suggestion.strip()])
+    if optional:
+        lines.extend(["", optional.strip()])
+    return "\n".join(lines)
+
+
+def _intent_label(parsed: ParsedQuery) -> str:
+    if parsed.intent == "comparison":
+        return "Comparison"
+    if parsed.intent == "recommendation":
+        return "Recommendation"
+    goal = (parsed.user_goal or parsed.rewritten_query or "").lower()
+    if any(token in goal for token in ["subsidy", "fame", "pm e-drive", "pm e drive", "policy", "incentive"]):
+        return "Policy/Subsidy"
+    if any(token in goal for token in ["tco", "total cost", "running cost", "petrol", "cost/km", "cost per km"]):
+        return "Cost (TCO)"
+    return "Technical"
+
+
+def _extracted_context(parsed: ParsedQuery) -> list[str]:
+    filters = parsed.filters
+    vehicle_type = filters.vehicle_type or "not specified"
+    budget = "not specified"
+    if filters.min_price_inr is not None and filters.max_price_inr is not None:
+        budget = f"{format_price(filters.min_price_inr)} to {format_price(filters.max_price_inr)}"
+    elif filters.max_price_inr is not None:
+        budget = f"up to {format_price(filters.max_price_inr)}"
+    elif filters.min_price_inr is not None:
+        budget = f"above {format_price(filters.min_price_inr)}"
+    daily = f"{filters.daily_distance_km} km/day" if filters.daily_distance_km is not None else "not specified"
+    location = filters.location or filters.state or "not specified"
+    return [
+        f"Budget: {budget}; daily usage: {daily}; location: {location}; vehicle type: {vehicle_type}.",
+    ]
+
+
+def _recommendation_assumption(parsed: ParsedQuery) -> str | None:
+    filters = parsed.filters
+    if (
+        filters.vehicle_type
+        and (filters.max_price_inr is not None or filters.min_price_inr is not None)
+        and not filters.use_cases
+        and filters.daily_distance_km is None
+    ):
+        return "Since daily usage and charging access are not specified, I ranked these by overall value within your segment and budget."
+    return None
+
+
+def _charging_location_guidance(parsed: ParsedQuery) -> str | None:
+    filters = parsed.filters
+    if filters.home_charging is False:
+        return "No home charging is a real constraint, so prefer EVs with practical public/DC charging access or delay the purchase until charging is solved."
+    if filters.location_tier == "tier_1":
+        return "In a Tier 1 city, public charging is usually more practical, but home or workplace charging is still the best base setup."
+    if filters.location_tier == "tier_2_3":
+        return "In Tier 2/3 locations, prioritize dependable home charging before choosing the EV."
+    return None
+
+
+def _route_guidance(parsed: ParsedQuery) -> str | None:
+    if {"highway", "weekend", "family"} & set(parsed.filters.use_cases):
+        return "For long trips or highway use, use the route planner and check charging stops before finalizing the EV."
+    return None
+
+
 def build_clarification_answer(query: str, parsed: ParsedQuery) -> str:
     if parsed.intent == "comparison":
-        return (
-            "I can compare EVs, but I need the exact two model names from the current dataset.\n\n"
-            "Tell me both models directly, for example: `Compare Tata Nexon EV and MG ZS EV`."
+        return _format_advisor_answer(
+            answer="I can compare EVs, but I need the exact two model names from the current dataset.",
+            why=_extracted_context(parsed),
+            suggestion="Tell me both models directly, for example: `Compare Tata Nexon EV and MG ZS EV`.",
+            optional="Which two EV models should I compare?",
         )
 
     if parsed.intent == "recommendation":
         if parsed.filters.daily_distance_km is not None:
-            return (
-                f"A {parsed.filters.daily_distance_km} km daily commute is very EV-friendly.\n\n"
-                "To recommend the right fit, tell me your budget, whether you want a scooter/car/3-wheeler, and whether home charging is available.\n\n"
-                "I can suggest the best EVs once those anchors are clear."
+            return _format_advisor_answer(
+                answer=f"A {parsed.filters.daily_distance_km} km daily commute is very EV-friendly, but I need one more buying anchor before recommending a model.",
+                why=[
+                    "Range need depends on segment, budget, and charging access.",
+                    f"EV running cost is typically around ₹{parsed.filters.daily_distance_km}/day versus petrol around ₹{parsed.filters.daily_distance_km * 8}/day for this usage.",
+                ],
+                suggestion="Tell me your budget, whether you want a scooter/car/3-wheeler, and whether home charging is available. I can suggest the best EVs once those anchors are clear.",
+                optional="What is your budget?",
             )
 
         missing_fields: list[str] = []
@@ -59,16 +141,18 @@ def build_clarification_answer(query: str, parsed: ParsedQuery) -> str:
             ask = "Tell me your budget, whether you want a scooter/bike/car/3-wheeler, and whether home charging is available."
 
         prompt_bits = ", ".join(missing_fields) if missing_fields else "one more preference"
-        return (
-            f"I can build a solid EV shortlist, but I still need {prompt_bits} before I make the recommendation tighter.\n\n"
-            f"{ask}\n\n"
-            "I can suggest the best EVs once those anchors are clear.\n\n"
-            "If you want, I can start with either `family EV car under 18 lakh` or `city scooter under 1.2 lakh`."
+        return _format_advisor_answer(
+            answer=f"I can build a solid EV shortlist, but I still need {prompt_bits} before I make the recommendation tighter.",
+            why="A useful EV recommendation depends on budget, segment, charging access, and usage.",
+            suggestion=f"{ask} I can suggest the best EVs once those anchors are clear.",
+            optional="What budget and vehicle type should I use?",
         )
 
-    return (
-        "I need a bit more specificity to stay grounded.\n\n"
-        "Ask about a model, a comparison, a budget-based shortlist, charging, subsidies, or an EV concept like TCO."
+    return _format_advisor_answer(
+        answer="I need a bit more specificity to stay grounded.",
+        why="I can help best when the question includes a model, budget, segment, charging need, location, or use case.",
+        suggestion="Ask about a model, a comparison, a budget-based shortlist, charging, subsidies, or an EV concept like TCO.",
+        optional="What EV decision do you want help with?",
     )
 
 
@@ -84,26 +168,20 @@ def build_inventory_answer(total: int, counts: dict[str, int]) -> str:
 def build_spec_answer(vehicle: VehicleDocument, parsed: ParsedQuery, query: str | None = None) -> str:
     state_note = get_state_policy_note(parsed.filters.state)
     q = (query or "").lower()
-    lines = [
-        f"{vehicle.name} is the closest grounded match in the current EViq dataset.",
-        "",
-        f"Snapshot: {format_vehicle_snapshot(vehicle)}.",
-    ]
+    answer = f"{vehicle.name} is the closest grounded match in the current EViq dataset. Snapshot: {format_vehicle_snapshot(vehicle)}."
+    why: list[str] = []
     if "top speed" in q:
-        lines.extend(["", "Top speed: unavailable in the current dataset."])
+        why.append("Top speed: unavailable in the current dataset.")
     if "warranty" in q:
-        lines.extend(["", "Warranty: unavailable in the current dataset."])
+        why.append("Warranty: unavailable in the current dataset.")
     if state_note:
-        lines.extend(["", f"State context: {state_note}"])
-    lines.extend(
-        [
-            "",
-            "Caveat: if you need on-road price, dealer stock, or live subsidy, verify the latest quote.",
-            "",
-            f"Follow-up: do you want a deeper comparison against another EV in the same segment as {vehicle.name}?",
-        ]
+        why.append(f"State context: {state_note}")
+    return _format_advisor_answer(
+        answer=answer,
+        why=why,
+        suggestion="If you need on-road price, dealer stock, or live subsidy, verify the latest quote.",
+        optional=f"Do you want a deeper comparison against another EV in the same segment as {vehicle.name}?",
     )
-    return "\n".join(lines)
 
 
 def _comparison_value(value: object, fallback: str = "Unavailable") -> str:
@@ -136,10 +214,10 @@ def _build_comparison_lead(left: VehicleDocument, right: VehicleDocument) -> str
         range_gap = abs((left.range_km or 0) - (right.range_km or 0))
         if range_gap <= 20:
             return (
-                f"Short answer: {cheaper.name} looks like the stronger value pick, while {pricier.name} is the more premium option."
+                f"{cheaper.name} looks like the stronger value pick, while {pricier.name} is the more premium option."
             )
     return (
-        f"Short answer: {left.name} and {right.name} are a trade-off, so the better pick depends on whether you care more about price, range, battery size, or charging setup."
+        f"{left.name} and {right.name} are a trade-off, so the better pick depends on whether you care more about price, range, battery size, or charging setup."
     )
 
 
@@ -180,7 +258,12 @@ def _build_comparison_highlights(left: VehicleDocument, right: VehicleDocument) 
 def build_comparison_answer(matches: list[RetrievalMatch], parsed: ParsedQuery) -> str:
     vehicles = [match.vehicle for match in matches[:2]]
     if len(vehicles) < 2:
-        return "I can compare EVs, but I need two grounded models from the current dataset."
+        return _format_advisor_answer(
+            answer="I can compare EVs, but I need two grounded models from the current dataset.",
+            why=_extracted_context(parsed),
+            suggestion="Send the exact two model names from the app dataset.",
+            optional="Which two models should I compare?",
+        )
 
     left, right = vehicles
     rows = [
@@ -197,22 +280,63 @@ def build_comparison_answer(matches: list[RetrievalMatch], parsed: ParsedQuery) 
     state_note = get_state_policy_note(parsed.filters.state)
     lead = _build_comparison_lead(left, right)
     highlights = _build_comparison_highlights(left, right)
-    caveat = "Caveat: missing or policy-sensitive fields should still be verified before purchase."
-    follow_up = "Follow-up: tell me what matters most to you like price, charging speed, highway use, or family comfort, and I’ll name the better fit."
-    pieces = [lead, "", *rows]
+    pieces = [lead, "", *rows, ""]
     if highlights:
-        pieces.extend(["", "Quick take:"])
         pieces.extend(f"- {item}" for item in highlights)
     if state_note:
-        pieces.extend(["", f"State context: {state_note}"])
-    pieces.extend(["", caveat, "", follow_up])
+        pieces.append(f"- State context: {state_note}")
+    pieces.extend(
+        [
+            "",
+            "Pick based on your main constraint: price, charging speed, highway use, or family comfort. Missing or policy-sensitive fields should still be verified before purchase.",
+            "",
+            "Tell me what matters most and I’ll name the better fit.",
+        ]
+    )
     return "\n".join(pieces)
 
 
 def build_recommendation_answer(query: str, parsed: ParsedQuery, matches: list[RetrievalMatch]) -> str:
     top = matches[:3]
-    names = ", ".join(match.vehicle.name for match in top)
-    lines = [f"The strongest grounded matches for this request are {names}.", ""]
+    q = (query or "").lower()
+    if (
+        parsed.filters.max_price_inr is not None
+        and any(token in q for token in ["are you sure", "did i say", "i said", "meant", "actually"])
+    ):
+        answer = f"With the corrected budget of {format_price(parsed.filters.max_price_inr)}, I’d shortlist these EVs:"
+    else:
+        if parsed.filters.vehicle_type and parsed.filters.max_price_inr is not None:
+            answer = f"For a {parsed.filters.vehicle_type} under {format_price(parsed.filters.max_price_inr)}, I’d shortlist these EVs:"
+        elif parsed.filters.vehicle_type:
+            answer = f"For a {parsed.filters.vehicle_type}, I’d shortlist these EVs:"
+        else:
+            answer = "I’d shortlist these EVs:"
+
+    lines = [answer, ""]
+    assumption = _recommendation_assumption(parsed)
+    if assumption:
+        lines.extend([assumption, ""])
+
+    context_notes: list[str] = []
+    if parsed.filters.priority:
+        priority_labels = {
+            "price": "lowest listed price",
+            "range": "highest listed range",
+            "performance": "performance proxy: range, battery size, and fast-charging support",
+            "charging": "charging practicality and fast-charging support",
+            "value": "overall value from listed price, range, and battery size",
+        }
+        context_notes.append(f"Ranking basis: {priority_labels.get(parsed.filters.priority, parsed.filters.priority)}.")
+
+    charging_note = _charging_location_guidance(parsed)
+    if charging_note:
+        context_notes.append(charging_note)
+    route_note = _route_guidance(parsed)
+    if route_note:
+        context_notes.append(route_note)
+    if parsed.filters.daily_distance_km is not None:
+        daily = parsed.filters.daily_distance_km
+        context_notes.append(f"Running-cost estimate: EV about ₹{daily}/day versus petrol about ₹{daily * 8}/day, saving roughly ₹{daily * 7}/day at {daily} km/day.")
 
     for index, match in enumerate(top, start=1):
         vehicle = match.vehicle
@@ -229,8 +353,10 @@ def build_recommendation_answer(query: str, parsed: ParsedQuery, matches: list[R
             support_bits.append("is more practical without dependable home charging")
 
         direct_reason = "; ".join(support_bits) or "matches the current mix of budget, segment, and use-case filters"
-        lines.append(f"{index}. **{vehicle.name}** — {format_vehicle_snapshot(vehicle)}.")
-        lines.append(f"   Why it fits: {direct_reason}.")
+        lines.append(f"{index}. **{vehicle.name}** - {format_vehicle_snapshot(vehicle)}. Best fit: {direct_reason}.")
+
+    if context_notes:
+        lines.extend(["", *[f"- {item}" for item in context_notes]])
 
     state_note = get_state_policy_note(parsed.filters.state)
     if state_note:
@@ -241,14 +367,6 @@ def build_recommendation_answer(query: str, parsed: ParsedQuery, matches: list[R
                 f"Indicative segment support on the first option: central about ₹{central:,}, state about ₹{state_support:,}."
             )
 
-    lines.extend(
-        [
-            "",
-            "Caveat: I am staying inside the current dataset, so live dealer pricing, final subsidy eligibility, and real-world route charging still need verification.",
-            "",
-            "Follow-up: if you want, I can now narrow this by lowest running cost, best highway fit, or easiest charging setup.",
-        ]
-    )
     return "\n".join(lines)
 
 
@@ -261,52 +379,56 @@ def build_no_match_answer(parsed: ParsedQuery) -> str:
     if parsed.filters.min_range_km:
         hints.append(f"range above {parsed.filters.min_range_km} km")
     joined = ", ".join(hints) if hints else "your current filters"
-    return (
-        f"I could not find a grounded match inside {joined}.\n\n"
-        "Try relaxing one filter, or tell me which requirement matters most: budget, segment, charging, or highway range."
+    return _format_advisor_answer(
+        answer=f"I could not find a grounded match inside {joined}.",
+        why="The current filters are too tight for the available EV dataset.",
+        suggestion="Try relaxing one filter, or tell me which requirement matters most: budget, segment, charging, or highway range.",
     )
 
 
 def build_out_of_domain_answer() -> str:
-    return (
-        "I’m specialized for EV questions on EViq India.\n\n"
-        "Ask me about EV recommendations, comparisons, charging, subsidies, TCO, batteries, or a specific electric model from the current dataset."
-    )
+    return "Not enough data available"
 
 
 def build_knowledge_answer(query: str, article: KnowledgeArticle | None) -> str:
     q = (query or "").lower()
-    if "tco" in q or "total cost of ownership" in q:
-        lead = "TCO means Total Cost of Ownership."
-        follow_up = "Follow-up: if you want, I can break TCO into purchase price, charging cost, maintenance, insurance, and resale assumptions."
+    if any(token in q for token in ["tco", "total cost of ownership", "running cost", "petrol"]):
+        lead = "TCO means Total Cost of Ownership: purchase price plus running cost, charging/fuel, maintenance, insurance, and resale."
+        daily_match = re.search(r"(\d+)\s*km", q)
+        savings_note = "Based on typical EV trends, EV running cost is about ₹1/km and petrol is about ₹8/km, so the saving is roughly ₹7/km."
+        if daily_match:
+            daily = int(daily_match.group(1))
+            savings_note = f"Based on typical EV trends, at {daily} km/day the running cost is about ₹{daily}/day for an EV versus ₹{daily * 8}/day for petrol, saving roughly ₹{daily * 7}/day."
+        follow_up = "Share your daily km and vehicle type if you want a simple monthly savings estimate."
     elif "rain" in q and any(token in q for token in ["ev", "evs", "charge", "charging", "drive", "work"]):
         lead = "Modern EVs are generally safe in rain when the vehicle and charger are in good condition."
-        follow_up = "Follow-up: if you want, I can explain charging safety, flood risk, or what to check after water exposure."
+        savings_note = None
+        follow_up = "I can explain charging safety, flood risk, or what to check after water exposure."
     elif "limitations" in q:
         lead = "My limits are mostly about data boundaries, not EV basics."
-        follow_up = "Follow-up: I can still help if you want a shortlist with clearly marked caveats."
+        savings_note = None
+        follow_up = "I can still help with a shortlist and clearly marked caveats."
     elif "subsid" in q:
         lead = "Subsidies are policy-sensitive, so the safe answer is to treat them as a snapshot rather than a permanent fixed number."
-        follow_up = "Follow-up: tell me your state and segment if you want a grounded policy-context answer."
+        savings_note = None
+        follow_up = "Tell me your state and segment if you want a grounded policy-context answer."
     else:
         lead = article.title if article else "Here is the grounded EV concept answer from the knowledge base."
-        follow_up = "Follow-up: if you want, I can connect this concept back to a real EV shortlist in the dataset."
+        savings_note = None
+        follow_up = "I can connect this concept back to a real EV shortlist in the dataset."
 
-    lines = [lead]
+    why: list[str] = []
+    if savings_note:
+        why.append(savings_note)
     if article:
         support = extract_supporting_lines(article, query, limit=4)
         if support:
-            lines.extend(["", "Why this matters:"])
-            for item in support:
-                lines.append(f"- {item}")
-            lines.extend(["", f"Source: {article.title}."])
+            why.extend(support)
+        why.append(f"Source: {article.title}.")
 
-    lines.extend(
-        [
-            "",
-            "Caveat: concept answers come from the EViq knowledge base, while model-specific decisions still depend on the current vehicle dataset.",
-            "",
-            follow_up,
-        ]
+    return _format_advisor_answer(
+        answer=lead,
+        why=why,
+        suggestion="Use this as guidance from the EViq knowledge base; model-specific decisions still depend on the current vehicle dataset.",
+        optional=follow_up,
     )
-    return "\n".join(lines)

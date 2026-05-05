@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import ChatFeedback, ChatMessage, ChatSession, Vehicle
-from services.ev_rag import ev_rag_service
+from rag.pipeline import ev_rag_service
 from services.llm import configured_provider_summary
 from .auth import JWT_ALG, JWT_SECRET, read_bearer_token
 
@@ -129,8 +129,11 @@ def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session
             "answer": "Please type an EV question and I’ll help.",
             "intent": "info",
             "parsed_query": None,
+            "query_type": "short_factual",
+            "user_level": "beginner",
             "sources": [],
             "provider": None,
+            "confidence": "no_answer",
         }
 
     session = get_or_create_session(request, user_id, db)
@@ -152,8 +155,11 @@ def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session
             "answer": answer,
             "intent": "info",
             "parsed_query": None,
+            "query_type": "dataset",
+            "user_level": "intermediate",
             "sources": [],
             "provider": None,
+            "confidence": "grounded",
         }
     try:
         result = ev_rag_service.answer(request.message, history)
@@ -169,8 +175,11 @@ def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session
             "answer": answer,
             "intent": "info",
             "parsed_query": None,
+            "query_type": "dataset",
+            "user_level": "intermediate",
             "sources": [],
             "provider": None,
+            "confidence": "no_answer",
         }
 
     save_assistant_message(db, session.id, result.answer)
@@ -217,17 +226,23 @@ def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session
                 "battery_kwh": match.vehicle.battery_kwh,
                 "charging_time": match.vehicle.charging_time,
                 "score": match.score,
+                "matched_on": match.matched_on,
+                "confidence": result.confidence,
             }
         )
 
+    parsed_payload = result.parsed_query.model_dump()
     return {
         "success": True,
         "session_id": session.id,
         "answer": result.answer,
         "intent": result.intent,
-        "parsed_query": result.parsed_query.model_dump(),
+        "parsed_query": parsed_payload,
+        "query_type": parsed_payload.get("query_type"),
+        "user_level": parsed_payload.get("user_level"),
         "sources": source_payload,
         "provider": result.provider,
+        "confidence": result.confidence,
     }
 
 
@@ -243,12 +258,15 @@ async def chat_stream(request: ChatRequest, user_id: int | None = Depends(get_op
     session_id = payload["session_id"]
     sources = payload.get("sources", [])
     provider = payload.get("provider")
+    confidence = payload.get("confidence")
+    query_type = payload.get("query_type")
+    user_level = payload.get("user_level")
 
     async def event_stream():
         yield f"data: {json.dumps({'type': 'session', 'session_id': session_id})}\n\n"
         for token in answer.split(" "):
             yield f"data: {json.dumps({'type': 'chunk', 'content': token + ' '})}\n\n"
-        yield f"data: {json.dumps({'type': 'done', 'sources': sources, 'provider': provider})}\n\n"
+        yield f"data: {json.dumps({'type': 'done', 'sources': sources, 'provider': provider, 'confidence': confidence, 'query_type': query_type, 'user_level': user_level})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 

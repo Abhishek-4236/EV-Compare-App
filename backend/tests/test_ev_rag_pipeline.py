@@ -1,6 +1,7 @@
 import unittest
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 if str(BACKEND_DIR) not in sys.path:
@@ -8,9 +9,11 @@ if str(BACKEND_DIR) not in sys.path:
 
 from core.config import settings
 from services.ev_catalog import build_vehicle_text, load_excel_as_documents
+from services.ev_chat_retrieval import hybrid_retrieve
 from services.ev_rag import EVRAGService
-from services.ev_rag_types import ParsedQuery
+from services.ev_rag_types import ParsedQuery, RetrievalMatch
 from services.faiss_store import FaissStore
+from services.nvidia_reranker import is_nvidia_rerank_configured, nvidia_rerank_matches
 from services.query_parser import parse_user_query
 
 try:
@@ -23,21 +26,32 @@ except Exception:
 class EVRAGPipelineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._original_nvidia_enabled = settings.NVIDIA_RERANK_ENABLED
+        cls._original_nvidia_key = settings.NVIDIA_API_KEY
+        settings.NVIDIA_RERANK_ENABLED = False
+        settings.NVIDIA_API_KEY = None
         cls.rag = EVRAGService()
+
+    @classmethod
+    def tearDownClass(cls):
+        settings.NVIDIA_RERANK_ENABLED = cls._original_nvidia_enabled
+        settings.NVIDIA_API_KEY = cls._original_nvidia_key
 
     def test_excel_is_normalized_into_documents(self):
         documents = load_excel_as_documents(settings.EV_EXCEL_PATH)
         self.assertGreater(len(documents), 0)
         self.assertTrue(documents[0].id)
         self.assertTrue(documents[0].name)
+        self.assertTrue(documents[0].content)
         self.assertIsInstance(documents[0].features, list)
+        self.assertIn("source_row", documents[0].metadata)
 
     def test_vehicle_text_builder_includes_core_fields(self):
         document = load_excel_as_documents(settings.EV_EXCEL_PATH)[0]
         text = build_vehicle_text(document)
         self.assertIn(document.name, text)
-        self.assertIn("Price:", text)
-        self.assertIn("Range:", text)
+        self.assertIn("dataset price", text)
+        self.assertIn("claimed range", text)
 
     @unittest.skipUnless(HAS_FAISS, "faiss-cpu is not installed in this environment")
     def test_faiss_store_returns_results(self):
@@ -55,6 +69,7 @@ class EVRAGPipelineTests(unittest.TestCase):
         parsed = parse_user_query("best electric bike under 2 lakh with 150 km range")
         self.assertIsInstance(parsed, ParsedQuery)
         self.assertEqual(parsed.intent, "recommendation")
+        self.assertEqual(parsed.query_type, "decision")
         self.assertEqual(parsed.filters.vehicle_type, "bike")
         self.assertEqual(parsed.filters.min_range_km, 150)
 
@@ -183,6 +198,64 @@ class EVRAGPipelineTests(unittest.TestCase):
         self.assertEqual(result.intent, "info")
         self.assertEqual(result.matches, [])
         self.assertIn("Maharashtra", result.answer)
+
+    def test_nvidia_reranker_is_disabled_without_key(self):
+        original_enabled = settings.NVIDIA_RERANK_ENABLED
+        original_key = settings.NVIDIA_API_KEY
+        try:
+            settings.NVIDIA_RERANK_ENABLED = True
+            settings.NVIDIA_API_KEY = None
+            self.assertFalse(is_nvidia_rerank_configured())
+        finally:
+            settings.NVIDIA_RERANK_ENABLED = original_enabled
+            settings.NVIDIA_API_KEY = original_key
+
+    def test_nvidia_reranker_reorders_candidates_when_configured(self):
+        documents = load_excel_as_documents(settings.EV_EXCEL_PATH)
+        matches = [
+            RetrievalMatch(vehicle=documents[0], score=0.1, matched_on=["rank"]),
+            RetrievalMatch(vehicle=documents[1], score=0.2, matched_on=["rank"]),
+        ]
+        response_body = b'{"rankings":[{"index":1,"logit":9.5},{"index":0,"logit":1.2}]}'
+
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return None
+
+            def read(self):
+                return response_body
+
+        original_enabled = settings.NVIDIA_RERANK_ENABLED
+        original_key = settings.NVIDIA_API_KEY
+        try:
+            settings.NVIDIA_RERANK_ENABLED = True
+            settings.NVIDIA_API_KEY = "test-key"
+            with patch("services.nvidia_reranker.request.urlopen", return_value=FakeResponse()):
+                reranked = nvidia_rerank_matches("best scooter", matches, top_k=2)
+            self.assertEqual(reranked[0].vehicle.id, documents[1].id)
+            self.assertIn("nvidia_rerank", reranked[0].matched_on)
+        finally:
+            settings.NVIDIA_RERANK_ENABLED = original_enabled
+            settings.NVIDIA_API_KEY = original_key
+
+    def test_hybrid_retrieve_stays_local_when_nvidia_fails(self):
+        documents = load_excel_as_documents(settings.EV_EXCEL_PATH)
+        parsed = parse_user_query("best scooter under 1 lakh")
+        original_enabled = settings.NVIDIA_RERANK_ENABLED
+        original_key = settings.NVIDIA_API_KEY
+        try:
+            settings.NVIDIA_RERANK_ENABLED = True
+            settings.NVIDIA_API_KEY = "test-key"
+            with patch("services.nvidia_reranker.request.urlopen", side_effect=TimeoutError("timeout")):
+                matches = hybrid_retrieve("best scooter under 1 lakh", parsed, documents, store=None, top_k=3)
+            self.assertGreaterEqual(len(matches), 1)
+            self.assertFalse(any("nvidia_rerank" in match.matched_on for match in matches))
+        finally:
+            settings.NVIDIA_RERANK_ENABLED = original_enabled
+            settings.NVIDIA_API_KEY = original_key
 
 
 if __name__ == "__main__":

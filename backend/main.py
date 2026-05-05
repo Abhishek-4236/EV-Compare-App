@@ -2,11 +2,11 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
-from routers import vehicles, compare, recommend, chat, subsidies, map, auth, garage, admin
+from routes import vehicles, compare, recommend, chat, subsidies, map, auth, garage, admin
 import logging
 
 from core.config import settings
-from services.ev_rag import ev_rag_service
+from rag.pipeline import ev_rag_service
 from services.startup_sync import ensure_data_ready_on_startup, maybe_open_startup_url
 
 app = FastAPI(

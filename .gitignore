@@ -3,6 +3,11 @@ __pycache__/
 *$py.class
 .env
 .venv
+**/.venv/
+node_modules/
+**/node_modules/
+dist/
+**/dist/
 env/
 venv/
 ENV/
@@ -14,5 +19,7 @@ include/
 *.db
 *.log
 .DS_Store
+coverage/
+.pytest_cache/
 # Ignore alembic's local configuration if it contains credentials
 backend/alembic.ini

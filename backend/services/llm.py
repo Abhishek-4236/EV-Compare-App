@@ -10,21 +10,22 @@ from core.config import settings
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are an expert EV assistant.
+SYSTEM_PROMPT = """You are an expert EV assistant for India.
 
-- Answer like a real human expert
-- Start with a direct answer
-- Then explain clearly
-- Use bullet points if needed
-- Keep responses clean and readable
+- Answer like a real human expert: short, structured, practical, and specific.
+- Help across 2W, 3W, 4W, buses, and commercial EVs.
+- Do not use rigid labels like Answer, Why, Suggestion, or Optional.
+- Prefer tables for comparisons and structured lists for recommendations.
+- Detect the user's intent: Recommendation, Comparison, Cost (TCO), Technical, or Policy/Subsidy.
+- Preserve extracted anchors when present: budget, daily usage, location, and vehicle type.
+- For TCO, preserve the app rule that EV running cost is about ₹1/km and petrol is about ₹8/km when that appears in the draft.
 
-Rules:
-- Use dataset context when available
-- If not found -> say honestly and give general EV info
-- Never hallucinate
-- Handle unclear or broken questions
-- Ask clarification if needed
-- Keep tone natural and helpful"""
+Strict grounding rules:
+- Use only the provided dataset/context and the grounded draft.
+- Do not add outside facts, live market claims, or assumptions.
+- If context is missing or weak, return exactly: Not enough data available.
+- Preserve vehicle names, numbers, caveats, and table rows from the draft/context.
+- Ask a clarification question when the request is vague."""
 
 
 def _clean_text_block(text: str, max_chars: int = 420) -> str:
@@ -75,12 +76,14 @@ def _build_user_prompt(
     history: list[dict[str, str]] | None,
     general_only: bool,
     draft_answer: str,
+    query_type: str | None = None,
+    user_level: str | None = None,
 ) -> str:
     context_block = "\n".join(f"{index}. {chunk}" for index, chunk in enumerate(context_chunks, start=1)) or "None"
     grounding_note = (
-        "No relevant dataset context was found. Answer using general EV knowledge only, and clearly say it is general guidance."
+        "No relevant dataset context was found. Return exactly: Not enough data available."
         if general_only or not context_chunks
-        else "Use the retrieved context for any model-specific, pricing, charging, or policy claims."
+        else "Use the retrieved context for every factual claim."
     )
     return (
         "You are improving a grounded EV answer so it feels natural and conversational.\n\n"
@@ -92,13 +95,19 @@ def _build_user_prompt(
         "- Never replace a compared vehicle with a different model, even if names seem similar.\n"
         "- If the draft contains a markdown table, preserve the same rows, values, and model order.\n"
         "- If the user asks for table format, keep the answer in markdown table format.\n"
+        "- Do not add rigid section labels like Answer, Why, Suggestion, or Optional.\n"
         "- If you are not fully confident, stay very close to the draft instead of improvising.\n"
         "- Start with a direct answer.\n"
         "- Then explain clearly.\n"
+        "- Adapt depth to the detected user level: beginner means plain language, intermediate means concise reasoning, advanced means precise trade-offs.\n"
+        "- Adapt structure to the query type: conceptual uses explanation, decision uses comparison and recommendation, dataset uses direct grounded answer, short factual stays brief.\n"
         "- Use bullets only when they genuinely help readability.\n"
         "- Do not output labels like 'User question:' or overly robotic section headings.\n"
-        "- If the draft already says context is general, preserve that honesty.\n"
+        "- If the draft says 'Not enough data available', return exactly that sentence.\n"
+        "- Do not include unsupported general guidance.\n"
         f"- {grounding_note}\n\n"
+        f"Detected query type: {query_type or 'dataset'}\n"
+        f"Detected user level: {user_level or 'intermediate'}\n\n"
         f"User question:\n{query}\n\n"
         f"Grounded draft answer to rewrite:\n{draft_answer}\n\n"
         f"Recent chat context:\n{_format_history(history)}\n\n"
@@ -181,7 +190,12 @@ def generate_chat_response(
     draft_answer: str,
     history: list[dict[str, str]] | None = None,
     general_only: bool = False,
+    query_type: str | None = None,
+    user_level: str | None = None,
 ) -> tuple[str | None, str | None]:
+    if general_only or not context_chunks:
+        return None, None
+
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {
@@ -192,11 +206,13 @@ def generate_chat_response(
                 history=history,
                 general_only=general_only,
                 draft_answer=draft_answer,
+                query_type=query_type,
+                user_level=user_level,
             ),
         },
     ]
 
-    if settings.HF_API_KEY and settings.GROQ_MODEL:
+    if settings.HF_MODEL_ENABLED and settings.HF_API_KEY and settings.GROQ_MODEL:
         try:
             answer = _generate_with_hf_router_chat(settings.GROQ_MODEL, messages)
             if answer:
@@ -204,7 +220,7 @@ def generate_chat_response(
         except Exception as exc:
             logger.warning("Primary routed generation failed: %s", exc)
 
-    if settings.GROQ_API_KEY and ":" not in (settings.GROQ_MODEL or ""):
+    if settings.GROQ_MODEL_ENABLED and settings.GROQ_API_KEY and ":" not in (settings.GROQ_MODEL or ""):
         try:
             answer = _generate_with_groq_direct(messages)
             if answer:
@@ -212,7 +228,7 @@ def generate_chat_response(
         except Exception as exc:
             logger.warning("Direct Groq generation failed: %s", exc)
 
-    if settings.HF_API_KEY and settings.HF_MODEL:
+    if settings.HF_MODEL_ENABLED and settings.HF_API_KEY and settings.HF_MODEL:
         try:
             answer = _generate_with_hf_router_chat(settings.HF_MODEL, messages)
             if answer:
@@ -228,8 +244,14 @@ def configured_provider_summary() -> dict[str, Any]:
         "primary_model": settings.GROQ_MODEL,
         "fallback_model": settings.HF_MODEL,
         "groq_configured": bool(settings.GROQ_API_KEY),
+        "groq_enabled": bool(settings.GROQ_MODEL_ENABLED),
         "groq_model": settings.GROQ_MODEL,
         "hf_configured": bool(settings.HF_API_KEY),
+        "hf_enabled": bool(settings.HF_MODEL_ENABLED),
         "hf_model": settings.HF_MODEL,
         "top_k": settings.RAG_TOP_K,
+        "nvidia_rerank_enabled": bool(settings.NVIDIA_RERANK_ENABLED),
+        "nvidia_rerank_configured": bool(settings.NVIDIA_RERANK_ENABLED and settings.NVIDIA_API_KEY),
+        "nvidia_rerank_model": settings.NVIDIA_RERANK_MODEL,
+        "nvidia_rerank_url": settings.NVIDIA_RERANK_URL,
     }

@@ -11,10 +11,16 @@ from .query_parser import parse_user_query
 FOLLOW_UP_PREFIXES = (
     "and ",
     "also ",
+    "actually ",
+    "are you sure",
+    "did i say",
+    "didn't i say",
     "give ",
     "show ",
     "put ",
     "convert ",
+    "i said",
+    "i meant",
     "what about",
     "now ",
     "make it",
@@ -59,6 +65,10 @@ def build_session_memory(chat_history: list[dict[str, str]] | None) -> SessionMe
             memory.filters.min_range_km = parsed.filters.min_range_km
         if parsed.filters.vehicle_type:
             memory.filters.vehicle_type = parsed.filters.vehicle_type
+        if parsed.filters.location:
+            memory.filters.location = parsed.filters.location
+        if parsed.filters.location_tier:
+            memory.filters.location_tier = parsed.filters.location_tier
         if parsed.filters.brand:
             memory.filters.brand = parsed.filters.brand
         if parsed.filters.charging_type:
@@ -73,6 +83,8 @@ def build_session_memory(chat_history: list[dict[str, str]] | None) -> SessionMe
             memory.filters.home_charging = parsed.filters.home_charging
         if parsed.filters.use_cases:
             memory.filters.use_cases = _merge_use_cases(memory.filters.use_cases, parsed.filters.use_cases)
+        if parsed.filters.priority:
+            memory.filters.priority = parsed.filters.priority
 
     return memory
 
@@ -92,6 +104,10 @@ def apply_session_memory(query: str, parsed: ParsedQuery, memory: SessionMemory)
         filters.min_range_km = remembered.min_range_km
     if not filters.vehicle_type:
         filters.vehicle_type = remembered.vehicle_type
+    if not filters.location:
+        filters.location = remembered.location
+    if not filters.location_tier:
+        filters.location_tier = remembered.location_tier
     if not filters.brand:
         filters.brand = remembered.brand
     if not filters.charging_type:
@@ -105,6 +121,8 @@ def apply_session_memory(query: str, parsed: ParsedQuery, memory: SessionMemory)
     if filters.home_charging is None:
         filters.home_charging = remembered.home_charging
     filters.use_cases = _merge_use_cases(remembered.use_cases, filters.use_cases)
+    if not filters.priority:
+        filters.priority = remembered.priority
 
     intent = parsed.intent
     if intent == "info" and memory.last_intent in {"recommendation", "comparison"}:
