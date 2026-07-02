@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     
     # Database
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/ev_compare"
+    REDIS_URL: str = "redis://localhost:6379/0"
     
     # JWT Auth
     JWT_SECRET: str = "change-me-in-production"
@@ -51,6 +52,7 @@ class Settings(BaseSettings):
         "NVIDIA_RERANK_ENABLED",
         "AUTO_IMPORT_DATA_ON_STARTUP",
         "AUTO_OPEN_BROWSER",
+        "RATE_LIMIT_ENABLED",
         mode="before",
     )
     @classmethod
@@ -67,6 +69,18 @@ class Settings(BaseSettings):
     AUTO_IMPORT_DATA_ON_STARTUP: bool = True
     AUTO_OPEN_BROWSER: bool = True
     APP_OPEN_URL: str | None = "http://127.0.0.1:8000/docs"
+
+    # Basic in-process rate limiting. Use an API gateway or Redis-backed limiter
+    # for multi-instance production deployments.
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_DEFAULT_PER_WINDOW: int = 600
+    RATE_LIMIT_AUTH_PER_WINDOW: int = 60
+    RATE_LIMIT_CHAT_PER_WINDOW: int = 300
+    RATE_LIMIT_ADMIN_PER_WINDOW: int = 30
+
+    # Dataset uploads
+    DATASET_UPLOAD_MAX_BYTES: int = 5_000_000
 
     # EV chatbot artifacts
     EV_EXCEL_PATH: str = str(PROJECT_ROOT / "data" / "raw" / "India_EV_All_Segments_Dataset_2026_filled.xlsx")
@@ -93,3 +107,4 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ENV_FILE, env_file_encoding="utf-8", extra="ignore")
 
 settings = Settings()
+

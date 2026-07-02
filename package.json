@@ -1,0 +1,14 @@
+{
+  "name": "ev-compare-app",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Complete restore wrapper for the EV Compare App repository.",
+  "scripts": {
+    "frontend:install": "npm --prefix frontend install",
+    "frontend:dev": "npm --prefix frontend run dev",
+    "frontend:build": "npm --prefix frontend run build",
+    "frontend:lint": "npm --prefix frontend run lint",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down"
+  }
+}

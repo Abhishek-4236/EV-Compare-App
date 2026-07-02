@@ -13,7 +13,7 @@ from main import app
 from services.chat_analysis import build_query_plan, normalize_query_text
 from services.retrieval import station_answer
 from database import SessionLocal
-from models import Vehicle
+from models import ChatFeedback, ChatMessage, ChatSession, User, Vehicle
 from core.config import settings
 from services.query_parser import parse_user_query
 
@@ -240,6 +240,17 @@ class ChatQualityTests(unittest.TestCase):
         self.assertIn("MG ZS EV", body["answer"])
         self.assertNotIn("Ola S1 X+", body["answer"])
 
+    def test_vehicle_subsidy_chat_uses_tool_without_crashing(self):
+        response = self.client.post(
+            "/api/chat/",
+            json={"message": "Tata Tiago EV price subsidy in Maharashtra for 30 km daily"},
+        )
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertIn("Tata Tiago", body["answer"])
+        self.assertIn("Maharashtra", body["answer"])
+        self.assertIn("5-year TCO", body["answer"])
+
     def test_price_priority_sorts_by_lowest_price_inside_category(self):
         response = self.client.post("/api/chat/", json={"message": "cheapest scooter under 1 lakh"})
         self.assertEqual(response.status_code, 200)
@@ -291,6 +302,61 @@ class ChatQualityTests(unittest.TestCase):
             self.assertEqual(source["type"], "car")
             self.assertLessEqual(source["price"], 2000000)
         self.assertNotIn("Ola S1 X+", body["answer"])
+
+    def test_chat_history_requires_session_owner(self):
+        owner_email = "owner.history.security@example.com"
+        other_email = "other.history.security@example.com"
+        db = SessionLocal()
+        try:
+            users = db.query(User).filter(User.email.in_([owner_email, other_email])).all()
+            user_ids = [user.id for user in users]
+            if user_ids:
+                session_ids = [row.id for row in db.query(ChatSession).filter(ChatSession.user_id.in_(user_ids)).all()]
+                if session_ids:
+                    db.query(ChatFeedback).filter(ChatFeedback.session_id.in_(session_ids)).delete(synchronize_session=False)
+                    db.query(ChatMessage).filter(ChatMessage.session_id.in_(session_ids)).delete(synchronize_session=False)
+                    db.query(ChatSession).filter(ChatSession.id.in_(session_ids)).delete(synchronize_session=False)
+                db.query(User).filter(User.id.in_(user_ids)).delete(synchronize_session=False)
+                db.commit()
+        finally:
+            db.close()
+
+        owner_signup = self.client.post(
+            "/api/auth/signup",
+            json={"full_name": "History Owner", "email": owner_email, "password": "password123"},
+        )
+        self.assertEqual(owner_signup.status_code, 200)
+        other_signup = self.client.post(
+            "/api/auth/signup",
+            json={"full_name": "History Intruder", "email": other_email, "password": "password123"},
+        )
+        self.assertEqual(other_signup.status_code, 200)
+
+        owner_token = owner_signup.json()["access_token"]
+        other_token = other_signup.json()["access_token"]
+        owner_headers = {"Authorization": f"Bearer {owner_token}"}
+        other_headers = {"Authorization": f"Bearer {other_token}"}
+
+        chat = self.client.post("/api/chat/", json={"message": "hi"}, headers=owner_headers)
+        self.assertEqual(chat.status_code, 200)
+        session_id = chat.json()["session_id"]
+
+        owner_history = self.client.get(f"/api/chat/history/{session_id}", headers=owner_headers)
+        self.assertEqual(owner_history.status_code, 200)
+        self.assertGreaterEqual(len(owner_history.json()), 1)
+
+        anonymous_history = self.client.get(f"/api/chat/history/{session_id}")
+        self.assertEqual(anonymous_history.status_code, 401)
+
+        other_history = self.client.get(f"/api/chat/history/{session_id}", headers=other_headers)
+        self.assertEqual(other_history.status_code, 404)
+
+        hijack_attempt = self.client.post(
+            "/api/chat/",
+            json={"message": "continue this chat", "session_id": session_id},
+            headers=other_headers,
+        )
+        self.assertEqual(hijack_attempt.status_code, 404)
 
 
 if __name__ == "__main__":

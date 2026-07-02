@@ -6,6 +6,7 @@ from routes import vehicles, compare, recommend, chat, subsidies, map, auth, gar
 import logging
 
 from core.config import settings
+from core.rate_limit import FixedWindowRateLimiter, client_id_from_request
 from rag.pipeline import ev_rag_service
 from services.startup_sync import ensure_data_ready_on_startup, maybe_open_startup_url
 
@@ -16,6 +17,36 @@ app = FastAPI(
 )
 
 logger = logging.getLogger(__name__)
+rate_limiter = FixedWindowRateLimiter(
+    window_seconds=settings.RATE_LIMIT_WINDOW_SECONDS,
+    limits_by_prefix={
+        "/api/auth": settings.RATE_LIMIT_AUTH_PER_WINDOW,
+        "/api/chat": settings.RATE_LIMIT_CHAT_PER_WINDOW,
+        "/api/admin": settings.RATE_LIMIT_ADMIN_PER_WINDOW,
+    },
+    default_limit=settings.RATE_LIMIT_DEFAULT_PER_WINDOW,
+)
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    if settings.RATE_LIMIT_ENABLED and request.url.path.startswith("/api/"):
+        decision = rate_limiter.check(client_id_from_request(request), request.url.path)
+        if not decision.allowed:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded"},
+                headers={
+                    "Retry-After": str(decision.retry_after_seconds),
+                    "X-RateLimit-Limit": str(decision.limit),
+                    "X-RateLimit-Remaining": str(decision.remaining),
+                },
+            )
+        response = await call_next(request)
+        response.headers["X-RateLimit-Limit"] = str(decision.limit)
+        response.headers["X-RateLimit-Remaining"] = str(decision.remaining)
+        return response
+    return await call_next(request)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -43,6 +74,7 @@ app.add_middleware(
 app.include_router(vehicles.router)
 app.include_router(compare.router)
 app.include_router(recommend.router)
+app.include_router(chat.router)
 app.include_router(subsidies.router)
 app.include_router(map.router)
 app.include_router(auth.router)
@@ -74,5 +106,4 @@ def health():
         "project": "India EV Compare",
         "team": "VBIT "
     }
-    
-app.include_router(chat.router)
+

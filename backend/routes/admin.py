@@ -8,7 +8,9 @@ from models import User
 from .auth import read_bearer_token, JWT_SECRET, JWT_ALG
 from jose import jwt, JWTError
 from scripts.import_excel import read_import_state, run_import
+from services.dataset_validation import validate_excel_upload
 from services.ev_rag import ev_rag_service
+from core.config import settings
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
@@ -33,8 +35,14 @@ async def upload_dataset(
     admin_id: int = Depends(get_current_admin_id),
     db: Session = Depends(get_db)
 ):
-    if not file.filename.endswith(".xlsx"):
-        raise HTTPException(status_code=400, detail="Only .xlsx files are allowed")
+    try:
+        validate_excel_upload(
+            filename=file.filename,
+            file_obj=file.file,
+            max_bytes=settings.DATASET_UPLOAD_MAX_BYTES,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     # Define the save path
     raw_dir = Path(__file__).resolve().parent.parent.parent / "data" / "raw"

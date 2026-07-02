@@ -187,6 +187,62 @@ TECHNICAL_HINTS = [
 REPOSITORY_HINTS = ["repo", "repository", "zip", "folder structure", "scan files", "codebase"]
 EMOTIONAL_HINTS = ["confused", "stuck", "frustrated", "worried", "scared", "motivation"]
 
+FINANCIAL_HINTS = [
+    "price",
+    "on-road",
+    "on road",
+    "onroad",
+    "subsidy",
+    "subsidies",
+    "fame",
+    "fame-ii",
+    "fame ii",
+    "pm e-drive",
+    "pm e drive",
+    "pm e-drive",
+    "road tax",
+    "registration",
+    "insurance",
+    "tco",
+    "total cost",
+    "running cost",
+    "cost per km",
+    "cost/km",
+]
+
+TECHNICAL_EV_HINTS = [
+    "range",
+    "battery",
+    "charging",
+    "charger",
+    "top speed",
+    "speed",
+    "motor",
+    "warranty",
+    "ip rating",
+    "ground clearance",
+    "payload",
+    "power",
+    "kwh",
+    "km",
+]
+
+
+def requires_ev_tools(query: str, intent: str | None = None) -> bool:
+    """
+    True when the user asks for price/subsidy/TCO or model-specific EV specs/comparisons.
+    This is used to enforce tool execution before answering.
+    """
+    q = (query or "").lower()
+    if any(token in q for token in FINANCIAL_HINTS):
+        return True
+    inferred_intent = (intent or "").lower()
+    if inferred_intent in {"comparison", "recommendation"}:
+        return True
+    return any(token in q for token in TECHNICAL_EV_HINTS) and any(
+        brand in q for brand in ["tata", "mg", "byd", "kia", "hyundai", "mahindra", "ola", "ather", "tvs", "bajaj", "hero"]
+    )
+
 
 def _parse_price_amount(amount_text: str, unit: str | None) -> int:
     amount = float(amount_text)

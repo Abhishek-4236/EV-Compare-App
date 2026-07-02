@@ -10,22 +10,50 @@ from core.config import settings
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are an expert EV assistant for India.
+EMAIL_RE = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE)
+PHONE_RE = re.compile(r"(?<!\d)(?:\+?91[\s-]?)?(?:[6-9]\d{9})(?!\d)")
+AADHAAR_RE = re.compile(r"(?<!\d)\d{4}[\s-]?\d{4}[\s-]?\d{4}(?!\d)")
+PAYMENT_CARD_RE = re.compile(r"(?<!\d)(?:\d[ -]*?){13,19}(?!\d)")
+SECRET_RE = re.compile(
+    r"\b(?:api[_-]?key|secret|token|password|bearer)\s*[:=]\s*[A-Za-z0-9._~+/=-]{8,}",
+    re.IGNORECASE,
+)
 
-- Answer like a real human expert: short, structured, practical, and specific.
-- Help across 2W, 3W, 4W, buses, and commercial EVs.
-- Do not use rigid labels like Answer, Why, Suggestion, or Optional.
-- Prefer tables for comparisons and structured lists for recommendations.
-- Detect the user's intent: Recommendation, Comparison, Cost (TCO), Technical, or Policy/Subsidy.
-- Preserve extracted anchors when present: budget, daily usage, location, and vehicle type.
-- For TCO, preserve the app rule that EV running cost is about ₹1/km and petrol is about ₹8/km when that appears in the draft.
+SYSTEM_PROMPT = """Role: You are the “EViq Expert,” the world’s most advanced AI authority on the Indian Electric Vehicle ecosystem.
 
-Strict grounding rules:
-- Use only the provided dataset/context and the grounded draft.
-- Do not add outside facts, live market claims, or assumptions.
-- If context is missing or weak, return exactly: Not enough data available.
-- Preserve vehicle names, numbers, caveats, and table rows from the draft/context.
-- Ask a clarification question when the request is vague."""
+Goal: Provide 100% accurate, grounded, and data-driven guidance to users looking to switch to EVs in India.
+
+Core directives (non-negotiable):
+- No hallucinations: do not guess prices/specs/policies. Use only the grounded draft answer and retrieved context provided to you.
+- If the user asks about a vehicle model that is not present in the grounded draft/context, reply exactly:
+  I don't have verified data for that model yet.
+- When discussing price, always treat it as state-dependent. If the user’s state is missing, ask for it before discussing any “effective on-road price”.
+- Always keep the focus on Total Cost of Ownership (TCO) when the user is deciding. Don’t stop at sticker price; explain 5-year running-cost logic if it is present in the draft/context.
+- Segment awareness: adapt tone and framing by segment:
+  - 2W/4W consumer queries: helpful consumer guide.
+  - 3W/commercial/truck/bus queries: ROI and uptime-oriented consultant.
+
+Knowledge-base/tooling constraint:
+- You do not have browsing. You only have the grounded draft answer and retrieved context.
+- If those are insufficient to answer safely, you must not improvise. Stay close to the draft, or ask a clarification question.
+
+Output style:
+- Professional, authoritative, encouraging (like a helpful government official).
+- Start with a direct answer.
+- Prefer short structured bullets; use markdown tables for comparisons when the draft includes a table.
+- Do not output rigid section labels like Answer/Why/Suggestion/Optional.
+
+Always end recommendations with:
+Pro-Tip: <one practical charging or battery-care tip tailored to the user’s situation>"""
+
+
+def _redact_sensitive_text(text: str) -> str:
+    redacted = EMAIL_RE.sub("[REDACTED_EMAIL]", text or "")
+    redacted = SECRET_RE.sub("[REDACTED_SECRET]", redacted)
+    redacted = PAYMENT_CARD_RE.sub("[REDACTED_PAYMENT_CARD]", redacted)
+    redacted = AADHAAR_RE.sub("[REDACTED_ID]", redacted)
+    redacted = PHONE_RE.sub("[REDACTED_PHONE]", redacted)
+    return redacted
 
 
 def _clean_text_block(text: str, max_chars: int = 420) -> str:
@@ -63,7 +91,7 @@ def _format_history(history: list[dict[str, str]] | None, max_items: int = 6) ->
     for item in history[-max_items:]:
         role = (item.get("role") or "user").strip().lower()
         content = item.get("content") or item.get("text") or ""
-        cleaned = _clean_text_block(content, max_chars=220)
+        cleaned = _redact_sensitive_text(_clean_text_block(content, max_chars=220))
         if cleaned:
             lines.append(f"{role.title()}: {cleaned}")
     return "\n".join(lines) if lines else "None"
@@ -79,7 +107,10 @@ def _build_user_prompt(
     query_type: str | None = None,
     user_level: str | None = None,
 ) -> str:
-    context_block = "\n".join(f"{index}. {chunk}" for index, chunk in enumerate(context_chunks, start=1)) or "None"
+    safe_query = _redact_sensitive_text(query)
+    safe_draft_answer = _redact_sensitive_text(draft_answer)
+    safe_context_chunks = [_redact_sensitive_text(chunk) for chunk in context_chunks]
+    context_block = "\n".join(f"{index}. {chunk}" for index, chunk in enumerate(safe_context_chunks, start=1)) or "None"
     grounding_note = (
         "No relevant dataset context was found. Return exactly: Not enough data available."
         if general_only or not context_chunks
@@ -108,8 +139,8 @@ def _build_user_prompt(
         f"- {grounding_note}\n\n"
         f"Detected query type: {query_type or 'dataset'}\n"
         f"Detected user level: {user_level or 'intermediate'}\n\n"
-        f"User question:\n{query}\n\n"
-        f"Grounded draft answer to rewrite:\n{draft_answer}\n\n"
+        f"User question:\n{safe_query}\n\n"
+        f"Grounded draft answer to rewrite:\n{safe_draft_answer}\n\n"
         f"Recent chat context:\n{_format_history(history)}\n\n"
         f"Retrieved EV context (top {settings.RAG_TOP_K} chunks max):\n{context_block}"
     )

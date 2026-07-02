@@ -21,5 +21,10 @@ include/
 .DS_Store
 coverage/
 .pytest_cache/
-# Ignore alembic's local configuration if it contains credentials
-backend/alembic.ini
+
+*.sqlite
+*.sqlite3
+*.bak
+*.tmp
+.coverage
+htmlcov/

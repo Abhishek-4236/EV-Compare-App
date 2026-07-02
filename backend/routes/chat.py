@@ -74,10 +74,17 @@ def get_or_create_session(request: ChatRequest, user_id: int | None, db: Session
             session = ChatSession(id=str(uuid.uuid4()), expertise_level="Novice", user_id=user_id, title=title)
             db.add(session)
             db.commit()
-        elif user_id and not session.user_id:
+        elif session.user_id is not None:
+            if user_id is None:
+                raise HTTPException(status_code=401, detail="Sign in required")
+            if session.user_id != user_id:
+                raise HTTPException(status_code=404, detail="Chat session not found")
+        elif user_id:
             session.user_id = user_id
             db.commit()
         return session
+    except HTTPException:
+        raise
     except Exception:
         db.rollback()
         _MEMORY_SESSIONS.setdefault(
@@ -162,7 +169,7 @@ def generate_chat_payload(request: ChatRequest, user_id: int | None, db: Session
             "confidence": "grounded",
         }
     try:
-        result = ev_rag_service.answer(request.message, history)
+        result = ev_rag_service.answer(request.message, history, db=db)
     except FileNotFoundError:
         answer = (
             "The EV knowledge base is not built yet. "
@@ -341,7 +348,12 @@ def delete_session(
 
 
 @router.get("/history/{session_id}")
-def get_session_history(session_id: str, db: Session = Depends(get_db)):
+def get_session_history(
+    session_id: str,
+    user_id: int | None = Depends(get_optional_user_id),
+    db: Session = Depends(get_db),
+):
+    get_owned_session_or_404(session_id, user_id, db)
     try:
         messages = db.query(ChatMessage).filter(ChatMessage.session_id == session_id).order_by(ChatMessage.created_at.asc()).all()
         return [{"role": message.role, "text": message.content} for message in messages]

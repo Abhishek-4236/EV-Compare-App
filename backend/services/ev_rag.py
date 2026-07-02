@@ -4,7 +4,10 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 
+from sqlalchemy.orm import Session
+
 from core.config import settings
+from models import Vehicle
 from .embeddings import start_model_warmup
 from .ev_catalog import load_documents, load_excel_as_documents
 from .ev_chat_knowledge import (
@@ -44,8 +47,10 @@ from .ev_chat_retrieval import (
 from .ev_rag_types import ChatAnswer, ParsedQuery, RetrievalMatch, VehicleDocument
 from .faiss_store import FaissStore
 from .llm import generate_chat_response
-from .query_parser import parse_user_query
+from .query_parser import parse_user_query, requires_ev_tools
 from .retrieval import station_answer
+from .ev_tools import tool_compare_vehicles, tool_get_subsidies, tool_get_vehicles
+from .ev_answer_safety import confidence_level, validate_grounding
 
 
 SMALLTALK_REPLIES = {
@@ -84,6 +89,7 @@ SPEC_HINTS = [
 ]
 
 STRICT_NO_DATA_MESSAGE = "Not enough data available"
+NO_VERIFIED_DATA_MESSAGE = "I don't have verified data for that model yet."
 
 COMPARISON_FOLLOW_UP_HINTS = (
     "comparison",
@@ -155,7 +161,13 @@ class EVRAGService:
             raise RuntimeError("EV knowledge base is unavailable")
         return self._artifacts
 
-    def answer(self, query: str, chat_history: list[dict[str, str]] | None = None) -> ChatAnswer:
+    def answer(
+        self,
+        query: str,
+        chat_history: list[dict[str, str]] | None = None,
+        *,
+        db: Session | None = None,
+    ) -> ChatAnswer:
         history = chat_history or []
         normalized = (query or "").strip().lower()
 
@@ -170,6 +182,11 @@ class EVRAGService:
         parsed = parse_user_query(query)
         memory = build_session_memory(history)
         parsed = apply_session_memory(query, parsed, memory)
+
+        if db is not None and requires_ev_tools(query, parsed.intent):
+            tool_answer = self._tool_first_answer(query=query, parsed=parsed, history=history, db=db)
+            if tool_answer is not None:
+                return tool_answer
 
         inventory_answer = self._inventory_answer(normalized)
         if inventory_answer:
@@ -313,6 +330,317 @@ class EVRAGService:
             general_only=False,
         )
 
+    def _format_inr(self, value: int | None) -> str:
+        if value is None:
+            return "Unavailable"
+        if value >= 100000:
+            return f"₹{value / 100000:.2f} lakh"
+        return f"₹{value:,}"
+
+    def _db_vehicle_id_for_doc(self, db: Session, vehicle: VehicleDocument) -> int | None:
+        row = db.query(Vehicle).filter(Vehicle.brand == vehicle.brand, Vehicle.model == vehicle.model).first()
+        return int(row.id) if row else None
+
+    def _vehicle_doc_from_db(self, row: Vehicle) -> VehicleDocument:
+        name = f"{row.brand} {row.model}".strip()
+        return VehicleDocument(
+            id=str(row.id),
+            content=None,
+            name=name,
+            brand=row.brand,
+            model=row.model,
+            vehicle_type=str(row.vehicle_type or row.category or "EV"),
+            price_inr=int(row.approx_price_inr) if row.approx_price_inr is not None else None,
+            range_km=int(row.range_km) if row.range_km is not None else None,
+            battery_kwh=float(row.battery_kwh or 0) if row.battery_kwh is not None else None,
+            charging_time=None,
+            charging_type=str(row.charging_type) if row.charging_type else None,
+            features=[],
+            source_row=0,
+            metadata={"category": row.category, "segment": str(row.segment)},
+        )
+
+    def _tool_first_answer(
+        self,
+        *,
+        query: str,
+        parsed: ParsedQuery,
+        history: list[dict[str, str]],
+        db: Session,
+    ) -> ChatAnswer | None:
+        normalized = (query or "").lower()
+
+        # Comparison: resolve 2 vehicles, map to DB ids, then compute via tool.
+        if parsed.intent == "comparison":
+            comparison_matches, clarification = self._comparison_matches(query)
+            if clarification:
+                follow_up_matches = self._follow_up_comparison_matches(query, parsed, history)
+                if follow_up_matches:
+                    comparison_matches = follow_up_matches
+                else:
+                    return ChatAnswer(
+                        answer=clarification,
+                        intent="comparison",
+                        parsed_query=parsed,
+                        matches=[],
+                        provider=None,
+                        confidence="low",
+                    )
+
+            ids: list[int] = []
+            db_docs: list[VehicleDocument] = []
+            for match in comparison_matches[:2]:
+                vid = self._db_vehicle_id_for_doc(db, match.vehicle)
+                if not vid:
+                    return ChatAnswer(
+                        answer=NO_VERIFIED_DATA_MESSAGE,
+                        intent="comparison",
+                        parsed_query=parsed,
+                        matches=[],
+                        provider=None,
+                        confidence="low",
+                    )
+                ids.append(vid)
+                row = db.query(Vehicle).filter(Vehicle.id == vid).first()
+                if row:
+                    db_docs.append(self._vehicle_doc_from_db(row))
+
+            tool = tool_compare_vehicles(db, ids=ids)
+            if not tool.ok:
+                return ChatAnswer(
+                    answer=STRICT_NO_DATA_MESSAGE,
+                    intent="comparison",
+                    parsed_query=parsed,
+                    matches=[],
+                    provider=None,
+                    confidence="low",
+                )
+
+            vehicles = (tool.data or {}).get("vehicles") or []
+            if len(vehicles) < 2:
+                return ChatAnswer(
+                    answer=STRICT_NO_DATA_MESSAGE,
+                    intent="comparison",
+                    parsed_query=parsed,
+                    matches=[],
+                    provider=None,
+                    confidence="low",
+                )
+
+            left, right = vehicles[0], vehicles[1]
+            table = [
+                f"| Feature | {left.get('name')} | {right.get('name')} |",
+                "|---|---|---|",
+                f"| Approx price | {self._format_inr(left.get('approx_price_inr'))} | {self._format_inr(right.get('approx_price_inr'))} |",
+                f"| Range | {left.get('range_km', 'Unavailable')} km | {right.get('range_km', 'Unavailable')} km |",
+                f"| Battery | {left.get('battery_kwh', 'Unavailable')} kWh | {right.get('battery_kwh', 'Unavailable')} kWh |",
+                f"| Top speed | {left.get('top_speed_kmh', 'Unavailable')} km/h | {right.get('top_speed_kmh', 'Unavailable')} km/h |",
+                f"| Charging type | {left.get('charging_type', 'Unavailable')} | {right.get('charging_type', 'Unavailable')} |",
+                f"| Rating | {left.get('overall_rating', 'Unavailable')} | {right.get('overall_rating', 'Unavailable')} |",
+                f"| Central subsidy (model) | {self._format_inr(left.get('fame2_subsidy_inr'))} | {self._format_inr(right.get('fame2_subsidy_inr'))} |",
+                f"| Cost efficiency | {left.get('cost_efficiency', 'Unavailable')} | {right.get('cost_efficiency', 'Unavailable')} |",
+                f"| Value score | {left.get('value_score', 'Unavailable')} | {right.get('value_score', 'Unavailable')} |",
+            ]
+            draft = "\n".join(
+                [
+                    "Here’s the grounded side-by-side from the current EViq database:",
+                    "",
+                    *table,
+                    "",
+                    "Tell me what matters most (price, range, charging, or performance) and I’ll call the better fit.",
+                ]
+            )
+            context_chunks = [
+                f"compare_vehicles result: {left.get('name')} price {left.get('approx_price_inr')} range {left.get('range_km')} battery {left.get('battery_kwh')} value_score {left.get('value_score')}",
+                f"compare_vehicles result: {right.get('name')} price {right.get('approx_price_inr')} range {right.get('range_km')} battery {right.get('battery_kwh')} value_score {right.get('value_score')}",
+            ]
+            matches = [
+                RetrievalMatch(vehicle=db_docs[0], score=1.0, matched_on=["tool:compare_vehicles"]) if len(db_docs) > 0 else None,
+                RetrievalMatch(vehicle=db_docs[1], score=1.0, matched_on=["tool:compare_vehicles"]) if len(db_docs) > 1 else None,
+            ]
+            matches = [m for m in matches if m is not None]
+            parsed = parsed.model_copy(update={"vehicle_names": [left.get("name") or "", right.get("name") or ""]})
+            return self._finalize_answer(
+                query=query,
+                parsed=parsed,
+                history=history,
+                matches=matches,
+                fallback_answer=draft,
+                context_chunks=context_chunks,
+                general_only=False,
+            )
+
+        # Model-specific price/subsidy/TCO/specs: use DB row when a vehicle is mentioned.
+        named = resolve_named_vehicles(query, self.artifacts.vehicles)
+        primary = named[0] if named else None
+
+        financial = any(token in normalized for token in ["price", "on-road", "on road", "subsidy", "tco", "running cost", "cost/km"])
+        if financial and primary is not None:
+            vid = self._db_vehicle_id_for_doc(db, primary)
+            if not vid:
+                return ChatAnswer(answer=NO_VERIFIED_DATA_MESSAGE, intent=parsed.intent, parsed_query=parsed, matches=[], provider=None, confidence="low")
+            if not parsed.filters.state:
+                return ChatAnswer(
+                    answer="Which state are you registering in (e.g., Delhi, Maharashtra)?",
+                    intent="info",
+                    parsed_query=parsed,
+                    matches=[],
+                    provider=None,
+                    confidence="low",
+                )
+            daily_km = int(parsed.filters.daily_distance_km or 30)
+            tool = tool_get_subsidies(db, vehicle_id=vid, state=parsed.filters.state, daily_km=daily_km)
+            if not tool.ok:
+                return ChatAnswer(answer=STRICT_NO_DATA_MESSAGE, intent="info", parsed_query=parsed, matches=[], provider=None, confidence="low")
+
+            row = db.query(Vehicle).filter(Vehicle.id == vid).first()
+            if not row:
+                return ChatAnswer(answer=NO_VERIFIED_DATA_MESSAGE, intent="info", parsed_query=parsed, matches=[], provider=None, confidence="low")
+            doc = self._vehicle_doc_from_db(row)
+
+            approx_price = int(row.approx_price_inr or 0)
+            total_sub = int(tool.data.get("total_applicable_subsidies") or 0)
+            effective = max(0, approx_price - total_sub)
+
+            draft = "\n".join(
+                [
+                    f"For {doc.name} in {parsed.filters.state.title()}, here’s the grounded subsidy + TCO snapshot (daily usage: {daily_km} km/day):",
+                    "",
+                    f"- Listed price (approx): {self._format_inr(approx_price)}",
+                    f"- Central subsidy (applicable): {self._format_inr(int(tool.data.get('central_subsidy_inr') or 0))}",
+                    f"- State subsidy (applicable): {self._format_inr(int(tool.data.get('state_subsidy_inr') or 0))}",
+                    f"- Total applicable subsidies: {self._format_inr(total_sub)}",
+                    f"- Effective price after subsidies (indicative): {self._format_inr(effective)}",
+                    f"- 5-year TCO estimate (app formula): {self._format_inr(int(tool.data.get('tco_5year_inr') or 0))}",
+                    "",
+                    "If you share your actual monthly km and charging tariff, I can tighten the running-cost estimate further.",
+                ]
+            )
+            context_chunks = [
+                f"get_subsidies result for vehicle_id {vid} state {parsed.filters.state}: central {tool.data.get('central_subsidy_inr')} state_sub {tool.data.get('state_subsidy_inr')} total {tool.data.get('total_applicable_subsidies')} tco_5year {tool.data.get('tco_5year_inr')}",
+                f"vehicle: {doc.name} price {approx_price} range {doc.range_km} battery {doc.battery_kwh}",
+            ]
+            match = RetrievalMatch(vehicle=doc, score=1.0, matched_on=["tool:get_subsidies"])
+            return self._finalize_answer(
+                query=query,
+                parsed=parsed,
+                history=history,
+                matches=[match],
+                fallback_answer=draft,
+                context_chunks=context_chunks,
+                general_only=False,
+            )
+
+        # Recommendation: use DB vehicles list tool first.
+        if parsed.intent == "recommendation":
+            category_map = {
+                "scooter": "2W",
+                "bike": "2W",
+                "car": "4W",
+                "three_wheeler": "3W",
+                "truck": "Truck",
+                "bus": "Bus",
+                "commercial": None,
+            }
+            category = category_map.get(parsed.filters.vehicle_type or "", None)
+
+            # Preserve existing app behavior expectations:
+            # - Budget queries default to low price first
+            # - Priority=price sorts ascending by price
+            # - Priority=range sorts descending by range
+            # - Priority=performance sorts by top speed proxy
+            priority = parsed.filters.priority or parsed.sort_by
+            if priority == "price":
+                sort_by, sort_order = "approx_price_inr", "ASC"
+            elif priority == "range":
+                sort_by, sort_order = "range_km", "DESC"
+            elif priority == "performance":
+                sort_by, sort_order = "top_speed_kmh", "DESC"
+            else:
+                sort_by = "approx_price_inr" if parsed.filters.max_price_inr is not None else "overall_rating"
+                sort_order = "ASC" if sort_by == "approx_price_inr" else "DESC"
+
+            tool = tool_get_vehicles(
+                db,
+                category=category,
+                brand=parsed.filters.brand,
+                min_price=parsed.filters.min_price_inr,
+                max_price=parsed.filters.max_price_inr,
+                min_range=parsed.filters.min_range_km,
+                charging_type=parsed.filters.charging_type,
+                sort_by=sort_by,  # type: ignore[arg-type]
+                sort_order=sort_order,  # type: ignore[arg-type]
+                page=1,
+                limit=max(5, settings.RAG_TOP_K),
+            )
+            vehicles = (tool.data or {}).get("vehicles") or []
+            if not vehicles:
+                return None
+
+            def normalize_vehicle_type(v: dict) -> str:
+                cat = (v.get("category") or "").upper()
+                vt = (v.get("vehicle_type") or "").lower()
+                if cat == "4W":
+                    return "car"
+                if cat == "3W":
+                    return "three_wheeler"
+                if cat == "TRUCK":
+                    return "truck"
+                if cat == "BUS":
+                    return "bus"
+                if cat == "2W":
+                    return "scooter" if "scooter" in vt else "bike"
+                return (v.get("vehicle_type") or "EV") or "EV"
+
+            matches: list[RetrievalMatch] = []
+            context_chunks: list[str] = []
+            for v in vehicles[: settings.RAG_TOP_K]:
+                name = (v.get("name") or "").strip()
+                brand = (v.get("brand") or "").strip()
+                model = (v.get("model") or "").strip()
+                doc = VehicleDocument(
+                    id=str(v.get("id") or ""),
+                    content=None,
+                    name=name,
+                    brand=brand,
+                    model=model,
+                    vehicle_type=normalize_vehicle_type(v),
+                    price_inr=int(v.get("approx_price_inr")) if v.get("approx_price_inr") is not None else None,
+                    range_km=int(v.get("range_km")) if v.get("range_km") is not None else None,
+                    battery_kwh=float(v.get("battery_kwh")) if v.get("battery_kwh") is not None else None,
+                    charging_time=None,
+                    charging_type=str(v.get("charging_type")) if v.get("charging_type") else None,
+                    features=[],
+                    source_row=0,
+                    metadata={"category": v.get("category")},
+                )
+                matches.append(RetrievalMatch(vehicle=doc, score=1.0, matched_on=["tool:get_vehicles"]))
+                context_chunks.append(
+                    f"get_vehicles result: {name} type {doc.vehicle_type} price {doc.price_inr} range {doc.range_km} battery {doc.battery_kwh} charging_type {doc.charging_type} rating {v.get('overall_rating')}"
+                )
+
+            draft = build_recommendation_answer(query, parsed, matches)
+            if not draft.strip().endswith("Pro-Tip:"):
+                draft = "\n".join(
+                    [
+                        draft.rstrip(),
+                        "",
+                        "Pro-Tip: If home charging is available, set a conservative daily charge limit (like 80–90%) and reserve 100% only for long trips.",
+                    ]
+                )
+
+            return self._finalize_answer(
+                query=query,
+                parsed=parsed,
+                history=history,
+                matches=matches,
+                fallback_answer=draft,
+                context_chunks=context_chunks,
+                general_only=False,
+            )
+
+        return None
+
     def inventory_summary(self) -> str:
         vehicles = self.artifacts.vehicles
         counts: dict[str, int] = {}
@@ -455,14 +783,14 @@ class EVRAGService:
             query_type=parsed.query_type,
             user_level=parsed.user_level,
         )
-        answer = self._validate_grounding(answer or fallback_answer, fallback_answer, context_chunks, matches)
+        answer = validate_grounding(answer or fallback_answer, fallback_answer, context_chunks, matches)
         return ChatAnswer(
             answer=answer,
             intent=parsed.intent,
             parsed_query=parsed,
             matches=matches,
             provider=provider,
-            confidence=self._confidence_level(parsed, matches),
+            confidence=confidence_level(parsed, matches),
         )
 
     def _vehicle_context_chunks(self, matches: list[RetrievalMatch], parsed: ParsedQuery) -> list[str]:
@@ -497,56 +825,5 @@ class EVRAGService:
 
     def _build_general_no_context_answer(self, parsed: ParsedQuery) -> str:
         return STRICT_NO_DATA_MESSAGE
-
-    def _validate_grounding(
-        self,
-        answer: str,
-        fallback_answer: str,
-        context_chunks: list[str],
-        matches: list[RetrievalMatch],
-    ) -> str:
-        if not context_chunks and not matches:
-            return STRICT_NO_DATA_MESSAGE
-
-        supported_text = " ".join([fallback_answer, *context_chunks]).lower()
-        answer_text = (answer or "").strip()
-        if not answer_text:
-            return fallback_answer
-
-        vehicle_names = [match.vehicle.name for match in matches]
-        unsupported_names = [
-            name
-            for name in re.findall(r"\b[A-Z][A-Za-z0-9+-]*(?:\s+[A-Z][A-Za-z0-9+-]*){1,4}\b", answer_text)
-            if any(token in name.lower() for token in ["ev", "tata", "mg", "byd", "kia", "hyundai", "ather", "ola"])
-            and name.lower() not in supported_text
-        ]
-        if unsupported_names:
-            return fallback_answer
-
-        for number in re.findall(r"\b\d+(?:\.\d+)?\b", answer_text):
-            if number not in supported_text:
-                return fallback_answer
-
-        if vehicle_names and not any(name.lower() in answer_text.lower() for name in vehicle_names):
-            return fallback_answer
-        return answer_text
-
-    def _confidence_level(self, parsed: ParsedQuery, matches: list[RetrievalMatch]) -> str:
-        if not matches:
-            return "low"
-        if parsed.intent == "comparison":
-            return "high" if len(matches) >= 2 else "low"
-        if parsed.intent == "recommendation":
-            has_category = bool(parsed.filters.vehicle_type)
-            has_budget = parsed.filters.max_price_inr is not None or parsed.filters.min_price_inr is not None
-            has_usage = bool(parsed.filters.use_cases) or parsed.filters.daily_distance_km is not None
-            has_priority = bool(parsed.filters.priority or parsed.sort_by)
-            if has_category and has_budget and (has_usage or has_priority):
-                return "high"
-            if has_category and has_budget:
-                return "medium"
-            return "low"
-        return "high"
-
 
 ev_rag_service = EVRAGService()
